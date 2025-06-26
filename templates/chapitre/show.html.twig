@@ -1,0 +1,361 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ chapitre.titre }} - {{ chapitre.oeuvre.titre }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4a5568;
+        text-decoration: none;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .nav-links a {
+        color: #4a5568;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+        color: #667eea;
+    }
+    
+    .breadcrumb {
+        background: white;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .breadcrumb-list {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumb-list a {
+        color: #4a5568;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-list a:hover {
+        color: #667eea;
+    }
+    
+    .reading-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .chapitre-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .chapitre-meta {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .chapitre-title {
+        font-size: 2.5rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+    
+    .oeuvre-title {
+        color: #667eea;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+
+    
+    .chapitre-content {
+        background: white;
+        padding: 0;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .page-content {
+        margin-bottom: 0;
+        text-align: center;
+    }
+    
+    .page-image {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .page-content:last-child {
+        margin-bottom: 0;
+    }
+    
+    .navigation {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .nav-chapitre {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f7fafc;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+    }
+    
+    .btn:disabled,
+    .btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    
+    .back-btn {
+        background: #f7fafc;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+        margin-bottom: 2rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .back-btn:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+    }
+    
+    .chapter-info {
+        text-align: center;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .chapter-number {
+        background: #667eea;
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .page-separator {
+        border: none;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+        margin: 3rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .reading-container {
+            padding: 1rem;
+        }
+        
+        .chapitre-content {
+            padding: 2rem;
+        }
+        
+        .navigation {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .nav-chapitre {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .chapitre-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<header class="header">
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ path('app_home') }}" class="logo">🎌 MangaThèque</a>
+            <ul class="nav-links">
+                <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                <li><a href="/api/docs">API</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+            <li>→</li>
+            <li><a href="{{ path('app_oeuvre_show', {id: chapitre.oeuvre.id}) }}">{{ chapitre.oeuvre.titre }}</a></li>
+            <li>→</li>
+            <li>{{ chapitre.titre }}</li>
+        </ul>
+    </div>
+</div>
+
+<main class="reading-container">
+    <a href="{{ path('app_oeuvre_show', {id: chapitre.oeuvre.id}) }}" class="btn back-btn">
+        ← Retour au manga
+    </a>
+    
+    <section class="chapitre-header">
+        <div class="chapitre-meta">
+            Chapitre {{ chapitre.ordre }} de
+        </div>
+        <div class="oeuvre-title">{{ chapitre.oeuvre.titre }}</div>
+        <span class="chapter-number">{{ chapitre.ordre }}</span>
+        <h1 class="chapitre-title">{{ chapitre.titre }}</h1>
+        <div class="chapter-info">
+            Ajouté le {{ chapitre.createdAt|date('d/m/Y à H:i') }}
+        </div>
+    </section>
+    
+
+    
+    <section class="chapitre-content">
+        {% if chapitre.pages %}
+            {% for key, page in chapitre.pages %}
+                <div class="page-content">
+                    <img src="{{ page }}" alt="{{ chapitre.titre }}" class="page-image" loading="lazy">
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="page-content">
+                <p><em>Aucune page disponible pour ce chapitre.</em></p>
+            </div>
+        {% endif %}
+    </section>
+    
+    <nav class="navigation">
+        <div class="nav-chapitre">
+            {% set previousChapitre = chapitre.previousChapitre %}
+            {% if previousChapitre %}
+                <a href="{{ path('app_chapitre_show', {id: previousChapitre.id}) }}" class="btn btn-secondary">
+                    ← Chapitre précédent
+                </a>
+            {% else %}
+                <span class="btn btn-secondary disabled">← Chapitre précédent</span>
+            {% endif %}
+            
+            {% set nextChapitre = chapitre.nextChapitre %}
+            {% if nextChapitre %}
+                <a href="{{ path('app_chapitre_show', {id: nextChapitre.id}) }}" class="btn btn-primary">
+                    Chapitre suivant →
+                </a>
+            {% else %}
+                <span class="btn btn-primary disabled">Chapitre suivant →</span>
+            {% endif %}
+        </div>
+        
+        <div class="chapter-info">
+            Chapitre {{ chapitre.ordre }} sur {{ chapitre.oeuvre.chapitres|length }}
+        </div>
+    </nav>
+</main>
+{% endblock %} 

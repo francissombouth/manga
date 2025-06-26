@@ -1,0 +1,310 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }} - Administration{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
+<style>
+.admin-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.form-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.breadcrumb a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-help {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.form-errors {
+    margin-top: 0.5rem;
+    color: #ef4444;
+    font-size: 0.85rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-secondary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    border: 1px solid;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        padding: 0 1rem;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'partials/_navigation.html.twig' %}
+
+<div class="admin-container">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <a href="{{ path('admin_auteurs') }}">Auteurs</a>
+            <span>></span>
+            <span>{{ title }}</span>
+        </div>
+
+        <div class="admin-header">
+            <h1 class="admin-title">
+                {% if auteur.id %}✏️{% else %}➕{% endif %} {{ title }}
+            </h1>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="form-card">
+            {{ form_start(form) }}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.nom) }}
+                    {{ form_widget(form.nom) }}
+                    {{ form_errors(form.nom) }}
+                    <div class="form-help">Le nom de famille de l'auteur (obligatoire)</div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.prenom) }}
+                    {{ form_widget(form.prenom) }}
+                    {{ form_errors(form.prenom) }}
+                    <div class="form-help">Le prénom de l'auteur (optionnel)</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.nomPlume) }}
+                    {{ form_widget(form.nomPlume) }}
+                    {{ form_errors(form.nomPlume) }}
+                    <div class="form-help">Nom de plume ou pseudonyme (optionnel)</div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.nationalite) }}
+                    {{ form_widget(form.nationalite) }}
+                    {{ form_errors(form.nationalite) }}
+                    <div class="form-help">Nationalité de l'auteur (ex: Japonais, Coréen, Français)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.dateNaissance) }}
+                {{ form_widget(form.dateNaissance) }}
+                {{ form_errors(form.dateNaissance) }}
+                <div class="form-help">Date de naissance de l'auteur (optionnel)</div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.biographie) }}
+                {{ form_widget(form.biographie) }}
+                {{ form_errors(form.biographie) }}
+                <div class="form-help">
+                    Biographie de l'auteur (optionnel)<br>
+                    💡 Vous pouvez inclure des informations sur sa carrière, ses œuvres principales, son style, etc.
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_auteurs') }}" class="btn btn-secondary">
+                    ❌ Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    {% if auteur.id %}💾 Mettre à jour{% else %}✨ Créer l'auteur{% endif %}
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+
+        {% if auteur.id and auteur.oeuvres|length > 0 %}
+            <div style="text-align: center; margin-top: 2rem;">
+                <div style="background: var(--bg-card); border: 1px solid var(--border-secondary); border-radius: 15px; padding: 1.5rem;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">📚 Œuvres de cet auteur</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Cet auteur a {{ auteur.oeuvres|length }} œuvre(s) dans la base de données.
+                    </p>
+                    <a href="{{ path('admin_oeuvres') }}?auteur={{ auteur.id }}" class="btn btn-secondary">
+                        👀 Voir les œuvres
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

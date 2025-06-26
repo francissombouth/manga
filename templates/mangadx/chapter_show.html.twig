@@ -1,0 +1,384 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ chapter.title }} - {{ manga ? manga.title : 'MangaThèque' }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1rem 0;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #4a5568;
+        text-decoration: none;
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .nav-links a {
+        color: #4a5568;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+        color: #667eea;
+    }
+    
+    .breadcrumb {
+        background: white;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .breadcrumb-list {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumb-list a {
+        color: #4a5568;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-list a:hover {
+        color: #667eea;
+    }
+    
+    .reading-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .chapitre-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .chapitre-meta {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .chapitre-title {
+        font-size: 2.5rem;
+        color: #2d3748;
+        margin-bottom: 1rem;
+    }
+    
+    .oeuvre-title {
+        color: #667eea;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    .chapitre-content {
+        background: white;
+        padding: 0;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .page-content {
+        margin-bottom: 0;
+        text-align: center;
+    }
+    
+    .page-image {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .page-content:last-child {
+        margin-bottom: 0;
+    }
+    
+    .navigation {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+    
+    .nav-chapitre {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn {
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f7fafc;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+        background: #e2e8f0;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-outline:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    
+    .loading-message {
+        text-align: center;
+        padding: 3rem;
+        color: #718096;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .credit {
+        background: #2d3748;
+        color: white;
+        padding: 2rem 0;
+        text-align: center;
+        margin-top: 3rem;
+    }
+    
+    .credit a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    
+    @media (max-width: 768px) {
+        .reading-container {
+            padding: 1rem;
+        }
+        
+        .chapitre-title {
+            font-size: 1.8rem;
+        }
+        
+        .navigation {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .nav-chapitre {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="header">
+    <div class="container">
+        <nav class="nav">
+            <a href="{{ path('mangadx_home') }}" class="logo">🎌 MangaThèque</a>
+            <ul class="nav-links">
+                <li><a href="{{ path('mangadx_home') }}">Accueil</a></li>
+                <li><a href="{{ path('mangadx_search') }}">Recherche</a></li>
+                <li><a href="{{ path('app_oeuvre_list') }}">Ma Collection</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<div class="breadcrumb">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li><a href="{{ path('mangadx_home') }}">🏠 Accueil</a></li>
+            {% if manga %}
+                <li>→</li>
+                <li><a href="{{ path('mangadx_manga_show', {id: manga.id}) }}">📖 {{ manga.title }}</a></li>
+            {% endif %}
+            <li>→</li>
+            <li>📄 {{ chapter.title }}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="reading-container">
+    <section class="chapitre-header">
+        <div class="chapitre-meta">
+            {% if manga %}
+                <div class="oeuvre-title">{{ manga.title }}</div>
+            {% endif %}
+            {% if chapter.volume %}
+                Volume {{ chapter.volume }}
+            {% endif %}
+            {% if chapter.chapter %}
+                • Chapitre {{ chapter.chapter }}
+            {% endif %}
+            {% if chapter.language_flag %}
+                • {{ chapter.language_flag }} {{ chapter.language_name }}
+            {% endif %}
+            {% if chapter.published_at %}
+                • {{ chapter.published_at|date('d/m/Y') }}
+            {% endif %}
+        </div>
+        
+        <h1 class="chapitre-title">{{ chapter.title }}</h1>
+    </section>
+    
+    <section class="chapitre-content">
+        {% if chapter.pages %}
+            {% for page in chapter.pages %}
+                <div class="page-content">
+                    <img src="{{ page }}" 
+                         alt="{{ chapter.title }} - Page {{ loop.index }}" 
+                         class="page-image" 
+                         loading="lazy"
+                         onerror="this.parentElement.innerHTML='<div style=\'text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 10px; margin: 1rem 0; color: #6c757d;\'><h4>⚠️ Erreur de chargement</h4><p>Page {{ loop.index }} indisponible</p><small>Les serveurs MangaDx peuvent être temporairement surchargés.<br>Essayez de recharger la page dans quelques minutes.</small></div>';">
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="loading-message" style="text-align: center; padding: 3rem; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3>📖 Chargement des pages...</h3>
+                <p>Récupération des images depuis MangaDx en cours.</p>
+                <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 10px; color: #856404;">
+                    <strong>⚠️ Problème de chargement ?</strong><br>
+                    <small>MangaDx peut avoir des problèmes temporaires. Essayez de :</small>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>Recharger la page dans quelques minutes</li>
+                        <li>Vérifier votre connexion internet</li>
+                        <li>Essayer un autre chapitre et revenir plus tard</li>
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+    
+    <section class="navigation">
+        <div class="nav-chapitre">
+            {% if previousChapter %}
+                <a href="{{ path('mangadx_chapter_show', {id: previousChapter.id}) }}" class="btn btn-secondary">
+                    ⬅️ Précédent
+                </a>
+            {% else %}
+                <button class="btn btn-secondary" disabled>
+                    ⬅️ Précédent
+                </button>
+            {% endif %}
+            
+            {% if nextChapter %}
+                <a href="{{ path('mangadx_chapter_show', {id: nextChapter.id}) }}" class="btn btn-primary">
+                    Suivant ➡️
+                </a>
+            {% else %}
+                <button class="btn btn-secondary" disabled>
+                    Suivant ➡️
+                </button>
+            {% endif %}
+        </div>
+        
+        {% if manga %}
+            <a href="{{ path('mangadx_manga_show', {id: manga.id}) }}" class="btn btn-outline">
+                📚 Tous les chapitres
+            </a>
+        {% endif %}
+    </section>
+</div>
+
+<footer class="credit">
+    <div class="container">
+        <p>
+            Images fournies par <a href="https://mangadex.org" target="_blank">MangaDx</a> • 
+            Merci aux équipes de traduction • 
+            Application respectant la <a href="https://api.mangadx.org/docs/" target="_blank">politique d'usage MangaDx</a>
+        </p>
+    </div>
+</footer>
+{% endblock %} 

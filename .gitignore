@@ -1,0 +1,123 @@
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
+
+###> symfony/phpunit-bridge ###
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> doctrine/doctrine-bundle ###
+/migrations/*.temp
+###< doctrine/doctrine-bundle ###
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###
+
+###> phpstan/phpstan ###
+phpstan.neon
+###< phpstan/phpstan ###
+
+# IDEs et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+/var/log/*.log
+
+# Cache
+.cache/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# Composer
+/composer.phar
+
+# NPM/Yarn
+package-lock.json
+yarn.lock
+
+# Environment files
+.env.prod
+.env.staging
+.env.test.local
+
+# Upload directories (si applicable)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Assets compilés
+/public/assets/
+/public/css/
+/public/js/
+
+# Database files (pour SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage reports
+/coverage/
+clover.xml
+
+# PHPStan
+/phpstan-baseline.neon
+
+# Rector
+rector.php
+
+# Security checker
+.security-checker.lock
+
+# Local scripts
+local_*
+
+# Documentation build
+docs/_build/
+
+# Deployment
+deploy.sh
+deploy/
+
+# Frontend build
+frontend/build/
+frontend/dist/
+frontend/node_modules/
+
+# Images de test
+test-images/
+sample-covers/

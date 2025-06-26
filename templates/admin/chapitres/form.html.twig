@@ -1,0 +1,457 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }} - Administration{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
+<style>
+.admin-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.admin-header {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.oeuvre-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.oeuvre-title {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.oeuvre-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-error {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.form-help {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+}
+
+.pages-collection {
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.pages-collection h4 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.page-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 10px;
+}
+
+.page-input {
+    flex: 1;
+    margin: 0 !important;
+}
+
+.page-remove-btn {
+    padding: 0.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.page-remove-btn:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.add-page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.add-page-btn:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-2px);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-secondary);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-secondary);
+}
+
+.btn-secondary:hover {
+    background: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.breadcrumb {
+    margin-bottom: 2rem;
+}
+
+.breadcrumb a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: var(--text-muted);
+    margin: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        padding: 0 1rem;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+    
+    .page-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'partials/_navigation.html.twig' %}
+
+<div class="admin-container">
+    <div class="form-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <a href="{{ path('admin_oeuvres') }}">Œuvres</a>
+            <span>></span>
+            <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}">Chapitres</a>
+            <span>></span>
+            <span>{{ title }}</span>
+        </div>
+
+        <div class="admin-header">
+            <h1 class="admin-title">
+                {% if chapitre.id %}✏️{% else %}➕{% endif %} {{ title }}
+            </h1>
+            
+            <div class="oeuvre-info">
+                <div class="oeuvre-title">{{ oeuvre.titre }}</div>
+                <div class="oeuvre-meta">
+                    {{ oeuvre.type }} • 
+                    {% if oeuvre.auteur %}par {{ oeuvre.auteur.nom }}{% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="form-card">
+            {{ form_start(form) }}
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.titre) }}
+                    {{ form_widget(form.titre) }}
+                    {{ form_errors(form.titre) }}
+                    <div class="form-help">Titre du chapitre</div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.ordre) }}
+                    {{ form_widget(form.ordre) }}
+                    {{ form_errors(form.ordre) }}
+                    <div class="form-help">Numéro d'ordre dans l'œuvre</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.resume) }}
+                {{ form_widget(form.resume) }}
+                {{ form_errors(form.resume) }}
+                <div class="form-help">Résumé ou description du chapitre (optionnel)</div>
+            </div>
+
+            {% if form.oeuvre is defined %}
+                <div class="form-group">
+                    {{ form_label(form.oeuvre) }}
+                    {{ form_widget(form.oeuvre) }}
+                    {{ form_errors(form.oeuvre) }}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                {{ form_label(form.pages) }}
+                <div class="pages-collection" data-prototype="{{ form_widget(form.pages.vars.prototype)|e('html_attr') }}" data-index="{{ form.pages|length }}">
+                    <h4>Pages du chapitre</h4>
+                    <div class="form-help" style="margin-bottom: 1rem;">
+                        Ajoutez les URLs des images de chaque page du chapitre dans l'ordre de lecture.
+                    </div>
+                    
+                    <div class="pages-list">
+                        {% for pageForm in form.pages %}
+                            <div class="page-item">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <strong style="color: var(--text-primary);">Page {{ loop.index }}</strong>
+                                </div>
+                                {{ form_widget(pageForm) }}
+                                {{ form_errors(pageForm) }}
+                                <button type="button" class="page-remove-btn" onclick="removePage(this)">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="button" class="add-page-btn" onclick="addPage()">
+                        ➕ Ajouter une page
+                    </button>
+                </div>
+                {{ form_errors(form.pages) }}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="btn btn-secondary">
+                    ❌ Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    {% if chapitre.id %}💾 Mettre à jour{% else %}✨ Créer le chapitre{% endif %}
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+function addPage() {
+    const collection = document.querySelector('.pages-collection');
+    const list = collection.querySelector('.pages-list');
+    const index = parseInt(collection.dataset.index);
+    
+    const prototype = collection.dataset.prototype;
+    const newForm = prototype.replace(/__name__/g, index);
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'page-item';
+    wrapper.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <strong style="color: var(--text-primary);">Page ${index + 1}</strong>
+        </div>
+        ${newForm}
+        <button type="button" class="page-remove-btn" onclick="removePage(this)">
+            🗑️ Supprimer
+        </button>
+    `;
+    
+    list.appendChild(wrapper);
+    collection.dataset.index = index + 1;
+    
+    // Focus sur le nouveau champ
+    const newInput = wrapper.querySelector('input');
+    if (newInput) {
+        newInput.focus();
+    }
+    
+    updatePageNumbers();
+}
+
+function removePage(button) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette page ?')) {
+        button.closest('.page-item').remove();
+        updatePageNumbers();
+    }
+}
+
+function updatePageNumbers() {
+    const pageItems = document.querySelectorAll('.page-item');
+    pageItems.forEach((item, index) => {
+        const label = item.querySelector('strong');
+        if (label) {
+            label.textContent = `Page ${index + 1}`;
+        }
+    });
+}
+
+// Initialiser les numéros de page au chargement
+document.addEventListener('DOMContentLoaded', updatePageNumbers);
+</script>
+{% endblock %} 

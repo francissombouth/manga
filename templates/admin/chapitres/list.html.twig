@@ -1,0 +1,396 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chapitres de "{{ oeuvre.titre }}" - Administration{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
+<style>
+.admin-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.admin-header {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.oeuvre-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.oeuvre-title {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.oeuvre-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.admin-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-secondary);
+}
+
+.btn-secondary:hover {
+    background: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.chapitres-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chapitre-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.chapitre-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-secondary);
+}
+
+.chapitre-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.chapitre-title-section {
+    flex: 1;
+}
+
+.chapitre-number {
+    display: inline-block;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.chapitre-title {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.chapitre-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.chapitre-resume {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.chapitre-pages {
+    margin-bottom: 1.5rem;
+}
+
+.pages-count {
+    color: var(--accent-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chapitre-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.empty-state {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.breadcrumb {
+    margin-bottom: 2rem;
+}
+
+.breadcrumb a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: var(--text-muted);
+    margin: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .admin-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .chapitre-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .chapitre-actions {
+        justify-content: flex-start;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'partials/_navigation.html.twig' %}
+
+<div class="admin-container">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <a href="{{ path('admin_oeuvres') }}">Œuvres</a>
+            <span>></span>
+            <span>Chapitres</span>
+        </div>
+
+        <div class="admin-header">
+            <h1 class="admin-title">📖 Gestion des Chapitres</h1>
+            
+            <div class="oeuvre-info">
+                <div class="oeuvre-title">{{ oeuvre.titre }}</div>
+                <div class="oeuvre-meta">
+                    {{ oeuvre.type }} • 
+                    {% if oeuvre.auteur %}par {{ oeuvre.auteur.nom }}{% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}{% endif %} • 
+                    {{ chapitres|length }} chapitre(s)
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Contrôles -->
+        <div class="admin-controls">
+            <div>
+                <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">
+                    ⬅️ Retour aux œuvres
+                </a>
+                <a href="{{ path('admin_oeuvre_edit', {id: oeuvre.id}) }}" class="btn btn-secondary">
+                    ✏️ Éditer l'œuvre
+                </a>
+            </div>
+            
+            <a href="{{ path('admin_chapitre_new', {id: oeuvre.id}) }}" class="btn btn-primary">
+                ➕ Nouveau chapitre
+            </a>
+        </div>
+
+        <!-- Liste des chapitres -->
+        {% if chapitres %}
+            <div class="chapitres-grid">
+                {% for chapitreData in chapitres %}
+                    {% set chapitre = chapitreData.chapitre %}
+                    {% set pages = chapitreData.pages %}
+                    {% set pages_count = chapitreData.pages_count %}
+                    {% set peut_recuperer_pages = chapitreData.peut_recuperer_pages %}
+                    
+                    <div class="chapitre-card">
+                        <div class="chapitre-header">
+                            <div class="chapitre-title-section">
+                                <div class="chapitre-number">Chapitre {{ chapitre.ordre }}</div>
+                                <h3 class="chapitre-title">{{ chapitre.titre }}</h3>
+                                <div class="chapitre-meta">
+                                    <span>📅 Créé le {{ chapitre.createdAt|date('d/m/Y H:i') }}</span>
+                                    <span>🔄 Modifié le {{ chapitre.updatedAt|date('d/m/Y H:i') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if chapitre.resume %}
+                            <div class="chapitre-resume">
+                                {{ chapitre.resume }}
+                            </div>
+                        {% endif %}
+
+                        <div class="chapitre-pages">
+                            <div class="pages-count">
+                                <span>📄</span>
+                                <span>{{ pages_count }} page(s)</span>
+                                {% if peut_recuperer_pages %}
+                                    <span style="color: #10b981; font-size: 0.8rem;">(récupérées dynamiquement)</span>
+                                {% else %}
+                                    <span style="color: #f59e0b; font-size: 0.8rem;">(pas d'ID MangaDx)</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if pages_count > 0 %}
+                                <div style="margin-top: 0.5rem;">
+                                    <small style="color: var(--text-secondary);">
+                                        {% if pages|length > 0 %}
+                                            Première page: <a href="{{ pages[0] }}" target="_blank" style="color: var(--accent-primary);">{{ pages[0]|split('/')|last }}</a>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="chapitre-actions">
+                            {% if chapitre.mangadxChapterId %}
+                                <a href="{{ path('mangadx_chapter_show', {id: chapitre.mangadxChapterId}) }}" class="btn btn-secondary btn-sm" target="_blank">
+                                    👁️ Voir (MangaDx)
+                                </a>
+                            {% else %}
+                                <a href="{{ path('app_chapitre_show', {id: chapitre.id}) }}" class="btn btn-secondary btn-sm" target="_blank">
+                                    👁️ Voir (local)
+                                </a>
+                            {% endif %}
+                            <a href="{{ path('admin_chapitre_edit', {id: chapitre.id}) }}" class="btn btn-secondary btn-sm">
+                                ✏️ Éditer
+                            </a>
+                            <form method="POST" action="{{ path('admin_chapitre_delete', {id: chapitre.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce chapitre ?')">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    🗑️ Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>Aucun chapitre</h3>
+                <p>Cette œuvre n'a pas encore de chapitres. Commencez par créer le premier chapitre !</p>
+                <a href="{{ path('admin_chapitre_new', {id: oeuvre.id}) }}" class="btn btn-primary" style="margin-top: 1rem;">
+                    ➕ Créer le premier chapitre
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

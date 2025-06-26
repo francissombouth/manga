@@ -1,0 +1,152 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche{% if query %} : {{ query }}{% endif %} - MangaThèque{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
+{% endblock %}
+
+{% block body %}
+{% include 'partials/_navigation.html.twig' %}
+
+<section class="search-hero">
+    <div class="container">
+        <h1>🔍 Rechercher des mangas</h1>
+        
+        <form action="{{ path('mangadx_search') }}" method="GET" class="search-form">
+            <input type="text" name="q" class="search-input" placeholder="Rechercher un manga..." value="{{ query }}" required>
+            <button type="submit" class="search-btn">🔍 Rechercher</button>
+        </form>
+    </div>
+</section>
+
+<section class="results-section">
+    <div class="container">
+        {% if query %}
+            <div class="results-header">
+                <h2 class="results-title">Résultats pour "{{ query }}"</h2>
+                <div class="results-count">{{ mangas|length }} manga(s) trouvé(s)</div>
+            </div>
+            
+            <div class="alert-info">
+                <small>
+                    ✅ <strong>Contenu familial</strong> : Seuls les mangas tout public et à contenu suggestif léger sont affichés.
+                    <br>Le contenu érotique et pornographique est automatiquement exclu.
+                </small>
+            </div>
+            
+            {% if mangas|length > 0 %}
+            <div class="alert-warning">
+                <small>
+                    🔄 <strong>Recherche en temps réel</strong> dans la base MangaDx officielle
+                    <br>📅 Résultats du {{ "now"|date("d/m/Y à H:i") }} • 🌐 API : <code style="color: #00d4ff;">api.mangadx.org</code>
+                </small>
+            </div>
+            {% endif %}
+            
+            {% if mangas %}
+                <div class="mangas-grid">
+                    {% for manga in mangas %}
+                        <a href="{{ path('mangadx_manga_show', {id: manga.id}) }}" class="manga-card">
+                            {% if manga.cover_url %}
+                                <img src="{{ path('image_proxy') }}?url={{ manga.cover_url|url_encode }}" 
+                                     alt="{{ manga.title }}" 
+                                     class="manga-cover" 
+                                     loading="lazy" 
+                                     onerror="this.src='{{ path('image_proxy') }}';">
+                            {% else %}
+                                <img src="{{ path('image_proxy') }}" 
+                                     alt="{{ manga.title }}" 
+                                     class="manga-cover">
+                            {% endif %}
+                            
+                            <!-- Overlay VortexScans style -->
+                            <div class="manga-overlay">
+                                <div class="manga-title-overlay">{{ manga.title }}</div>
+                                {% if manga.authors %}
+                                    <div class="manga-author-overlay">par {{ manga.authors|join(', ') }}</div>
+                                {% endif %}
+                                
+                                {% if manga.year %}
+                                    <div class="manga-rating">
+                                        <span>📅</span>
+                                        <span>{{ manga.year }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                <span class="manga-meta-badge">{{ manga.status|title }}</span>
+                                
+                                {% if manga.tags %}
+                                    <div class="manga-genres">
+                                        {% for tag in manga.tags|slice(0, 3) %}
+                                            <span class="genre-tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                {% if manga.description %}
+                                    <div class="manga-overlay-description">
+                                        {{ manga.description|slice(0, 120) }}{% if manga.description|length > 120 %}...{% endif %}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="manga-overlay-cta">
+                                    <span class="cta-text">📖 Voir les détails</span>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-results">
+                    <h3>😔 Aucun résultat trouvé</h3>
+                    <p>Votre recherche "{{ query }}" n'a donné aucun résultat.</p>
+                    
+                    <div class="suggestions">
+                        <h4>💡 Suggestions :</h4>
+                        <ul>
+                            <li>• Vérifiez l'orthographe de votre recherche</li>
+                            <li>• Essayez des termes plus généraux</li>
+                            <li>• Recherchez en anglais (ex: "One Piece", "Naruto")</li>
+                            <li>• Utilisez le nom de l'auteur</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <a href="{{ path('mangadx_home') }}" class="btn btn-primary">
+                            🏠 Voir les mangas populaires
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="results-header">
+                <h2 class="results-title">Recherchez parmi des milliers de mangas</h2>
+                <p class="results-count">Utilisez le formulaire ci-dessus pour rechercher vos mangas préférés</p>
+            </div>
+            
+            <div class="suggestions">
+                <h4>🌟 Recherches populaires :</h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                    <a href="{{ path('mangadx_search', {q: 'One Piece'}) }}" class="tag">One Piece</a>
+                    <a href="{{ path('mangadx_search', {q: 'Naruto'}) }}" class="tag">Naruto</a>
+                    <a href="{{ path('mangadx_search', {q: 'Dragon Ball'}) }}" class="tag">Dragon Ball</a>
+                    <a href="{{ path('mangadx_search', {q: 'Attack on Titan'}) }}" class="tag">Attack on Titan</a>
+                    <a href="{{ path('mangadx_search', {q: 'Demon Slayer'}) }}" class="tag">Demon Slayer</a>
+                    <a href="{{ path('mangadx_search', {q: 'My Hero Academia'}) }}" class="tag">My Hero Academia</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<footer class="credit">
+    <div class="container">
+        <p>
+            Données fournies par <a href="https://mangadex.org" target="_blank">MangaDx</a> • 
+            Merci aux équipes de traduction • 
+            Application respectant la <a href="https://api.mangadx.org/docs/" target="_blank">politique d'usage MangaDx</a>
+        </p>
+    </div>
+</footer>
+{% endblock %} 

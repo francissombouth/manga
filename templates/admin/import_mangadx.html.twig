@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import MangaDx - Administration{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block body %}
+{% include 'partials/_navigation.html.twig' %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-download"></i> Import depuis MangaDx API
+                    </h4>
+                    <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour aux œuvres
+                    </a>
+                </div>
+                
+                <div class="card-body">
+                    {% for flash_type, flash_messages in app.flashes %}
+                        {% for flash_message in flash_messages %}
+                            <div class="alert alert-{{ flash_type == 'error' ? 'danger' : flash_type }} alert-dismissible fade show">
+                                {{ flash_message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">🚀 Importer une œuvre</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        <div class="mb-3">
+                                            <label for="mangadx_id" class="form-label">
+                                                <strong>ID MangaDx</strong>
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                id="mangadx_id" 
+                                                name="mangadx_id" 
+                                                placeholder="exemple: a96676e5-8ae2-425e-b549-7f15dd34a6d8"
+                                                required
+                                            >
+                                            <div class="form-text">
+                                                💡 Trouvez l'ID dans l'URL MangaDx : <code>https://mangadx.org/title/<mark>a96676e5-8ae2-425e-b549-7f15dd34a6d8</mark></code>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="fas fa-download"></i> Importer l'œuvre
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">📋 Commandes utiles</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Import par commande :</h6>
+                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:sync-mangadx &lt;mangadx-id&gt;</code></pre>
+                                    
+                                    <h6 class="mt-3">Synchroniser toutes les œuvres :</h6>
+                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:sync-mangadx --update-all</code></pre>
+                                    
+                                    <h6 class="mt-3">Charger des données d'exemple :</h6>
+                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:load-sample-data</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">ℹ️ Comment ça marche ?</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ol class="list-unstyled">
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">1</span>
+                                            <strong>Trouvez une œuvre</strong><br>
+                                            <small class="text-muted">Allez sur MangaDx.org et cherchez l'œuvre désirée</small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">2</span>
+                                            <strong>Copiez l'ID</strong><br>
+                                            <small class="text-muted">L'ID est dans l'URL de la page de l'œuvre</small>
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">3</span>
+                                            <strong>Importez</strong><br>
+                                            <small class="text-muted">L'œuvre et ses chapitres seront automatiquement récupérés</small>
+                                        </li>
+                                        <li>
+                                            <span class="badge bg-success me-2">✓</span>
+                                            <strong>Modifiez</strong><br>
+                                            <small class="text-muted">Vous pouvez ensuite personnaliser l'œuvre localement</small>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="card border-warning mt-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">⚠️ Important</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="small mb-0">
+                                        <li>Les données sont sauvegardées dans votre BDD</li>
+                                        <li>Vous pouvez modifier les œuvres après import</li>
+                                        <li>La synchronisation met à jour les chapitres</li>
+                                        <li>Les modifications locales sont préservées</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-success mt-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">📊 Statistiques</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h4 class="text-primary">{{ total_oeuvres|default(0) }}</h4>
+                                            <small>Œuvres</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h4 class="text-success">{{ total_chapitres|default(0) }}</h4>
+                                            <small>Chapitres</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+pre code {
+    font-size: 0.9em;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %} 
