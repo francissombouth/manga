@@ -1,0 +1,36 @@
+# Variables d'environnement pour Docker Compose
+# Copiez ce fichier vers .env dans le répertoire racine du projet
+
+# Environnement Symfony
+APP_ENV=prod
+APP_SECRET=your-secret-key-here-change-me-in-production
+
+# Configuration Base de données
+POSTGRES_VERSION=16
+POSTGRES_DB=manga_db
+POSTGRES_USER=manga_user
+POSTGRES_PASSWORD=your-database-password-here
+
+# URL de connexion à la base de données
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=${POSTGRES_VERSION}&charset=utf8
+
+# Configuration Mailer
+MAILER_DSN=smtp://mailer:1025
+
+# Configuration JWT (si utilisé)
+JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
+JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
+JWT_PASSPHRASE=your-jwt-passphrase
+
+# Configuration CORS
+CORS_ALLOW_ORIGIN=http://localhost:3000
+
+# Configuration Frontend (React)
+REACT_APP_API_URL=http://localhost:8000
+
+# Configuration des ports
+BACKEND_PORT=8000
+FRONTEND_PORT=3000
+DATABASE_PORT=5432
+MAILER_WEB_PORT=8025
+MAILER_SMTP_PORT=1025 

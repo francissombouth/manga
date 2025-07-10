@@ -1,0 +1,90 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+docker/README.md
+*.md
+CHANGELOG*
+
+# Tests
+tests/
+phpunit.xml
+phpunit.dist.xml
+
+# Development
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Logs
+*.log
+logs/
+var/log/
+/var/log/*
+
+# Cache
+var/cache/
+/var/cache/*
+node_modules/
+.npm
+.yarn
+
+# Temporary files
+tmp/
+temp/
+.tmp
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml
+Dockerfile
+docker/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Vendor (will be installed during build)
+vendor/
+
+# Frontend specific
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Symfony specific
+/public/bundles/
+/var/
+/vendor/
+.env.local
+.env.local.php
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+public/uploads/
+
+# IDE
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
+.phpunit.result.cache 

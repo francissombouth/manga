@@ -178,4 +178,49 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
     }
+
+    // === MÉTHODES UTILITAIRES POUR LA GESTION DES RÔLES ===
+
+    /**
+     * Vérifie si l'utilisateur a le rôle admin
+     */
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->roles);
+    }
+
+    /**
+     * Ajoute un rôle à l'utilisateur
+     */
+    public function addRole(string $role): static
+    {
+        if (!in_array($role, $this->roles)) {
+            $this->roles[] = $role;
+        }
+        return $this;
+    }
+
+    /**
+     * Supprime un rôle de l'utilisateur
+     */
+    public function removeRole(string $role): static
+    {
+        $this->roles = array_filter($this->roles, fn($r) => $r !== $role);
+        return $this;
+    }
+
+    /**
+     * Retourne les rôles sous forme de chaîne lisible
+     */
+    public function getRolesAsString(): string
+    {
+        $roleLabels = [
+            'ROLE_USER' => 'Utilisateur',
+            'ROLE_ADMIN' => 'Administrateur',
+            'ROLE_SUPER_ADMIN' => 'Super Admin'
+        ];
+
+        $roles = array_map(fn($role) => $roleLabels[$role] ?? $role, $this->getRoles());
+        return implode(', ', $roles);
+    }
 } 

@@ -1,0 +1,1281 @@
+/* ==========================================================================
+   ASURA SCANS THEME - MangaThèque
+   ========================================================================== */
+
+/* Variables CSS */
+:root {
+    /* Couleurs principales */
+    --primary-dark: #0d0d0d;
+    --secondary-dark: #1a1a1a;
+    --accent-purple: #8b5cf6;
+    --accent-purple-light: #a78bfa;
+    --accent-purple-dark: #7c3aed;
+    
+    /* Couleurs de texte */
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    
+    /* Couleurs de fond */
+    --bg-primary: #0d0d0d;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #1f1f1f;
+    --bg-card-hover: #2a2a2a;
+    
+    /* Bordures */
+    --border-color: #374151;
+    --border-color-light: #4b5563;
+    
+    /* Ombres */
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+    
+    /* Rayons de bordure */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    
+    /* Espacement */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+}
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* Prévention du dépassement horizontal global */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* Prévention des débordements pour les conteneurs */
+.container, .main-container, .navbar-container {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Gestion des mots longs */
+h1, h2, h3, h4, h5, h6, .manga-title, .oeuvre-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+}
+
+/* Gestion des images */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Navigation */
+.navbar {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+    padding: 0.75rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    gap: 1.5rem;
+}
+
+    /* Navigation responsive pleine largeur */
+@media (max-width: 768px) {
+    .navbar-container {
+        max-width: 100vw;
+        margin: 0;
+        padding: 0 1rem;
+    }
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 800;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.navbar-brand:hover {
+    color: var(--accent-purple);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    border-color: var(--accent-purple);
+}
+
+.navbar-nav {
+    list-style: none;
+    gap: 1rem;
+}
+
+.nav-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+
+.nav-link:hover {
+    background-color: rgba(139, 92, 246, 0.15);
+    color: var(--accent-purple);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+/* Styles spéciaux pour liens spécifiques */
+.admin-link {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark)) !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.admin-link:hover {
+    background: linear-gradient(135deg, #a855f7, #8b5cf6) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+/* Améliorations responsive générales */
+.container, .main-container {
+    padding-left: clamp(1rem, 4vw, 2rem);
+    padding-right: clamp(1rem, 4vw, 2rem);
+}
+
+/* Variables responsive */
+:root {
+    --header-height: 70px;
+    --container-max-width: 1400px;
+    --grid-gap: clamp(1rem, 2vw, 1.5rem);
+    --card-padding: clamp(1rem, 2vw, 1.5rem);
+    --text-responsive: clamp(0.9rem, 2vw, 1rem);
+}
+
+/* Variables responsives par breakpoint */
+@media (max-width: 768px) {
+    :root {
+        --grid-gap: clamp(0.75rem, 2vw, 1rem);
+        --card-padding: clamp(0.75rem, 2vw, 1rem);
+        --space-lg: 1.5rem;
+        --space-md: 1rem;
+        --space-sm: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --grid-gap: clamp(0.5rem, 2vw, 0.75rem);
+        --card-padding: clamp(0.5rem, 2vw, 0.75rem);
+        --space-lg: 1rem;
+        --space-md: 0.75rem;
+        --space-sm: 0.5rem;
+    }
+}
+
+.register-link {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.register-link:hover {
+    background: linear-gradient(135deg, #34d399, #10b981) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.logout-link:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.search-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-primary);
+    width: 280px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Container principal */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--space-xl);
+}
+
+/* Header de la collection */
+.collection-header {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--space-xl);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.collection-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-purple), var(--accent-purple-light));
+}
+
+.collection-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    background: linear-gradient(135deg, var(--text-primary), var(--accent-purple-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.collection-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: var(--space-lg);
+}
+
+.collection-stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xl);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-purple);
+    display: block;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Grille des mangas */
+.manga-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, calc(50vw - 2rem)), 1fr));
+    gap: var(--grid-gap);
+    padding: 0;
+}
+
+.manga-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.manga-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow);
+    border-color: var(--accent-purple);
+}
+
+.manga-cover-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.manga-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.manga-card:hover .manga-cover {
+    transform: scale(1.05);
+}
+
+.new-badge {
+    position: absolute;
+    top: var(--space-sm);
+    right: var(--space-sm);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+}
+
+.manga-info {
+    padding: var(--space-md);
+}
+
+.manga-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.manga-author {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: var(--space-sm);
+}
+
+.manga-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.manga-type {
+    background-color: var(--accent-purple);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.chapters-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.manga-actions {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.btn-read {
+    flex: 1;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+    color: white;
+    border: none;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-read:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+    text-decoration: none;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    height: fit-content;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    position: sticky;
+    top: 100px;
+}
+
+/* Scrollbar personnalisé pour la sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--accent-purple);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-purple-light);
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.trending-list {
+    list-style: none;
+}
+
+.trending-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.3s ease;
+    margin-bottom: 0.25rem;
+}
+
+.trending-item:hover {
+    background-color: var(--bg-card-hover);
+}
+
+.trending-rank {
+    background-color: var(--accent-purple);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.trending-info {
+    flex: 1;
+}
+
+.trending-title {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.trending-chapters {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* Sections de sidebar compactes */
+.sidebar-section {
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-section:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-section + .sidebar-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Détails de sidebar compacts */
+.sidebar-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.sidebar-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.sidebar-detail-item span:first-child {
+    color: var(--text-secondary);
+}
+
+.sidebar-detail-item span:last-child {
+    color: var(--accent-purple);
+    font-weight: 600;
+}
+
+/* Actions de sidebar compactes */
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.sidebar-btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), #a855f7);
+    color: white;
+}
+
+.sidebar-btn-secondary {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent-purple);
+    border: 1px solid var(--accent-purple);
+}
+
+.sidebar-btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.sidebar-btn-info {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.sidebar-btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.sidebar-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Images de pages pour lecture */
+.page-image {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.page-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Animations utiles */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Effets sur les cartes manga */
+.manga-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--accent-purple);
+}
+
+/* Effets sur les boutons de lecture */
+.btn-read:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+}
+
+/* Sections */
+.section {
+    margin-bottom: var(--space-xl);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.section-link {
+    color: var(--accent-purple);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.section-link:hover {
+    color: var(--accent-purple-light);
+    text-decoration: none;
+}
+
+/* Responsive Design - Mobile First */
+
+/* Tablettes et petits écrans (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        padding: clamp(1rem, 3vw, 2rem);
+        gap: 1.5rem;
+    }
+    
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(240px, calc(50vw - 1rem)), 1fr));
+        gap: clamp(1rem, 2vw, 1.5rem);
+    }
+    
+    .collection-stats {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .sidebar {
+        order: -1;
+        position: static;
+        margin-bottom: 2rem;
+    }
+
+    /* Tables responsive */
+    .table-container, .users-table, .oeuvres-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-container .container {
+        padding: 0 1rem;
+    }
+}
+
+/* Mobiles (max-width: 768px) */
+@media (max-width: 768px) {    
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(180px, calc(45vw - 0.5rem)), 1fr));
+        gap: 1rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    .collection-stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        text-align: center;
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    .collection-title {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        text-align: center;
+    }
+
+    .collection-subtitle {
+        font-size: clamp(0.9rem, 3vw, 1rem);
+        text-align: center;
+    }
+
+    /* Admin tables */
+    .table th, .table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .admin-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-form {
+        max-width: 100%;
+    }
+
+    .search-input, .mobile-search-input {
+        font-size: 16px; /* Évite le zoom sur iOS */
+    }
+}
+
+/* Petits mobiles (max-width: 480px) */
+@media (max-width: 480px) {
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(160px, calc(45vw - 0.5rem)), 1fr));
+        gap: 0.75rem;
+        padding: 0 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+
+    .manga-card {
+        min-height: auto;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .manga-cover-container {
+        height: 180px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .manga-info {
+        padding: 0.75rem;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .manga-title {
+        font-size: 0.95rem;
+        line-height: 1.3;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+    }
+
+    .collection-stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 0 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+
+    .stat-item {
+        padding: 0.75rem;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .admin-container .container {
+        padding: 0 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+
+    /* Tables très mobiles */
+    .table th, .table td {
+        padding: 0.4rem 0.2rem;
+        font-size: 0.8rem;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    .actions-cell {
+        min-width: 120px;
+        max-width: 100%;
+    }
+
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        max-width: 100%;
+    }
+    
+    /* Containers et navigation pleine largeur */
+    .container, .main-container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    .navbar-container {
+        padding: 0 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+}
+
+/* États vides */
+.empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+    color: white;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    color: white;
+    text-decoration: none;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.manga-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.manga-card:nth-child(2) { animation-delay: 0.1s; }
+.manga-card:nth-child(3) { animation-delay: 0.2s; }
+.manga-card:nth-child(4) { animation-delay: 0.3s; }
+.manga-card:nth-child(5) { animation-delay: 0.4s; }
+.manga-card:nth-child(6) { animation-delay: 0.5s; }
+
+/* Messages Flash */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.flash-message {
+    animation: slideInRight 0.3s ease;
+}
+
+.flash-message:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Auto-hide flash messages after 5 seconds */
+.flash-message {
+    animation: slideInRight 0.3s ease, fadeOut 0.5s ease 4.5s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .flash-message {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        left: 20px !important;
+        max-width: none !important;
+    }
+}
+
+/* Media Queries */
+/* Mobile First Approach */
+
+/* Small devices (phones, 320px and up) */
+@media (min-width: 320px) {
+    .manga-grid {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1rem;
+    }
+
+    .collection-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .manga-card {
+        width: 100%;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    .manga-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .collection-stats {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+}
+
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+    .manga-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .main-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+    }
+
+    .sidebar {
+        display: block;
+    }
+}
+
+/* Extra large devices (large desktops, 1280px and up) */
+@media (min-width: 1280px) {
+    .manga-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* Specific Components Responsive Styles */
+@media (max-width: 768px) {
+    .manga-cover-container {
+        height: 200px;
+    }
+
+    .manga-title {
+        font-size: 1rem;
+    }
+
+    .manga-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .collection-header {
+        padding: 2rem 1rem;
+    }
+
+    .collection-title {
+        font-size: 1.5rem;
+    }
+
+    .flash-message {
+        width: 100%;
+        left: 5%;
+        bottom: 1rem;
+    }
+}
+
+/* Navigation Responsive */
+@media (max-width: 768px) {
+    .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 0.75rem;
+    }
+
+    .admin-link,
+    .register-link {
+        width: 100%;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) {
+    .manga-card:hover {
+        transform: none;
+    }
+
+    .nav-link:hover {
+        background-color: transparent;
+    }
+
+    .btn-read:hover {
+        transform: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .sidebar,
+    .manga-actions,
+    .flash-message {
+        display: none;
+    }
+
+    .main-container {
+        display: block;
+    }
+
+    .manga-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Ajuster les variables pour le mode sombre si nécessaire */
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --accent-purple: #9400d3;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f0f0f0;
+    }
+}
+
+/* Règle finale de sécurité contre le dépassement horizontal */
+@media (max-width: 768px) {
+    body, html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Largeur globale à 100% sans marges sur mobile - CORRECTION */
+    .navbar-container, .container, .main-container {
+        max-width: calc(100vw - 1rem) !important;
+        margin: 0 !important;
+        overflow-x: hidden !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .manga-grid, .collection-stats {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+    
+    .manga-card, .search-box, .search-input, .flash-message {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Messages flash pleine largeur - CORRECTION */
+    .flash-message {
+        max-width: calc(100vw - 20px) !important;
+        left: 10px !important;
+        right: 10px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Prévention pour les éléments de formulaire */
+    input, textarea, select, button {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Prévention pour les conteneurs flex */
+    .manga-meta, .collection-stats, .oeuvre-metadata, .genre-tags {
+        flex-wrap: wrap !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* RÈGLES STRICTES POUR TOUS LES ÉLÉMENTS - CORRECTION PADDING */
+    div, section, article, header, footer, nav, main, aside {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        word-wrap: break-word !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Correction spéciale pour les éléments avec padding */
+    .oeuvre-page, .main-container, .navbar-container {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Forcer la largeur réduite pour les éléments problématiques */
+    .mobile-nav {
+        max-width: 85vw !important;
+        width: 85vw !important;
+    }
+    
+    /* Tables responsives forcées */
+    table, .table {
+        max-width: 100% !important;
+        table-layout: fixed !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Images et média */
+    img, video, canvas, svg {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* CORRECTION ULTIME - Tous les éléments qui dépassent */
+    * {
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+    }
+}

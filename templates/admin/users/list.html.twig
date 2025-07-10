@@ -1,0 +1,479 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs - Administration{% endblock %}
+
+{% block stylesheets %}
+<style>
+.admin-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.admin-header {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-secondary);
+}
+
+.btn-secondary:hover {
+    background: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    background: #10b981;
+    color: white;
+}
+
+.btn-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.btn-warning:hover {
+    background: #f59e0b;
+    color: white;
+}
+
+.users-table {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-weight: 700;
+    padding: 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-secondary);
+}
+
+.table td {
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
+    vertical-align: middle;
+}
+
+.table tr:hover {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.user-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.user-email {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.role-admin {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-primary);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.role-user {
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.pagination-btn {
+    padding: 0.8rem 1.2rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid var(--border-secondary);
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
+@media (max-width: 768px) {
+    .admin-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.8rem 0.5rem;
+    }
+    
+    .btn-sm {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-container">
+    <div class="container">
+        <div class="admin-header">
+            <h1 class="admin-title">👥 Gestion des Utilisateurs</h1>
+            <p style="color: var(--text-secondary); margin: 0;">{{ total }} utilisateur(s) au total</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total }}</div>
+                <div class="stat-label">Utilisateurs Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">
+                    {% set adminCount = 0 %}
+                    {% for user in users %}
+                        {% if user.isAdmin %}
+                            {% set adminCount = adminCount + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ adminCount }}
+                </div>
+                <div class="stat-label">Administrateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total - adminCount }}</div>
+                <div class="stat-label">Utilisateurs Standards</div>
+            </div>
+        </div>
+
+        <!-- Contrôles -->
+        <div class="admin-controls">
+            <form method="GET" class="search-form">
+                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un utilisateur..." class="search-input">
+                <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
+                {% if search %}
+                    <a href="{{ path('admin_users') }}" class="btn btn-secondary">❌ Effacer</a>
+                {% endif %}
+            </form>
+            
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Table des utilisateurs -->
+        {% if users %}
+            <div class="users-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Rôles</th>
+                            <th>Date d'inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="user-name">{{ user.nom }}</div>
+                                </td>
+                                <td>
+                                    <div class="user-email">{{ user.email }}</div>
+                                </td>
+                                <td>
+                                    {% if user.isAdmin %}
+                                        <span class="role-badge role-admin">👑 Administrateur</span>
+                                    {% else %}
+                                        <span class="role-badge role-user">👤 Utilisateur</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ user.createdAt|date('d/m/Y H:i') }}
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{{ path('admin_user_edit_roles', {id: user.id}) }}" class="btn btn-secondary btn-sm">
+                                        ⚙️ Gérer les rôles
+                                    </a>
+                                    
+                                    {% if user.isAdmin %}
+                                        <form method="POST" action="{{ path('admin_user_toggle_admin', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Retirer les droits admin à {{ user.nom }} ?')">
+                                            <button type="submit" class="btn btn-warning btn-sm">
+                                                ➖ Retirer Admin
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="POST" action="{{ path('admin_user_toggle_admin', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Donner les droits admin à {{ user.nom }} ?')">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                ➕ Promouvoir Admin
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if user != app.user %}
+                                        <form method="POST" action="{{ path('admin_user_delete', {id: user.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer définitivement {{ user.nom }} ?')">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                🗑️ Supprimer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
+                <h3>Aucun utilisateur trouvé</h3>
+                <p>
+                    {% if search %}
+                        Aucun utilisateur ne correspond à votre recherche "{{ search }}".
+                    {% else %}
+                        Il n'y a encore aucun utilisateur.
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    <a href="{{ path('admin_users', {page: current_page - 1, search: search}) }}" class="pagination-btn">
+                        ⬅️ Précédent
+                    </a>
+                {% endif %}
+
+                <div class="pagination-info">
+                    Page {{ current_page }} sur {{ total_pages }}
+                </div>
+
+                {% if current_page < total_pages %}
+                    <a href="{{ path('admin_users', {page: current_page + 1, search: search}) }}" class="pagination-btn">
+                        Suivant ➡️
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

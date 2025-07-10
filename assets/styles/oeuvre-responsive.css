@@ -1,0 +1,950 @@
+/* Styles responsive pour la page d'œuvre */
+
+/* Variables pour les breakpoints */
+:root {
+    --mobile-max: 768px;
+    --tablet-max: 1024px;
+    --desktop-min: 1025px;
+}
+
+/* Prévention du dépassement horizontal */
+.oeuvre-page, .oeuvre-header, .tabs-section, .chapitre-card {
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* Styles de base pour la page d'œuvre */
+.oeuvre-page {
+    padding: 0 1rem;
+}
+
+/* Header responsive */
+.oeuvre-header {
+    padding: 2rem 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.oeuvre-header-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.oeuvre-cover {
+    width: 200px;
+    height: 280px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    flex-shrink: 0;
+}
+
+.oeuvre-details {
+    min-width: 0; /* Permet le text wrapping */
+}
+
+.oeuvre-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.2;
+    word-wrap: break-word;
+}
+
+.oeuvre-metadata {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.metadata-badge {
+    background: var(--accent-purple);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.metadata-badge.secondary {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent-purple);
+}
+
+.genre-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.genre-tag {
+    background: linear-gradient(135deg, #e11d48, #be185d);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.genre-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
+    text-decoration: none;
+    color: white;
+}
+
+.oeuvre-resume {
+    background: rgba(139, 92, 246, 0.05);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border-left: 4px solid var(--accent-purple);
+    margin-bottom: 2rem;
+}
+
+.oeuvre-resume h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.oeuvre-resume p {
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Section des onglets */
+.tabs-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.tabs-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tabs-header::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--text-secondary);
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 15px 15px 0 0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tab-btn.active {
+    background: var(--accent-purple);
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+/* Chapitres */
+.chapitres-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.chapitre-card {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.chapitre-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.1);
+}
+
+.chapitre-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.chapitre-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    word-wrap: break-word;
+}
+
+.chapitre-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.chapitre-badge {
+    background: var(--accent-purple);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chapitre-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-read {
+    background: linear-gradient(135deg, var(--accent-purple), #a855f7);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-read:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    text-decoration: none;
+    color: white;
+}
+
+/* Section de notation */
+.rating-section {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: #d1d5db;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+.rating-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-rating {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-rating.submit {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+}
+
+.btn-rating.remove {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+/* Commentaires */
+.comments-section {
+    margin-top: 2rem;
+}
+
+.comment-form {
+    background: var(--surface);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    resize: vertical;
+    font-family: inherit;
+    min-height: 120px;
+}
+
+.comment-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, var(--accent-purple), #a855f7);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+/* Responsive breakpoints */
+
+/* Tablets et plus petits */
+@media (max-width: 1024px) {
+    .oeuvre-header {
+        padding: 1.5rem !important;
+    }
+    
+    .oeuvre-header-grid {
+        gap: 1.5rem;
+    }
+    
+    .oeuvre-cover {
+        width: 160px;
+        height: 220px;
+    }
+    
+    .oeuvre-title {
+        font-size: 2rem;
+    }
+    
+    .tabs-section {
+        padding: 1.5rem;
+    }
+    
+    .tab-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .chapitre-card {
+        padding: 1.2rem;
+    }
+    
+    .chapitre-title {
+        font-size: 1.2rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .oeuvre-page {
+        padding: 0 0.5rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    .oeuvre-header {
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .oeuvre-header-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .oeuvre-cover {
+        width: 180px;
+        height: 250px;
+        margin: 0 auto;
+    }
+    
+    .oeuvre-title {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .oeuvre-metadata {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .metadata-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .genre-tags {
+        justify-content: center;
+        gap: 0.3rem;
+    }
+    
+    .genre-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .tab-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+    
+    .chapitre-title {
+        font-size: 1rem;
+        word-break: break-word;
+    }
+    
+    .btn-read {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+        min-width: 100px;
+        white-space: nowrap;
+    }
+    
+    .star {
+        font-size: 1.2rem;
+    }
+    
+    /* Correction spécifique pour les grilles et flexbox */
+    .oeuvre-header-grid, .chapitre-header, .oeuvre-metadata, .genre-tags {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .tabs-header {
+        padding-bottom: 0.5rem;
+        margin-right: -0.25rem;
+        margin-left: -0.25rem;
+    }
+    
+    .oeuvre-resume {
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .oeuvre-resume h3 {
+        font-size: 1.1rem;
+    }
+    
+    .oeuvre-resume p {
+        font-size: 0.9rem;
+    }
+    
+    .tabs-section {
+        padding: 1rem;
+    }
+    
+    .tabs-header {
+        gap: 0.3rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tab-btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.8rem;
+        min-width: 120px;
+    }
+    
+    .chapitre-card {
+        padding: 1rem;
+    }
+    
+    .chapitre-header {
+        flex-direction: column;
+        align-items: start;
+        gap: 0.5rem;
+    }
+    
+    .chapitre-title {
+        font-size: 1.1rem;
+        text-align: left;
+    }
+    
+    .chapitre-meta {
+        gap: 0.5rem;
+    }
+    
+    .chapitre-actions {
+        width: 100%;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+    
+    .btn-read {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.8rem;
+        flex: 1;
+        justify-content: center;
+        min-width: 120px;
+    }
+    
+    .rating-section {
+        padding: 1.5rem;
+    }
+    
+    .star-rating {
+        justify-content: center;
+        gap: 0.2rem;
+    }
+    
+    .star {
+        font-size: 1.5rem;
+    }
+    
+    .rating-actions {
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-rating {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.8rem;
+        flex: 1;
+        max-width: 150px;
+    }
+    
+    .comment-form {
+        padding: 1rem;
+    }
+    
+    .comment-form textarea {
+        min-height: 100px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Largeur réduite pour les sections principales */
+    .tabs-section, .oeuvre-header, .oeuvre-resume {
+        max-width: 100vw;
+        margin: 0;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 480px) {
+    .oeuvre-page {
+        padding: 0 0.25rem;
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    .oeuvre-cover {
+        width: 150px;
+        height: 210px;
+        max-width: 100vw;
+    }
+    
+    .oeuvre-title {
+        font-size: 1.5rem;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    .metadata-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        word-break: break-word;
+    }
+    
+    .genre-tag {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .tab-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.7rem;
+        min-width: 100px;
+    }
+    
+    .chapitre-title {
+        font-size: 1rem;
+    }
+    
+    .btn-read {
+        padding: 0.5rem 1rem;
+        font-size: 0.7rem;
+    }
+    
+    .star {
+        font-size: 1.3rem;
+    }
+    
+}
+
+/* Améliorations pour l'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Mode sombre spécifique */
+@media (prefers-color-scheme: dark) {
+    .oeuvre-cover img {
+        filter: brightness(0.9);
+    }
+    
+    .metadata-badge {
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+    }
+    
+    .genre-tag {
+        box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2);
+    }
+}
+
+/* Animations et transitions fluides */
+.oeuvre-header,
+.tabs-section,
+.chapitre-card,
+.rating-section,
+.comment-form {
+    transition: all 0.3s ease;
+}
+
+/* Focus states pour l'accessibilité */
+.tab-btn:focus,
+.btn-read:focus,
+.btn-rating:focus,
+.btn-submit:focus {
+    outline: 2px solid var(--accent-purple);
+    outline-offset: 2px;
+}
+
+/* Hover states pour les éléments interactifs */
+.chapitre-card:hover {
+    border-color: var(--accent-purple);
+}
+
+.genre-tag:focus {
+    outline: 2px solid var(--accent-purple);
+    outline-offset: 2px;
+}
+
+/* Amélioration des performances */
+.oeuvre-cover img {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+.btn-read,
+.btn-rating,
+.btn-submit {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Scrollbars personnalisées pour webkit */
+.tabs-header::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tabs-header::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.tabs-header::-webkit-scrollbar-thumb {
+    background: var(--accent-purple);
+    border-radius: 2px;
+}
+
+.tabs-header::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-purple-dark);
+}
+
+/* Règles finales pour prévenir tout dépassement horizontal */
+@media (max-width: 768px) {
+    * {
+        max-width: 100%;
+    }
+    
+    .oeuvre-page * {
+        box-sizing: border-box;
+    }
+    
+    /* Correction pour les inputs et formulaires */
+    input, textarea, select, button {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Correction pour les listes et conteneurs flex */
+    .oeuvre-metadata, .genre-tags, .chapitre-meta, .rating-actions {
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+    
+    /* Correction pour les grilles */
+    .oeuvre-header-grid, .chapitres-grid {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    /* Correction pour le texte long */
+    .oeuvre-title, .chapitre-title, .genre-tag, .metadata-badge {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+    
+    /* Largeur réduite pour les sections principales */
+    .tabs-section, .oeuvre-header, .oeuvre-resume {
+        max-width: 100vw;
+        margin: 0;
+    }
+    
+    /* RÈGLES ULTRA-STRICTES pour empêcher tout dépassement */
+    .oeuvre-page, .oeuvre-page * {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        word-wrap: break-word !important;
+    }
+    
+    /* Forcer tous les conteneurs principaux à 100vw max */
+    .oeuvre-page > *, 
+    .oeuvre-header, 
+    .tabs-section, 
+    .oeuvre-resume,
+    .chapitres-grid,
+    .chapitre-card {
+        max-width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* Corrections spécifiques pour la page oeuvre/show.html.twig */
+@media (max-width: 768px) {
+    /* Containers principaux de la page œuvre - CORRECTION PADDING */
+    .oeuvre-page {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 0.5rem !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+    
+    .main-container.oeuvre-page {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Header et navigation */
+    .breadcrumb-container {
+        max-width: 100% !important;
+        margin-bottom: 1rem !important;
+        padding: 0.8rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .manga-header {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+    
+    /* Grid d'en-tête responsive */
+    .oeuvre-header-grid {
+        gap: min(2rem, 4vw) !important;
+        max-width: 100% !important;
+    }
+    
+    /* Éléments avec styles inline problématiques */
+    .oeuvre-header [style*="gap"] {
+        gap: min(1rem, 2vw) !important;
+    }
+    
+    .oeuvre-details [style*="gap: 2rem"] {
+        gap: min(1.5rem, 3vw) !important;
+    }
+    
+    .oeuvre-details [style*="gap: 1rem"] {
+        gap: min(0.8rem, 2vw) !important;
+    }
+    
+    /* Correction pour les textes longs */
+    .oeuvre-title {
+        font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        hyphens: auto !important;
+        max-width: 100% !important;
+    }
+    
+    /* Métadonnées responsive */
+    .oeuvre-metadata {
+        gap: min(1rem, 2vw) !important;
+        max-width: 100% !important;
+    }
+    
+    .metadata-badge {
+        font-size: clamp(0.8rem, 2vw, 0.9rem) !important;
+        padding: 0.4rem 0.8rem !important;
+        word-wrap: break-word !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Genres tags */
+    .genre-tags {
+        gap: min(0.5rem, 1vw) !important;
+        max-width: 100% !important;
+    }
+    
+    .genre-tag {
+        font-size: clamp(0.7rem, 2vw, 0.8rem) !important;
+        padding: 0.3rem 0.6rem !important;
+        word-wrap: break-word !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Section notation */
+    .rating-section {
+        max-width: 100% !important;
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .star-rating {
+        gap: min(0.3rem, 1vw) !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    /* Boutons de notation */
+    .rating-actions {
+        gap: min(0.8rem, 2vw) !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    .btn-rating {
+        padding: 0.6rem 1rem !important;
+        font-size: clamp(0.8rem, 2vw, 0.9rem) !important;
+        max-width: 100% !important;
+        flex: 1 !important;
+        min-width: auto !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* RÈGLES ULTRA-STRICTES pour empêcher tout dépassement - CORRECTION */
+    .oeuvre-page, .oeuvre-page * {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        word-wrap: break-word !important;
+    }
+    
+    /* Forcer tous les conteneurs principaux à tenir dans l'écran */
+    .oeuvre-page > *, 
+    .oeuvre-header, 
+    .tabs-section, 
+    .oeuvre-resume,
+    .chapitres-grid,
+    .chapitre-card {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .oeuvre-page {
+        padding: 0 0.25rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .oeuvre-header {
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .oeuvre-header-grid {
+        gap: 1rem !important;
+    }
+    
+    /* Forcer tous les éléments à être plus petits sur très petits écrans */
+    .metadata-badge {
+        font-size: 0.7rem !important;
+        padding: 0.3rem 0.5rem !important;
+        box-sizing: border-box !important;
+    }
+    
+    .genre-tag {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.4rem !important;
+        box-sizing: border-box !important;
+    }
+}
+

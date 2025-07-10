@@ -1,0 +1,301 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Éditer les rôles de {{ user.nom }} - Administration{% endblock %}
+
+{% block stylesheets %}
+<style>
+.admin-container {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.admin-header {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+}
+
+.form-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.role-group {
+    margin-bottom: 1.5rem;
+}
+
+.role-group h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.role-options {
+    display: grid;
+    gap: 1rem;
+}
+
+.role-option {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+}
+
+.role-option:hover {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.role-option.selected {
+    border-color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.role-option input[type="checkbox"] {
+    margin-right: 1rem;
+    transform: scale(1.2);
+    accent-color: var(--accent-purple);
+}
+
+.role-info {
+    flex: 1;
+}
+
+.role-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.role-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.role-icon {
+    font-size: 1.5rem;
+    margin-left: 1rem;
+    opacity: 0.6;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--accent-purple);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-purple-dark);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--text-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--text-primary);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.warning-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    color: #ef4444;
+}
+
+.warning-box i {
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-container">
+    <div class="admin-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; display: flex; align-items: center; gap: 1rem;">
+                    <i class="fas fa-user-cog"></i>
+                    Éditer les rôles
+                </h1>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                    Modifier les permissions de {{ user.nom }}
+                </p>
+            </div>
+            <a href="{{ path('admin_users') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <!-- Informations utilisateur -->
+        <div class="user-info">
+            <div class="user-avatar">
+                {{ user.nom|first|upper }}
+            </div>
+            <div>
+                <h3 style="margin: 0;">{{ user.nom }}</h3>
+                <div style="color: var(--text-secondary);">{{ user.email }}</div>
+                <small style="color: var(--text-secondary);">
+                    Inscrit le {{ user.createdAt|date('d/m/Y à H:i') }}
+                </small>
+            </div>
+        </div>
+
+        {% if user == app.user %}
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Attention :</strong> Vous modifiez vos propres rôles. Soyez prudent pour ne pas vous retirer l'accès administrateur !
+            </div>
+        {% endif %}
+
+        <!-- Formulaire de rôles -->
+        <form method="POST">
+            <div class="role-group">
+                <h3>
+                    <i class="fas fa-shield-alt"></i>
+                    Rôles et Permissions
+                </h3>
+
+                <div class="role-options">
+                    {% for role_key, role_label in available_roles %}
+                        <label class="role-option {% if role_key in user.roles %}selected{% endif %}">
+                            <input type="checkbox" 
+                                   name="roles[]" 
+                                   value="{{ role_key }}"
+                                   {% if role_key in user.roles %}checked{% endif %}
+                                   {% if role_key == 'ROLE_USER' %}disabled{% endif %}
+                                   onchange="toggleRoleSelection(this)">
+                            
+                            <div class="role-info">
+                                <div class="role-name">{{ role_label }}</div>
+                                <div class="role-description">
+                                    {% if role_key == 'ROLE_USER' %}
+                                        Accès de base à l'application (obligatoire)
+                                    {% elseif role_key == 'ROLE_ADMIN' %}
+                                        Accès à l'administration, gestion du contenu
+                                    {% elseif role_key == 'ROLE_SUPER_ADMIN' %}
+                                        Accès complet, gestion des utilisateurs et système
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="role-icon">
+                                {% if role_key == 'ROLE_USER' %}
+                                    <i class="fas fa-user"></i>
+                                {% elseif role_key == 'ROLE_ADMIN' %}
+                                    <i class="fas fa-crown"></i>
+                                {% elseif role_key == 'ROLE_SUPER_ADMIN' %}
+                                    <i class="fas fa-star"></i>
+                                {% endif %}
+                            </div>
+                        </label>
+
+                        {% if role_key == 'ROLE_USER' %}
+                            <!-- Champ caché pour s'assurer que ROLE_USER est toujours envoyé -->
+                            <input type="hidden" name="roles[]" value="ROLE_USER">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Sauvegarder les rôles
+                </button>
+                <a href="{{ path('admin_users') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleRoleSelection(checkbox) {
+    const roleOption = checkbox.closest('.role-option');
+    if (checkbox.checked) {
+        roleOption.classList.add('selected');
+    } else {
+        roleOption.classList.remove('selected');
+    }
+}
+
+// Initialiser l'état visuel des rôles
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        toggleRoleSelection(checkbox);
+    });
+});
+</script>
+{% endblock %} 

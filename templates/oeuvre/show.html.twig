@@ -3,413 +3,2274 @@
 {% block title %}{{ oeuvre.titre }} - {{ oeuvre.auteur ? oeuvre.auteur.nom : 'Auteur inconnu' }}{% endblock %}
 
 {% block stylesheets %}
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
-    
-    .header {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-    
-    .nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .logo {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #4a5568;
-        text-decoration: none;
-    }
-    
-    .nav-links {
-        display: flex;
-        gap: 2rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .nav-links a {
-        color: #4a5568;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
-    
-    .nav-links a:hover {
-        color: #667eea;
-    }
-    
-    .breadcrumb {
-        background: white;
-        padding: 1rem 0;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .breadcrumb-list {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        color: #718096;
-    }
-    
-    .breadcrumb-list a {
-        color: #4a5568;
-        text-decoration: none;
-    }
-    
-    .breadcrumb-list a:hover {
-        color: #667eea;
-    }
-    
-    .oeuvre-header {
-        background: white;
-        padding: 3rem 0;
-        margin-bottom: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    
-    .oeuvre-info {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 2rem;
-        align-items: start;
-    }
-    
-    .oeuvre-cover {
-        width: 200px;
-        height: 300px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    
-    .oeuvre-details h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        color: #2d3748;
-    }
-    
-    .oeuvre-author {
-        font-size: 1.2rem;
-        color: #718096;
-        margin-bottom: 1rem;
-        font-style: italic;
-    }
-    
-    .oeuvre-meta {
-        display: flex;
-        gap: 2rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-    }
-    
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #f7fafc;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.9rem;
-        color: #4a5568;
-    }
-    
-    .oeuvre-description {
-        line-height: 1.8;
-        color: #4a5568;
-        font-size: 1.1rem;
-    }
-    
-    .chapitres-section {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    
-    .section-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-        color: #2d3748;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .chapitres-grid {
-        display: grid;
-        gap: 1.5rem;
-    }
-    
-    .chapitre-card {
-        background: #f8f9fa;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s;
-        border-left: 4px solid #667eea;
-    }
-    
-    .chapitre-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    
-    .chapitre-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 1rem;
-    }
-    
-    .chapitre-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #2d3748;
-        margin: 0;
-    }
-    
-    .chapitre-number {
-        background: #667eea;
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: bold;
-    }
-    
-    .chapitre-resume {
-        color: #718096;
-        line-height: 1.6;
-        margin-bottom: 1rem;
-    }
-    
-    .chapitre-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .btn {
-        padding: 0.6rem 1.5rem;
-        border-radius: 20px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s;
-        font-size: 0.9rem;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .chapitre-meta {
-        font-size: 0.8rem;
-        color: #a0aec0;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #718096;
-    }
-    
-    .empty-state-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-    }
-    
-    .back-btn {
-        background: #f7fafc;
-        color: #4a5568;
-        border: 2px solid #e2e8f0;
-        margin-bottom: 2rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .back-btn:hover {
-        background: #edf2f7;
-        border-color: #cbd5e0;
-        transform: translateY(-2px);
-    }
-    
-    @media (max-width: 768px) {
-        .oeuvre-info {
-            grid-template-columns: 1fr;
-            text-align: center;
-        }
-        
-        .oeuvre-cover {
-            width: 150px;
-            height: 225px;
-            margin: 0 auto;
-        }
-        
-        .oeuvre-meta {
-            justify-content: center;
-        }
-        
-        .container {
-            padding: 0 1rem;
-        }
-    }
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/oeuvre-responsive.css') }}">
 {% endblock %}
 
 {% block body %}
-<header class="header">
-    <div class="container">
-        <nav class="nav">
-            <a href="{{ path('app_home') }}" class="logo">🎌 MangaThèque</a>
-            <ul class="nav-links">
-                <li><a href="{{ path('app_home') }}">Accueil</a></li>
-                <li><a href="/api/docs">API</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<div class="breadcrumb">
-    <div class="container">
-        <ul class="breadcrumb-list">
-            <li><a href="{{ path('app_home') }}">Accueil</a></li>
-            <li>→</li>
-            <li>{{ oeuvre.titre }}</li>
-        </ul>
-    </div>
-</div>
-
-<main class="container">
-    <a href="{{ path('app_home') }}" class="btn back-btn">← Retour à la collection</a>
-    
-    <section class="oeuvre-header">
-        <div class="container">
-            <div class="oeuvre-info">
-                <div class="oeuvre-cover">
-                    {% if oeuvre.type == 'Manhwa' %}
-                        🇰🇷
-                    {% else %}
-                        🎌
-                    {% endif %}
-                </div>
-                <div class="oeuvre-details">
-                    <h1>{{ oeuvre.titre }}</h1>
-                    {% if oeuvre.auteur %}
-                    <p class="oeuvre-author">par {{ oeuvre.auteur.nom }}{% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}</p>
-                    {% endif %}
+<body data-user="{{ app.user ? 'true' : 'false' }}">
+<!-- Script de rechargement simplifié et robuste -->
+<script>
+    (function() {
+        console.log('✅ Script de rechargement initialisé pour l\'œuvre {{ oeuvre.id }}');
+        
+        // Variables globales pour cette page
+        let reloadAttempted = false;
+        let pageInitialized = false;
+        const oeuvreId = '{{ oeuvre.id }}';
+        const pageKey = `oeuvre_${oeuvreId}_loaded`;
+        
+        // Fonction pour vérifier si la page a besoin d'être rechargée
+        function needsReload() {
+            const currentTimestamp = Date.now();
+            const lastLoadTime = sessionStorage.getItem(pageKey);
+            
+            // Toujours recharger au premier accès
+            if (!lastLoadTime) {
+                console.log('🔄 Premier accès à cette œuvre, rechargement nécessaire');
+                return true;
+            }
+            
+            // Recharger si plus de 2 minutes se sont écoulées
+            if ((currentTimestamp - parseInt(lastLoadTime)) > 120000) {
+                console.log('🔄 Session expirée, rechargement nécessaire');
+                return true;
+            }
+            
+            console.log('✅ Page déjà rechargée récemment');
+            return false;
+        }
+        
+        // Fonction pour marquer la page comme rechargée
+        function markAsReloaded() {
+            sessionStorage.setItem(pageKey, Date.now().toString());
+            console.log('✅ Page marquée comme rechargée');
+        }
+        
+        // Fonction d'initialisation complète de la page
+        function initializePage() {
+            if (pageInitialized) {
+                console.log('⚠️ Page déjà initialisée, skip');
+                return;
+            }
+            
+            console.log('🎯 Initialisation complète de la page');
+            pageInitialized = true;
+            
+            // Attendre un peu pour s'assurer que tout est chargé
+            setTimeout(() => {
+                try {
+                    // Initialiser les onglets
+                    if (typeof initTabs === 'function') {
+                        initTabs();
+                    }
                     
-                    <div class="oeuvre-meta">
-                        <div class="meta-item">
-                            <span>📚</span>
-                            <span>{{ oeuvre.type }}</span>
+                    // Initialiser les autres fonctionnalités
+                    if (typeof checkFavoriteStatus === 'function') {
+                        checkFavoriteStatus({{ oeuvre.id }});
+                    }
+                    if (typeof initLikeButtons === 'function') {
+                        initLikeButtons();
+                    }
+                    if (typeof initReplies === 'function') {
+                        initReplies();
+                    }
+                    
+                    // Initialiser les étoiles de notation
+                    if (typeof initRatingStars === 'function') {
+                        initRatingStars();
+                    }
+                    
+                    // Charger la moyenne
+                    loadAverageRating();
+                    
+                    console.log('✅ Page entièrement initialisée');
+                } catch (error) {
+                    console.error('❌ Erreur lors de l\'initialisation:', error);
+                }
+            }, 200);
+        }
+        
+        // Fonction de rechargement
+        function performReload() {
+            if (reloadAttempted) {
+                console.log('⚠️ Rechargement déjà tenté, skip');
+                return;
+            }
+            
+            console.log('🔄 Déclenchement du rechargement...');
+            reloadAttempted = true;
+            markAsReloaded();
+            
+            // Utiliser Turbo si disponible, sinon rechargement classique
+            if (typeof Turbo !== 'undefined') {
+            Turbo.visit(window.location.href, { action: 'replace' });
+        } else {
+                window.location.reload(true);
+            }
+        }
+        
+        // Écouter les événements de chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOMContentLoaded déclenché');
+            
+            if (needsReload()) {
+                performReload();
+            } else {
+                console.log('✅ Initialisation directe de la page');
+                initializePage();
+            }
+        });
+        
+        // Backup avec turbo:load
+        document.addEventListener('turbo:load', function() {
+            console.log('🚀 Turbo:load déclenché');
+            
+            if (!reloadAttempted && needsReload()) {
+                performReload();
+            } else if (!pageInitialized) {
+                console.log('🔧 Initialisation via Turbo');
+                initializePage();
+            }
+        });
+        
+        // Gestion des erreurs
+        window.addEventListener('error', function(e) {
+            console.error('❌ Erreur globale détectée:', e.error);
+        });
+        
+        // Nettoyage lors du déchargement
+        window.addEventListener('beforeunload', function() {
+            console.log('🧹 Nettoyage avant déchargement');
+        });
+        
+        // Exposer les fonctions pour le débogage
+        window.reloadDebug = {
+            needsReload,
+            performReload,
+            initializePage,
+            pageKey,
+            oeuvreId
+        };
+        
+    })();
+</script>
+
+<div class="main-container oeuvre-page">
+    <!-- Contenu principal -->
+    <main class="content">
+        <!-- En-tête avec image et informations -->
+        <div class="manga-header">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb-container" style="background: rgba(139, 92, 246, 0.1); padding: 1rem; margin-bottom: 2rem; border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); flex-wrap: wrap;">
+                    <a href="{{ path('app_oeuvre_list') }}" style="color: var(--accent-purple); text-decoration: none;">📚 Catalogue</a>
+                    <span>→</span>
+                    <span style="word-break: break-word;">{{ oeuvre.titre }}</span>
+                </div>
+            </div>
+
+            <!-- Header de l'œuvre -->
+            <div class="oeuvre-header" style="background: var(--card-bg); border-radius: 20px; box-shadow: var(--shadow-lg);">
+                <div class="oeuvre-header-grid">
+                    <!-- Couverture -->
+                    <div class="oeuvre-cover">
+                        {% if oeuvre.couverture %}
+                            <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--accent-purple), #a855f7); display: flex; align-items: center; justify-content: center; color: white; font-size: clamp(2rem, 8vw, 3rem);">
+                                {% if oeuvre.type == 'Manhwa' %}🇰🇷{% else %}📖{% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Détails de l'œuvre -->
+                    <div class="oeuvre-details">
+                        <div style="display: flex; align-items: center; gap: min(1rem, 2vw); margin-bottom: 1rem; flex-wrap: wrap; max-width: 100%;">
+                            <h1 class="oeuvre-title" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">{{ oeuvre.titre }}</h1>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; max-width: 100%;">
+                                    🔐 Mode Admin
+                                </span>
+                            {% endif %}
                         </div>
-                        {% if oeuvre.datePublication %}
-                        <div class="meta-item">
-                            <span>📅</span>
-                            <span>{{ oeuvre.datePublication|date('Y') }}</span>
+                        
+                        {% if oeuvre.auteur %}
+                        <div style="display: flex; align-items: center; gap: min(2rem, 4vw); margin-bottom: 2rem; flex-wrap: wrap; max-width: 100%;">
+                            <p style="font-size: clamp(1.2rem, 3vw, 1.5rem); color: var(--text-secondary); font-style: italic; margin: 0; word-wrap: break-word; max-width: 100%;">
+                            par {{ oeuvre.auteur.nom }}{% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}
+                        </p>
+                            <!-- Moyenne des notes -->
+                            <div id="moyenne-header" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 92, 246, 0.1); padding: 0.5rem 1rem; border-radius: 10px; max-width: 100%;">
+                                <span style="color: var(--accent-purple); font-weight: 600;">⭐ Notre moyenne:</span>
+                                <span id="average-header-display" style="color: var(--accent-purple); font-weight: 700; font-size: 1.1rem;">-</span>
+                            </div>
                         </div>
                         {% endif %}
-                        <div class="meta-item">
-                            <span>📖</span>
-                            <span>{{ oeuvre.chapitres|length }} chapitre{{ oeuvre.chapitres|length > 1 ? 's' : '' }}</span>
+                        
+                        <!-- Métadonnées -->
+                        <div class="oeuvre-metadata">
+                            <div class="metadata-badge">
+                                📚 {{ oeuvre.type|default('MANGA') }}
+                            </div>
+                            {% if oeuvre.datePublication %}
+                            <div class="metadata-badge secondary">
+                                📅 {{ oeuvre.datePublication|date('Y') }}
+                            </div>
+                            {% endif %}
+                            <div class="metadata-badge secondary">
+                                📖 {{ oeuvre.chapitres|length }} chapitre{{ oeuvre.chapitres|length > 1 ? 's' : '' }}
+                            </div>
+                            {% if oeuvre.auteur and oeuvre.auteur.nationalite %}
+                            <div class="metadata-badge secondary">
+                                🌍 {{ oeuvre.auteur.nationalite }}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Badges des genres principaux -->
+                            {% if oeuvre.tags|length > 0 %}
+                                {% for tag in oeuvre.tags|slice(0, 3) %}
+                                <a href="{{ path('app_oeuvre_list', {tag: tag.id}) }}" class="genre-tag">
+                                    🎭 {{ tag.nom }}
+                                </a>
+                                {% endfor %}
+                                {% if oeuvre.tags|length > 3 %}
+                                <div style="background: rgba(225, 29, 72, 0.1); color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; border: 2px solid rgba(225, 29, 72, 0.3); font-size: 0.9rem;">
+                                    +{{ oeuvre.tags|length - 3 }} autres
+                                </div>
+                                {% endif %}
+                            {% endif %}
                         </div>
-                        {% if oeuvre.auteur and oeuvre.auteur.nationalite %}
-                        <div class="meta-item">
-                            <span>🌍</span>
-                            <span>{{ oeuvre.auteur.nationalite }}</span>
+                        
+                        <!-- Genres -->
+                        {% if oeuvre.tags|length > 0 %}
+                        <div style="margin-bottom: 2rem;">
+                            <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">🎭 Genres</h4>
+                            <div class="genre-tags">
+                                {% for tag in oeuvre.tags %}
+                                <a href="{{ path('app_oeuvre_list', {tag: tag.id}) }}" class="genre-tag">
+                                    🎭 {{ tag.nom }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if oeuvre.resume %}
+                        <div class="oeuvre-resume">
+                            <h3>📄 Résumé</h3>
+                            <p>{{ oeuvre.resume }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Section de notation placée après le résumé -->
+                        {% if app.user %}
+                        <div id="rating-section-main" class="rating-section">
+                            <h3 style="color: var(--text-primary); margin-bottom: 1.5rem; font-size: 1.5rem;">⭐ Noter cette œuvre</h3>
+                            <div style="display: flex; align-items: center; gap: min(1rem, 2vw); margin-bottom: 1rem; flex-wrap: wrap; max-width: 100%;">
+                                <div id="star-rating-main" class="star-rating" style="max-width: 100%;">
+                                    <span class="star star-main" data-rating="1">⭐</span>
+                                    <span class="star star-main" data-rating="2">⭐</span>
+                                    <span class="star star-main" data-rating="3">⭐</span>
+                                    <span class="star star-main" data-rating="4">⭐</span>
+                                    <span class="star star-main" data-rating="5">⭐</span>
+                                </div>
+                                <span id="current-rating-text-main" style="color: var(--text-secondary); font-weight: 600; word-wrap: break-word; max-width: 100%;"></span>
+                            </div>
+                            <div class="rating-actions">
+                                <button id="submit-rating-main" class="btn-rating submit" style="display: none;">
+                                    Confirmer la note
+                                </button>
+                                <button id="remove-rating-main" class="btn-rating remove" style="display: none;">
+                                    Supprimer ma note
+                                </button>
+                            </div>
                         </div>
                         {% endif %}
                     </div>
-                    
-                    {% if oeuvre.resume %}
-                    <p class="oeuvre-description">{{ oeuvre.resume }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section avec onglets -->
+        <div class="tabs-section">
+            <!-- Onglets -->
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="chapitres">
+                    📖 Chapitres ({{ oeuvre.chapitres|length }})
+                </button>
+                <button class="tab-btn" data-tab="commentaires">
+                    💬 Commentaires ({{ commentaires|length }})
+                </button>
+            </div>
+
+            <!-- Contenu onglet Chapitres -->
+            <div id="tab-chapitres" class="tab-content active">
+                {% if oeuvre.chapitres|length > 0 %}
+                <div class="chapitres-grid">
+                    {% for chapitre in oeuvre.chapitres %}
+                    <div class="chapitre-card">
+                        <div class="chapitre-header">
+                            <div>
+                                <h3 class="chapitre-title">
+                                    {{ chapitre.titre }}
+                                </h3>
+                                <div class="chapitre-meta">
+                                    <span class="chapitre-badge">
+                                        Ch. {{ chapitre.ordre }}
+                                    </span>
+                                    <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                                        Ajouté le {{ chapitre.createdAt|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if chapitre.resume %}
+                        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
+                            {{ chapitre.resume|length > 200 ? chapitre.resume|slice(0, 200) ~ '...' : chapitre.resume }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="chapitre-actions">
+                            {% if chapitre.mangadxChapterId %}
+                                <a href="{{ path('mangadx_chapter_show', {id: chapitre.mangadxChapterId}) }}" class="btn-read">
+                                    <span>📖</span> Lire le chapitre
+                                </a>
+                            {% else %}
+                                <a href="{{ path('app_chapitre_show', {id: chapitre.id}) }}" class="btn-read">
+                                    <span>📖</span> Lire le chapitre
+                                </a>
+                            {% endif %}
+                            
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('admin_chapitre_edit', {id: chapitre.id}) }}" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.6rem 1.5rem; border-radius: 20px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                                    <span>✏️</span> Éditer
+                                </a>
+                            {% endif %}
+                            
+                            {% if chapitre.pages|length > 0 %}
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                                {{ chapitre.pages|length }} page(s)
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state" style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Aucun chapitre disponible</h3>
+                    <p>Cette œuvre n'a pas encore de chapitres publiés.</p>
+                    <a href="{{ path('app_oeuvre_list') }}" style="background: var(--accent-purple); color: white; padding: 0.8rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; margin-top: 1rem; display: inline-block;">
+                        🔍 Explorer d'autres mangas
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Contenu onglet Commentaires -->
+            <div id="tab-commentaires" class="tab-content" style="display: none;">
+                {% if app.user %}
+
+                <!-- Formulaire d'ajout de commentaire -->
+                <div class="comment-form">
+                    <h3 style="color: var(--text-primary); margin-bottom: 1.5rem; font-size: 1.5rem;">💬 Ajouter un commentaire</h3>
+                    <form id="commentaire-form" style="display: grid; gap: 1.5rem;">
+                        <div>
+                            <label for="commentaire_contenu" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: 600;">Votre commentaire</label>
+                            <textarea id="commentaire_contenu" name="contenu" rows="3" placeholder="Exprimez-vous..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            💬 Publier le commentaire
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div style="background: rgba(139, 92, 246, 0.1); border: 2px solid var(--accent-purple); border-radius: 15px; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">🔐 Connexion requise</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Vous devez être connecté pour ajouter un commentaire.</p>
+                    <a href="{{ path('app_login') }}" style="background: var(--accent-purple); color: white; padding: 0.8rem 2rem; border-radius: 10px; text-decoration: none; font-weight: 600;">
+                        🔑 Se connecter
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Liste des commentaires -->
+                <div id="commentaires-list">
+                    {% if commentaires is empty %}
+                    <div class="empty-state" style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">💬</div>
+                        <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Aucun commentaire</h3>
+                        <p>Soyez le premier à donner votre avis sur cette œuvre !</p>
+                    </div>
+                    {% else %}
+                        {% for commentaire in commentaires %}
+                            {% if not commentaire.parent %}
+                                <div style="background: var(--surface); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                                                                    {{ commentaire.auteur.email|first|upper }}
+                                </div>
+                                <div>
+                                    <h4 style="color: var(--text-primary); margin: 0; font-size: 1.1rem;">{{ commentaire.auteur.email }}</h4>
+                                                <span style="color: var(--text-secondary); font-size: 0.9rem;">{{ commentaire.createdAt|date('d/m/Y H:i') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">{{ commentaire.contenu }}</p>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <button class="like-btn" data-commentaire-id="{{ commentaire.id }}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                                            <span class="like-icon">{{ app.user ? (commentaire.isLikedByUser(app.user) ? '❤️' : '🤍') : '🤍' }}</span>
+                                            <span class="like-count">{{ commentaire.likes|length }}</span> J'aime
+                                        </button>
+                                        {% if app.user %}
+                                        <button class="reply-btn" data-commentaire-id="{{ commentaire.id }}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                                            💬 Répondre
+                                        </button>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Formulaire de réponse (caché par défaut) -->
+                                    <div id="reply-form-{{ commentaire.id }}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px;">
+                                        <textarea id="reply-content-{{ commentaire.id }}" placeholder="Écrivez votre réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                                        <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                                            <button onclick="submitReply({{ commentaire.id }})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                                Publier
+                                            </button>
+                                            <button onclick="cancelReply({{ commentaire.id }})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Réponses -->
+                                    {% if commentaire.reponses|length > 0 %}
+                                    <div style="margin-top: 1rem;">
+                                        <button 
+                                            class="toggle-replies-btn" 
+                                            data-commentaire-id="{{ commentaire.id }}" 
+                                            style="background: none; border: none; color: var(--accent-purple); font-weight: 600; cursor: pointer; padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; transition: all 0.3s ease;"
+                                            onmouseover="this.style.textDecoration='underline'"
+                                            onmouseout="this.style.textDecoration='none'"
+                                        >
+                                            <span class="toggle-icon">▼</span>
+                                            <span class="toggle-text">Voir {{ commentaire.reponses|length }} réponse{{ commentaire.reponses|length > 1 ? 's' : '' }}</span>
+                                        </button>
+                                        <div id="replies-{{ commentaire.id }}" style="display: none;">
+                                            {% for reponse in commentaire.reponses %}
+                                                <div class="reponse-item" style="background: rgba(139, 92, 246, 0.05); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin: 1rem 0 1rem {{ 30 }}px; border-left: 3px solid var(--accent-purple);">
+                                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                                            <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                                                                                                    {{ reponse.auteur.email|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <h4 style="color: var(--text-primary); margin: 0; font-size: 1rem;">{{ reponse.auteur.email }}</h4>
+                                                                <span style="color: var(--text-secondary); font-size: 0.9rem;">{{ reponse.createdAt|date('d/m/Y H:i') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; font-size: 1rem;">{{ reponse.contenu }}</p>
+                                                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                                                        <button class="like-btn" data-commentaire-id="{{ reponse.id }}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                                                            <span class="like-icon">{{ app.user ? (reponse.isLikedByUser(app.user) ? '❤️' : '🤍') : '🤍' }}</span>
+                                                            <span class="like-count">{{ reponse.likes|length }}</span> J'aime
+                                                        </button>
+                                                        {% if app.user %}
+                                                        <button class="reply-to-reply-btn" data-commentaire-id="{{ reponse.id }}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                                                            💬 Répondre
+                                                        </button>
+                                                        {% endif %}
+                                                    </div>
+
+                                                    <!-- Formulaire de réponse à une réponse -->
+                                                    <div id="reply-to-reply-form-{{ reponse.id }}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px; border-left: 3px solid var(--accent-purple);">
+                                                        <textarea id="reply-to-reply-content-{{ reponse.id }}" placeholder="Répondre à cette réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                                                        <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                                                            <button onclick="submitReplyToReply({{ reponse.id }})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                                                Publier
+                                                            </button>
+                                                            <button onclick="cancelReplyToReply({{ reponse.id }})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                                                Annuler
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Réponses aux réponses (niveau 2) -->
+                                                    {% if reponse.reponses|length > 0 %}
+                                                    <div style="margin-top: 1rem;">
+                                                        <button 
+                                                            class="toggle-replies-to-replies-btn" 
+                                                            data-commentaire-id="{{ reponse.id }}" 
+                                                            style="background: none; border: none; color: var(--accent-purple); font-weight: 600; cursor: pointer; padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; transition: all 0.3s ease;"
+                                                            onmouseover="this.style.textDecoration='underline'"
+                                                            onmouseout="this.style.textDecoration='none'"
+                                                        >
+                                                            <span class="toggle-icon">▼</span>
+                                                            <span class="toggle-text">Voir {{ reponse.reponses|length }} réponse{{ reponse.reponses|length > 1 ? 's' : '' }} à cette réponse</span>
+                                                        </button>
+                                                        <div id="replies-to-replies-{{ reponse.id }}" style="display: none;">
+                                                            {% for reponseToReponse in reponse.reponses %}
+                                                                <div style="background: rgba(139, 92, 246, 0.03); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-color); margin: 0.8rem 0 0.8rem {{ 20 }}px; border-left: 3px solid #fbbf24;">
+                                                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.8rem;">
+                                                                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                                                            <div style="background: #fbbf24; color: white; padding: 0.4rem; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                                                                                {{ reponseToReponse.auteur.email|first|upper }}
+                                                                            </div>
+                                                                            <div>
+                                                                                <h5 style="color: var(--text-primary); margin: 0; font-size: 0.9rem;">{{ reponseToReponse.auteur.email }}</h5>
+                                                                                <span style="color: var(--text-secondary); font-size: 0.8rem;">{{ reponseToReponse.createdAt|date('d/m/Y H:i') }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.8rem; font-size: 0.9rem;">{{ reponseToReponse.contenu }}</p>
+                                                                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                                                        <button class="like-btn" data-commentaire-id="{{ reponseToReponse.id }}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.4rem 0.8rem; border-radius: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;">
+                                                                            <span class="like-icon">{{ app.user ? (reponseToReponse.isLikedByUser(app.user) ? '❤️' : '🤍') : '🤍' }}</span>
+                                                                            <span class="like-count">{{ reponseToReponse.likes|length }}</span> J'aime
+                                                                        </button>
+                                                    </div>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>
         </div>
-    </section>
-    
-    <section class="chapitres-section">
-        <h2 class="section-title">
-            📖 Chapitres
-        </h2>
-        
-        {% if oeuvre.chapitres|length > 0 %}
-        <div class="chapitres-grid">
-            {% for chapitre in oeuvre.chapitres %}
-            <div class="chapitre-card">
-                <div class="chapitre-header">
-                    <h3 class="chapitre-title">{{ chapitre.titre }}</h3>
-                    <span class="chapitre-number">{{ chapitre.ordre }}</span>
-                </div>
+
+        <!-- Bouton retour -->
+        <div style="margin-top: 3rem; text-align: center;">
+            <a href="{{ path('app_oeuvre_list') }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 1rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem; border: 2px solid var(--accent-purple);">
+                ← Retour au catalogue
+            </a>
+        </div>
+
+        <!-- Script principal -->
+        <script>
+        // Gestion des onglets et initialisation
+        function initTabs() {
+            console.log('🎯 Initialisation des onglets');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    console.log('📑 Changement vers l\'onglet:', targetTab);
+                    
+                    // Désactiver tous les onglets
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.style.background = 'rgba(139, 92, 246, 0.1)';
+                        btn.style.color = 'var(--text-secondary)';
+                    });
+                    tabContents.forEach(content => {
+                        content.style.display = 'none';
+                        content.classList.remove('active');
+                    });
+                    
+                    // Activer l'onglet cliqué
+                    this.classList.add('active');
+                    this.style.background = 'var(--accent-purple)';
+                    this.style.color = 'white';
+                    
+                    const activeContent = document.getElementById(`tab-${targetTab}`);
+                    if (activeContent) {
+                        activeContent.style.display = 'block';
+                        activeContent.classList.add('active');
+                        
+                        // Si c'est l'onglet commentaires, réinitialiser les fonctionnalités
+                        if (targetTab === 'commentaires') {
+                            console.log('💬 Réinitialisation de l\'onglet commentaires');
+                            setTimeout(() => {
+                                initLikeButtons();
+                                initReplies();
+                                initRatingStars();
+                            }, 50);
+                        }
+                    }
+                });
+            });
+
+            // Activer le premier onglet par défaut
+            const firstTab = tabButtons[0];
+            if (firstTab) {
+                console.log('🎯 Activation du premier onglet');
+                firstTab.click();
+            }
+        }
+
+
+
+        function initLikeButtons() {
+            console.log('❤️ Initialisation des boutons de like');
+            const likeButtons = document.querySelectorAll('.like-btn');
+            
+            // Supprimer les anciens event listeners en utilisant une approche plus sûre
+            likeButtons.forEach(button => {
+                const newButton = button.cloneNode(true);
+                if (button.parentNode) {
+                    button.parentNode.replaceChild(newButton, button);
+                }
+            });
+            
+            // Réattacher les event listeners
+            document.querySelectorAll('.like-btn').forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('❤️ Like pour le commentaire:', commentaireId);
+                    
+                    // Vérifier si l'utilisateur est connecté
+                    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
+                        showNotification('Vous devez être connecté pour liker un commentaire', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.status === 404) {
+                            showNotification('Fonctionnalité de like non disponible', 'warning');
+                            return;
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            const icon = this.querySelector('.like-icon');
+                            const count = this.querySelector('.like-count');
+                            
+                            if (icon) icon.textContent = data.isLiked ? '❤️' : '🤍';
+                            if (count) count.textContent = data.likesCount;
+                            
+                            console.log('✅ Like mis à jour:', data.isLiked);
+                        } else {
+                            showNotification(data.message || 'Erreur lors du like', 'error');
+                        }
+                    } catch (error) {
+                        console.log('⚠️ Erreur like (ignorée):', error.message);
+                        showNotification('Fonctionnalité de like temporairement indisponible', 'warning');
+                    }
+                });
+            });
+        }
+
+        function initReplies() {
+            console.log('💬 Initialisation des réponses');
+            
+            // Initialiser les boutons de réponse
+            const replyButtons = document.querySelectorAll('.reply-btn');
+            console.log('💬 Boutons de réponse trouvés:', replyButtons.length);
+            replyButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('💬 Affichage du formulaire de réponse pour:', commentaireId);
+                    showReplyForm(commentaireId);
+                });
+            });
+            
+            // Initialiser les boutons de réponse aux réponses
+            const replyToReplyButtons = document.querySelectorAll('.reply-to-reply-btn');
+            console.log('💬 Boutons de réponse aux réponses trouvés:', replyToReplyButtons.length);
+            replyToReplyButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('💬 Affichage du formulaire de réponse à une réponse pour:', commentaireId);
+                    showReplyToReplyForm(commentaireId);
+                });
+            });
+            
+            // Initialiser les boutons de basculement des réponses
+            const toggleButtons = document.querySelectorAll('.toggle-replies-btn');
+            console.log('🔄 Boutons de toggle trouvés:', toggleButtons.length);
+            toggleButtons.forEach((button, index) => {
+                console.log(`🔘 Bouton toggle ${index}:`, button.getAttribute('data-commentaire-id'));
                 
-                {% if chapitre.resume %}
-                <p class="chapitre-resume">{{ chapitre.resume|slice(0, 150) }}{% if chapitre.resume|length > 150 %}...{% endif %}</p>
+                // Supprimer les anciens event listeners
+                const newButton = button.cloneNode(true);
+                if (button.parentNode) {
+                    button.parentNode.replaceChild(newButton, button);
+                }
+                
+                // Réattacher l'event listener
+                newButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('🔄 Basculement des réponses pour:', commentaireId);
+                    toggleReplies(commentaireId);
+                });
+                
+                // Ajouter un test de clic
+                newButton.addEventListener('mousedown', function() {
+                    console.log('🖱️ Clic détecté sur bouton toggle:', this.getAttribute('data-commentaire-id'));
+                });
+            });
+            
+            // Initialiser les boutons de basculement des réponses aux réponses
+            const toggleRepliesToRepliesButtons = document.querySelectorAll('.toggle-replies-to-replies-btn');
+            console.log('🔄 Boutons de toggle réponses aux réponses trouvés:', toggleRepliesToRepliesButtons.length);
+            toggleRepliesToRepliesButtons.forEach((button, index) => {
+                console.log(`🔘 Bouton toggle réponses aux réponses ${index}:`, button.getAttribute('data-commentaire-id'));
+                
+                // Supprimer les anciens event listeners
+                const newButton = button.cloneNode(true);
+                if (button.parentNode) {
+                    button.parentNode.replaceChild(newButton, button);
+                }
+                
+                // Réattacher l'event listener
+                newButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('🔄 Basculement des réponses aux réponses pour:', commentaireId);
+                    toggleRepliesToReplies(commentaireId);
+                });
+                
+                // Ajouter un test de clic
+                newButton.addEventListener('mousedown', function() {
+                    console.log('🖱️ Clic détecté sur bouton toggle réponses aux réponses:', this.getAttribute('data-commentaire-id'));
+                });
+            });
+            
+            // Vérifier s'il y a des réponses à afficher
+            const repliesDivs = document.querySelectorAll('[id^="replies-"]');
+            console.log('📁 Divs de réponses trouvées:', repliesDivs.length);
+            repliesDivs.forEach(div => {
+                const commentaireId = div.id.replace('replies-', '');
+                console.log(`📁 Div réponses ${commentaireId}:`, div.children.length, 'réponses');
+            });
+        }
+
+        function initRatingStars() {
+            console.log('⭐ Initialisation des étoiles de notation');
+            
+            // Initialiser les étoiles principales
+            const starMainElements = document.querySelectorAll('.star-main');
+            const starElements = document.querySelectorAll('.star');
+            
+            // Fonction pour gérer les étoiles
+            function initStarRating(stars, ratingText, submitBtn, removeBtn, isMain = false) {
+                let currentRating = 0;
+                
+                stars.forEach(star => {
+                    star.addEventListener('mouseover', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        highlightStars(stars, rating);
+                        if (ratingText) {
+                            ratingText.textContent = `${rating}/5`;
+                        }
+                    });
+                    
+                    star.addEventListener('mouseout', function() {
+                        highlightStars(stars, currentRating);
+                        if (ratingText) {
+                            ratingText.textContent = currentRating > 0 ? `${currentRating}/5` : '';
+                        }
+                    });
+                    
+                    star.addEventListener('click', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        currentRating = rating;
+                        highlightStars(stars, rating);
+                        if (ratingText) {
+                            ratingText.textContent = `${rating}/5`;
+                        }
+                        if (submitBtn) {
+                            submitBtn.style.display = 'inline-block';
+                        }
+                        if (removeBtn) {
+                            removeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+                
+                // Gestion des boutons
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', async function() {
+                        if (currentRating > 0) {
+                            await submitRating(currentRating, isMain);
+                        }
+                    });
+                }
+                
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', async function() {
+                        await removeRating(isMain);
+                    });
+                }
+            }
+            
+            // Initialiser les deux systèmes de notation
+            if (starMainElements.length > 0) {
+                const ratingTextMain = document.getElementById('current-rating-text-main');
+                const submitBtnMain = document.getElementById('submit-rating-main');
+                const removeBtnMain = document.getElementById('remove-rating-main');
+                initStarRating(starMainElements, ratingTextMain, submitBtnMain, removeBtnMain, true);
+            }
+            
+            if (starElements.length > 0) {
+                const ratingText = document.getElementById('current-rating-text');
+                const submitBtn = document.getElementById('submit-rating');
+                const removeBtn = document.getElementById('remove-rating');
+                initStarRating(starElements, ratingText, submitBtn, removeBtn, false);
+            }
+            
+            // Charger la note existante
+            loadExistingRating();
+        }
+        
+        function highlightStars(stars, rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    // Étoiles sélectionnées : jaune doré avec effet brillant
+                    star.style.color = '#fbbf24';
+                    star.style.textShadow = '0 0 8px rgba(251, 191, 36, 0.6)';
+                    star.style.transform = 'scale(1.1)';
+                    star.style.transition = 'all 0.2s ease';
+                    star.classList.add('selected');
+                } else {
+                    // Étoiles non sélectionnées : gris clair
+                    star.style.color = '#d1d5db';
+                    star.style.textShadow = 'none';
+                    star.style.transform = 'scale(1)';
+                    star.style.transition = 'all 0.2s ease';
+                    star.classList.remove('selected');
+                }
+            });
+        }
+        
+        async function loadExistingRating() {
+            try {
+                // Vérifier si l'utilisateur est connecté avant de faire l'appel API
+                if (!document.body.dataset.user || document.body.dataset.user === 'false') {
+                    console.log('👤 Utilisateur non connecté, skip chargement de la note');
+                    return;
+                }
+                
+                console.log('📡 Chargement de la note existante...');
+                const response = await fetch(`/api/oeuvres/{{ oeuvre.id }}/rating`);
+                
+                if (response.status === 404) {
+                    console.log('📝 Aucune note existante pour cette œuvre');
+                    return;
+                }
+                
+                if (!response.ok) {
+                    console.log('⚠️ Erreur lors du chargement de la note:', response.status);
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('📊 Données reçues:', data);
+                
+                if (data.rating) {
+                    const stars = document.querySelectorAll('.star, .star-main');
+                    const ratingTexts = document.querySelectorAll('#current-rating-text, #current-rating-text-main');
+                    const submitBtns = document.querySelectorAll('#submit-rating, #submit-rating-main');
+                    const removeBtns = document.querySelectorAll('#remove-rating, #remove-rating-main');
+                    
+                    highlightStars(stars, data.rating);
+                    ratingTexts.forEach(text => {
+                        if (text) text.textContent = `${data.rating}/5`;
+                    });
+                    submitBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'inline-block';
+                    });
+                    removeBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'inline-block';
+                    });
+                    
+                    console.log('✅ Note existante chargée:', data.rating);
+                }
+                
+                // Mettre à jour l'affichage de la moyenne
+                if (data.average !== undefined) {
+                    updateAverageDisplay(data.average);
+                }
+            } catch (error) {
+                console.log('⚠️ Erreur lors du chargement de la note (ignorée):', error.message);
+            }
+        }
+        
+        async function submitRating(rating, isMain = false) {
+            try {
+                console.log('📤 Envoi de la note:', rating);
+                const response = await fetch(`/api/oeuvres/{{ oeuvre.id }}/rating`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rating: rating })
+                });
+                
+                console.log('📡 Réponse reçue:', response.status);
+                
+                if (response.status === 404) {
+                    showNotification('Fonctionnalité de notation non disponible', 'warning');
+                    return;
+                }
+                
+                if (response.status === 401) {
+                    showNotification('Vous devez être connecté pour noter une œuvre', 'warning');
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('📊 Données reçues:', data);
+                
+                if (response.ok) {
+                    showNotification('Note enregistrée avec succès !', 'success');
+                    // Mettre à jour l'affichage de la moyenne
+                    if (data.average !== undefined) {
+                        updateAverageDisplay(data.average);
+                    }
+                } else {
+                    showNotification(data.message || 'Erreur lors de l\'enregistrement de la note', 'error');
+                }
+            } catch (error) {
+                console.log('⚠️ Erreur lors de l\'enregistrement de la note (ignorée):', error.message);
+                showNotification('Fonctionnalité de notation temporairement indisponible', 'warning');
+            }
+        }
+        
+        async function removeRating(isMain = false) {
+            try {
+                console.log('🗑️ Suppression de la note...');
+                const response = await fetch(`/api/oeuvres/{{ oeuvre.id }}/rating`, {
+                    method: 'DELETE'
+                });
+                
+                console.log('📡 Réponse reçue:', response.status);
+                
+                if (response.status === 404) {
+                    showNotification('Fonctionnalité de notation non disponible', 'warning');
+                    return;
+                }
+                
+                if (response.status === 401) {
+                    showNotification('Vous devez être connecté pour supprimer votre note', 'warning');
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('📊 Données reçues:', data);
+                
+                if (response.ok) {
+                    showNotification('Note supprimée avec succès !', 'success');
+                    // Réinitialiser l'affichage
+                    const stars = document.querySelectorAll('.star, .star-main');
+                    const ratingTexts = document.querySelectorAll('#current-rating-text, #current-rating-text-main');
+                    const submitBtns = document.querySelectorAll('#submit-rating, #submit-rating-main');
+                    const removeBtns = document.querySelectorAll('#remove-rating, #remove-rating-main');
+                    
+                    highlightStars(stars, 0);
+                    ratingTexts.forEach(text => {
+                        if (text) text.textContent = '';
+                    });
+                    submitBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'none';
+                    });
+                    removeBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'none';
+                    });
+                    
+                    // Mettre à jour l'affichage de la moyenne
+                    if (data.average !== undefined) {
+                        updateAverageDisplay(data.average);
+                    }
+                } else {
+                    showNotification(data.message || 'Erreur lors de la suppression de la note', 'error');
+                }
+            } catch (error) {
+                console.log('⚠️ Erreur lors de la suppression de la note (ignorée):', error.message);
+                showNotification('Fonctionnalité de notation temporairement indisponible', 'warning');
+            }
+        }
+        
+        function updateAverageDisplay(average) {
+            const averageDisplay = document.getElementById('average-header-display');
+            if (averageDisplay) {
+                averageDisplay.textContent = average ? average.toFixed(1) : '-';
+            }
+        }
+        
+        // Fonction pour charger la moyenne au chargement de la page
+        async function loadAverageRating() {
+            try {
+                console.log('📊 Chargement de la moyenne...');
+                const response = await fetch(`/api/oeuvres/{{ oeuvre.id }}/rating`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.average !== undefined) {
+                        updateAverageDisplay(data.average);
+                        console.log('✅ Moyenne mise à jour:', data.average);
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Erreur lors du chargement de la moyenne (ignorée):', error.message);
+            }
+        }
+
+        function showReplyForm(commentaireId) {
+            console.log('📝 Affichage du formulaire de réponse pour:', commentaireId);
+            
+            // Cacher tous les autres formulaires de réponse
+            const allReplyForms = document.querySelectorAll('[id^="reply-form-"]');
+            allReplyForms.forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Cacher tous les formulaires de réponse aux réponses
+            const allReplyToReplyForms = document.querySelectorAll('[id^="reply-to-reply-form-"]');
+            allReplyToReplyForms.forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Afficher le formulaire de réponse pour ce commentaire
+            const replyForm = document.getElementById(`reply-form-${commentaireId}`);
+            if (replyForm) {
+                replyForm.style.display = 'block';
+                const textarea = document.getElementById(`reply-content-${commentaireId}`);
+                if (textarea) {
+                    textarea.focus();
+                }
+            }
+        }
+
+        function showReplyToReplyForm(commentaireId) {
+            console.log('📝 Affichage du formulaire de réponse à une réponse pour:', commentaireId);
+            
+            // Cacher tous les autres formulaires
+            const allReplyForms = document.querySelectorAll('[id^="reply-form-"]');
+            allReplyForms.forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            const allReplyToReplyForms = document.querySelectorAll('[id^="reply-to-reply-form-"]');
+            allReplyToReplyForms.forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Afficher le formulaire de réponse à une réponse
+            const replyToReplyForm = document.getElementById(`reply-to-reply-form-${commentaireId}`);
+            if (replyToReplyForm) {
+                replyToReplyForm.style.display = 'block';
+                const textarea = document.getElementById(`reply-to-reply-content-${commentaireId}`);
+                if (textarea) {
+                    textarea.focus();
+                }
+            }
+        }
+
+        function toggleReplies(commentaireId) {
+            console.log('🔄 Toggle réponses pour commentaire:', commentaireId);
+            
+            const repliesDiv = document.getElementById(`replies-${commentaireId}`);
+            const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
+            
+            console.log('📁 Div réponses trouvée:', !!repliesDiv);
+            console.log('🔘 Bouton toggle trouvé:', !!toggleBtn);
+            
+            if (!repliesDiv) {
+                console.error('❌ Div réponses non trouvée pour:', commentaireId);
+                return;
+            }
+            
+            if (!toggleBtn) {
+                console.error('❌ Bouton toggle non trouvé pour:', commentaireId);
+                return;
+            }
+            
+            const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+            const toggleText = toggleBtn.querySelector('.toggle-text');
+            
+            console.log('🔍 État actuel:', repliesDiv.style.display);
+            console.log('📊 Nombre de réponses:', repliesDiv.children.length);
+            
+            if (repliesDiv.style.display === 'none' || repliesDiv.style.display === '') {
+                console.log('👁️ Affichage des réponses');
+                repliesDiv.style.display = 'block';
+                if (toggleIcon) toggleIcon.textContent = '▲';
+                if (toggleText) toggleText.textContent = 'Masquer les réponses';
+            } else {
+                console.log('🙈 Masquage des réponses');
+                repliesDiv.style.display = 'none';
+                if (toggleIcon) toggleIcon.textContent = '▼';
+                const replyCount = repliesDiv.children.length;
+                if (toggleText) toggleText.textContent = `Voir ${replyCount} réponse${replyCount > 1 ? 's' : ''}`;
+            }
+            
+            console.log('✅ Toggle terminé');
+        }
+
+        function toggleRepliesToReplies(commentaireId) {
+            console.log('🔄 Toggle réponses aux réponses pour commentaire:', commentaireId);
+            
+            const repliesToRepliesDiv = document.getElementById(`replies-to-replies-${commentaireId}`);
+            const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
+            
+            console.log('📁 Div réponses aux réponses trouvée:', !!repliesToRepliesDiv);
+            console.log('🔘 Bouton toggle trouvé:', !!toggleBtn);
+            console.log('🔍 ID de la div recherchée:', `replies-to-replies-${commentaireId}`);
+            
+            if (!repliesToRepliesDiv) {
+                console.error('❌ Div réponses aux réponses non trouvée pour:', commentaireId);
+                console.log('🔍 Toutes les divs avec "replies-to-replies":', document.querySelectorAll('[id^="replies-to-replies-"]'));
+                return;
+            }
+            
+            if (!toggleBtn) {
+                console.error('❌ Bouton toggle non trouvé pour:', commentaireId);
+                console.log('🔍 Tous les boutons toggle-replies-to-replies:', document.querySelectorAll('.toggle-replies-to-replies-btn'));
+                return;
+            }
+            
+            const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+            const toggleText = toggleBtn.querySelector('.toggle-text');
+            
+            console.log('🔍 État actuel:', repliesToRepliesDiv.style.display);
+            console.log('📊 Nombre de réponses aux réponses:', repliesToRepliesDiv.children.length);
+            console.log('🔍 Contenu de la div:', repliesToRepliesDiv.innerHTML.substring(0, 100) + '...');
+            
+            if (repliesToRepliesDiv.style.display === 'none' || repliesToRepliesDiv.style.display === '') {
+                console.log('👁️ Affichage des réponses aux réponses');
+                repliesToRepliesDiv.style.display = 'block';
+                if (toggleIcon) toggleIcon.textContent = '▲';
+                if (toggleText) toggleText.textContent = 'Masquer les réponses à cette réponse';
+            } else {
+                console.log('🙈 Masquage des réponses aux réponses');
+                repliesToRepliesDiv.style.display = 'none';
+                if (toggleIcon) toggleIcon.textContent = '▼';
+                const replyCount = repliesToRepliesDiv.children.length;
+                if (toggleText) toggleText.textContent = `Voir ${replyCount} réponse${replyCount > 1 ? 's' : ''} à cette réponse`;
+            }
+            
+            console.log('✅ Toggle réponses aux réponses terminé');
+            console.log('🔍 Nouvel état:', repliesToRepliesDiv.style.display);
+        }
+
+        function showNotification(message, type = 'info') {
+            console.log(`🔔 Notification [${type}]:`, message);
+            
+            // Supprimer les anciennes notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => notif.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-300 shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            
+            // Ajouter une icône selon le type
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.2rem;">${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animation d'entrée
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100%)';
+            
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto-suppression
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                    notification.remove();
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Gestion du formulaire de commentaire principal
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentaireForm = document.getElementById('commentaire-form');
+            if (commentaireForm) {
+                commentaireForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log('💬 Soumission du commentaire principal');
+                    
+                    const textarea = document.getElementById('commentaire_contenu');
+                    const contenu = textarea.value.trim();
+                    
+                    if (!contenu) {
+                        showNotification('Veuillez écrire un commentaire', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('/api/commentaires', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ 
+                                contenu: contenu,
+                                oeuvreId: {{ oeuvre.id }}
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            showNotification('Commentaire ajouté avec succès !', 'success');
+                            textarea.value = '';
+                            
+                            // Ajouter le nouveau commentaire dynamiquement
+                            addNewComment(data.commentaire);
+                            
+                            // Mettre à jour le compteur de commentaires
+                            updateCommentCount(1);
+                        } else {
+                            showNotification(data.message || 'Erreur lors de l\'ajout du commentaire', 'error');
+                        }
+                    } catch (error) {
+                        console.error('❌ Erreur lors de l\'ajout du commentaire:', error);
+                        showNotification('Erreur lors de l\'envoi du commentaire', 'error');
+                    }
+                });
+            }
+        });
+
+        // Fonctions globales pour les réponses
+        window.cancelReply = function(commentaireId) {
+            console.log('❌ Annulation de la réponse pour:', commentaireId);
+            const replyForm = document.getElementById(`reply-form-${commentaireId}`);
+            if (replyForm) {
+                replyForm.style.display = 'none';
+                const textarea = document.getElementById(`reply-content-${commentaireId}`);
+                if (textarea) {
+                    textarea.value = '';
+                }
+            }
+        }
+
+        window.submitReply = async function(commentaireId) {
+            console.log('📤 Soumission de la réponse pour:', commentaireId);
+            const textarea = document.getElementById(`reply-content-${commentaireId}`);
+            if (!textarea) return;
+            
+            const contenu = textarea.value.trim();
+            if (!contenu) {
+                showNotification('Veuillez écrire une réponse', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/commentaires/${commentaireId}/repondre`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ contenu: contenu })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Réponse ajoutée avec succès !', 'success');
+                    cancelReply(commentaireId);
+                    
+                    // Ajouter la nouvelle réponse dynamiquement
+                    addNewReply(commentaireId, data.reponse);
+                    
+                    // Mettre à jour le compteur de réponses
+                    updateReplyCount(commentaireId, 1);
+                } else {
+                    showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erreur réponse:', error);
+                showNotification('Erreur lors de l\'envoi de la réponse', 'error');
+            }
+        }
+
+        // Fonctions globales pour les réponses aux réponses
+        window.cancelReplyToReply = function(commentaireId) {
+            console.log('❌ Annulation de la réponse à une réponse pour:', commentaireId);
+            const replyToReplyForm = document.getElementById(`reply-to-reply-form-${commentaireId}`);
+            if (replyToReplyForm) {
+                replyToReplyForm.style.display = 'none';
+                const textarea = document.getElementById(`reply-to-reply-content-${commentaireId}`);
+                if (textarea) {
+                    textarea.value = '';
+                }
+            }
+        }
+
+        window.submitReplyToReply = async function(commentaireId) {
+            console.log('📤 Soumission de la réponse à une réponse pour:', commentaireId);
+            const textarea = document.getElementById(`reply-to-reply-content-${commentaireId}`);
+            if (!textarea) return;
+            
+            const contenu = textarea.value.trim();
+            if (!contenu) {
+                showNotification('Veuillez écrire une réponse', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/commentaires/${commentaireId}/repondre`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ contenu: contenu })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification('Réponse ajoutée avec succès !', 'success');
+                    cancelReplyToReply(commentaireId);
+                    
+                    // Ajouter la nouvelle réponse à une réponse dynamiquement
+                    addNewReplyToReply(commentaireId, data.reponse);
+                    
+                    // Mettre à jour le compteur de réponses aux réponses
+                    updateReplyToReplyCount(commentaireId, 1);
+                } else {
+                    showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Erreur réponse à une réponse:', error);
+                showNotification('Erreur lors de l\'envoi de la réponse', 'error');
+            }
+        }
+
+        // Fonctions pour ajouter dynamiquement les commentaires et réponses
+        function addNewComment(commentaireData) {
+            console.log('➕ Ajout dynamique du commentaire:', commentaireData.id);
+            
+            const commentairesList = document.getElementById('commentaires-list');
+            if (!commentairesList) {
+                console.error('❌ Liste des commentaires non trouvée');
+                return;
+            }
+            
+            // Supprimer le message "Aucun commentaire" s'il existe
+            const emptyState = commentairesList.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            // Créer le HTML du nouveau commentaire
+            const commentaireHTML = generateCommentHTML(commentaireData);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = commentaireHTML;
+            const newCommentaire = tempDiv.firstElementChild;
+            
+            // Ajouter le commentaire au début de la liste
+            commentairesList.insertBefore(newCommentaire, commentairesList.firstChild);
+            
+            // Initialiser les fonctionnalités du nouveau commentaire
+            initCommentFeatures(newCommentaire);
+            
+            // Animation d'apparition
+            newCommentaire.style.opacity = '0';
+            newCommentaire.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                newCommentaire.style.transition = 'all 0.3s ease';
+                newCommentaire.style.opacity = '1';
+                newCommentaire.style.transform = 'translateY(0)';
+            }, 10);
+            
+            console.log('✅ Commentaire ajouté dynamiquement');
+        }
+        
+        function addNewReply(parentCommentaireId, reponseData) {
+            console.log('➕ Ajout dynamique de la réponse:', reponseData.id, 'au commentaire:', parentCommentaireId);
+            
+            const repliesDiv = document.getElementById(`replies-${parentCommentaireId}`);
+            if (!repliesDiv) {
+                console.error('❌ Div réponses non trouvée pour:', parentCommentaireId);
+                return;
+            }
+            
+            // Créer le HTML de la nouvelle réponse
+            const reponseHTML = generateReplyHTML(reponseData);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = reponseHTML;
+            const newReponse = tempDiv.firstElementChild;
+            
+            // Ajouter la réponse au début de la liste
+            repliesDiv.insertBefore(newReponse, repliesDiv.firstChild);
+            
+            // Initialiser les fonctionnalités de la nouvelle réponse
+            initReplyFeatures(newReponse);
+            
+            // Animation d'apparition
+            newReponse.style.opacity = '0';
+            newReponse.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                newReponse.style.transition = 'all 0.3s ease';
+                newReponse.style.opacity = '1';
+                newReponse.style.transform = 'translateX(0)';
+            }, 10);
+            
+            console.log('✅ Réponse ajoutée dynamiquement');
+        }
+        
+        function addNewReplyToReply(parentReponseId, reponseData) {
+            console.log('➕ Ajout dynamique de la réponse à une réponse:', reponseData.id, 'à la réponse:', parentReponseId);
+            
+            let repliesToRepliesDiv = document.getElementById(`replies-to-replies-${parentReponseId}`);
+            
+            // Si la div n'existe pas, la créer
+            if (!repliesToRepliesDiv) {
+                console.log('🔧 Création de la div réponses aux réponses pour:', parentReponseId);
+                
+                // Trouver l'élément parent (la réponse)
+                const parentReponse = document.querySelector(`[data-commentaire-id="${parentReponseId}"].reponse-item`) || 
+                                    document.querySelector(`#reply-to-reply-form-${parentReponseId}`)?.parentElement;
+                
+                if (!parentReponse) {
+                    console.error('❌ Élément parent (réponse) non trouvé pour:', parentReponseId);
+                    return;
+                }
+                
+                // Créer la div des réponses aux réponses
+                repliesToRepliesDiv = document.createElement('div');
+                repliesToRepliesDiv.id = `replies-to-replies-${parentReponseId}`;
+                repliesToRepliesDiv.style.display = 'none';
+                
+                // Ajouter la div après le formulaire de réponse
+                const replyForm = parentReponse.querySelector(`#reply-to-reply-form-${parentReponseId}`);
+                if (replyForm) {
+                    replyForm.parentNode.insertBefore(repliesToRepliesDiv, replyForm.nextSibling);
+                } else {
+                    // Si pas de formulaire, ajouter à la fin de la réponse
+                    parentReponse.appendChild(repliesToRepliesDiv);
+                }
+                
+                console.log('✅ Div réponses aux réponses créée');
+            }
+            
+            // Créer le HTML de la nouvelle réponse à une réponse
+            const reponseHTML = generateReplyToReplyHTML(reponseData);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = reponseHTML;
+            const newReponse = tempDiv.firstElementChild;
+            
+            // Ajouter la réponse au début de la liste
+            repliesToRepliesDiv.insertBefore(newReponse, repliesToRepliesDiv.firstChild);
+            
+            // Initialiser les fonctionnalités de la nouvelle réponse
+            initReplyToReplyFeatures(newReponse);
+            
+            // Animation d'apparition
+            newReponse.style.opacity = '0';
+            newReponse.style.transform = 'translateX(-20px)';
+            setTimeout(() => {
+                newReponse.style.transition = 'all 0.3s ease';
+                newReponse.style.opacity = '1';
+                newReponse.style.transform = 'translateX(0)';
+            }, 10);
+            
+            console.log('✅ Réponse à une réponse ajoutée dynamiquement');
+        }
+        
+        function generateCommentHTML(commentaireData) {
+            const userEmail = '{{ app.user.email }}';
+            const currentTime = new Date().toLocaleString('fr-FR');
+            
+            return `
+                <div style="background: var(--surface); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                ${userEmail.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 style="color: var(--text-primary); margin: 0; font-size: 1.1rem;">${userEmail}</h4>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">${currentTime}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">${commentaireData.contenu}</p>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <button class="like-btn" data-commentaire-id="${commentaireData.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="like-icon">🤍</span>
+                            <span class="like-count">0</span> J'aime
+                        </button>
+                        <button class="reply-btn" data-commentaire-id="${commentaireData.id}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                            💬 Répondre
+                        </button>
+                    </div>
+
+                    <!-- Formulaire de réponse (caché par défaut) -->
+                    <div id="reply-form-${commentaireData.id}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px;">
+                        <textarea id="reply-content-${commentaireData.id}" placeholder="Écrivez votre réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                        <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                            <button onclick="submitReply(${commentaireData.id})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                Publier
+                            </button>
+                            <button onclick="cancelReply(${commentaireData.id})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section des réponses (vide par défaut) -->
+                    <div id="replies-${commentaireData.id}" style="display: none;"></div>
+                </div>
+            `;
+        }
+        
+        function generateReplyHTML(reponseData) {
+            const userEmail = '{{ app.user.email }}';
+            const currentTime = new Date().toLocaleString('fr-FR');
+            
+            return `
+                <div class="reponse-item" style="background: rgba(139, 92, 246, 0.05); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin: 1rem 0 1rem 30px; border-left: 3px solid var(--accent-purple);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                                ${userEmail.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 style="color: var(--text-primary); margin: 0; font-size: 1rem;">${userEmail}</h4>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">${currentTime}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; font-size: 1rem;">${reponseData.contenu}</p>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <button class="like-btn" data-commentaire-id="${reponseData.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="like-icon">🤍</span>
+                            <span class="like-count">0</span> J'aime
+                        </button>
+                        <button class="reply-to-reply-btn" data-commentaire-id="${reponseData.id}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                            💬 Répondre
+                        </button>
+                    </div>
+
+                    <!-- Formulaire de réponse à une réponse -->
+                    <div id="reply-to-reply-form-${reponseData.id}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px; border-left: 3px solid var(--accent-purple);">
+                        <textarea id="reply-to-reply-content-${reponseData.id}" placeholder="Répondre à cette réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                        <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                            <button onclick="submitReplyToReply(${reponseData.id})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                Publier
+                            </button>
+                            <button onclick="cancelReplyToReply(${reponseData.id})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Section des réponses aux réponses (vide par défaut) -->
+                    <div id="replies-to-replies-${reponseData.id}" style="display: none;"></div>
+                </div>
+            `;
+        }
+        
+        function generateReplyToReplyHTML(reponseData) {
+            const userEmail = '{{ app.user.email }}';
+            const currentTime = new Date().toLocaleString('fr-FR');
+            
+            return `
+                <div style="background: rgba(139, 92, 246, 0.03); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-color); margin: 0.8rem 0 0.8rem 20px; border-left: 3px solid #fbbf24;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.8rem;">
+                        <div style="display: flex; align-items: center; gap: 0.8rem;">
+                            <div style="background: #fbbf24; color: white; padding: 0.4rem; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                                ${userEmail.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h5 style="color: var(--text-primary); margin: 0; font-size: 0.9rem;">${userEmail}</h5>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">${currentTime}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.8rem; font-size: 0.9rem;">${reponseData.contenu}</p>
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <button class="like-btn" data-commentaire-id="${reponseData.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.4rem 0.8rem; border-radius: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;">
+                            <span class="like-icon">🤍</span>
+                            <span class="like-count">0</span> J'aime
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function initCommentFeatures(commentaireElement) {
+            // Initialiser les boutons de like
+            const likeBtn = commentaireElement.querySelector('.like-btn');
+            if (likeBtn) {
+                likeBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('❤️ Like pour le nouveau commentaire:', commentaireId);
+                    
+                    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
+                        showNotification('Vous devez être connecté pour liker un commentaire', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const icon = this.querySelector('.like-icon');
+                            const count = this.querySelector('.like-count');
+                            
+                            if (icon) icon.textContent = data.isLiked ? '❤️' : '🤍';
+                            if (count) count.textContent = data.likesCount;
+                        }
+                    } catch (error) {
+                        console.log('⚠️ Erreur like (ignorée):', error.message);
+                    }
+                });
+            }
+            
+            // Initialiser le bouton de réponse
+            const replyBtn = commentaireElement.querySelector('.reply-btn');
+            if (replyBtn) {
+                replyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    showReplyForm(commentaireId);
+                });
+            }
+        }
+        
+        function initReplyFeatures(reponseElement) {
+            // Initialiser les boutons de like
+            const likeBtn = reponseElement.querySelector('.like-btn');
+            if (likeBtn) {
+                likeBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('❤️ Like pour la nouvelle réponse:', commentaireId);
+                    
+                    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
+                        showNotification('Vous devez être connecté pour liker un commentaire', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const icon = this.querySelector('.like-icon');
+                            const count = this.querySelector('.like-count');
+                            
+                            if (icon) icon.textContent = data.isLiked ? '❤️' : '🤍';
+                            if (count) count.textContent = data.likesCount;
+                        }
+                    } catch (error) {
+                        console.log('⚠️ Erreur like (ignorée):', error.message);
+                    }
+                });
+            }
+            
+            // Initialiser le bouton de réponse à une réponse
+            const replyToReplyBtn = reponseElement.querySelector('.reply-to-reply-btn');
+            if (replyToReplyBtn) {
+                replyToReplyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    showReplyToReplyForm(commentaireId);
+                });
+            }
+        }
+        
+        function initReplyToReplyFeatures(reponseElement) {
+            // Initialiser les boutons de like
+            const likeBtn = reponseElement.querySelector('.like-btn');
+            if (likeBtn) {
+                likeBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const commentaireId = this.getAttribute('data-commentaire-id');
+                    console.log('❤️ Like pour la nouvelle réponse à une réponse:', commentaireId);
+                    
+                    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
+                        showNotification('Vous devez être connecté pour liker un commentaire', 'warning');
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const icon = this.querySelector('.like-icon');
+                            const count = this.querySelector('.like-count');
+                            
+                            if (icon) icon.textContent = data.isLiked ? '❤️' : '🤍';
+                            if (count) count.textContent = data.likesCount;
+                        }
+                    } catch (error) {
+                        console.log('⚠️ Erreur like (ignorée):', error.message);
+                    }
+                });
+            }
+        }
+        
+        function updateCommentCount(increment) {
+            const tabBtn = document.querySelector('.tab-btn[data-tab="commentaires"]');
+            if (tabBtn) {
+                const currentText = tabBtn.textContent;
+                const match = currentText.match(/\((\d+)\)/);
+                if (match) {
+                    const currentCount = parseInt(match[1]);
+                    const newCount = currentCount + increment;
+                    tabBtn.textContent = currentText.replace(/\(\d+\)/, `(${newCount})`);
+                }
+            }
+        }
+        
+        function updateReplyCount(commentaireId, increment) {
+            const repliesDiv = document.getElementById(`replies-${commentaireId}`);
+            if (repliesDiv && repliesDiv.children.length === 1) {
+                // Première réponse, afficher le bouton toggle
+                const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'flex';
+                    const toggleText = toggleBtn.querySelector('.toggle-text');
+                    if (toggleText) {
+                        toggleText.textContent = `Voir 1 réponse`;
+                    }
+                }
+            }
+        }
+        
+        function updateReplyToReplyCount(reponseId, increment) {
+            const repliesToRepliesDiv = document.getElementById(`replies-to-replies-${reponseId}`);
+            if (repliesToRepliesDiv && repliesToRepliesDiv.children.length === 1) {
+                // Première réponse à une réponse, créer ou afficher le bouton toggle
+                let toggleBtn = document.querySelector(`[data-commentaire-id="${reponseId}"].toggle-replies-to-replies-btn`);
+                
+                if (!toggleBtn) {
+                    console.log('🔧 Création du bouton toggle réponses aux réponses pour:', reponseId);
+                    
+                    // Trouver l'élément parent (la réponse)
+                    const parentReponse = document.querySelector(`[data-commentaire-id="${reponseId}"].reponse-item`) || 
+                                        document.querySelector(`#reply-to-reply-form-${reponseId}`)?.parentElement;
+                    
+                    if (parentReponse) {
+                        // Créer le bouton toggle
+                        const toggleHTML = `
+                            <div style="margin-top: 1rem;">
+                                <button 
+                                    class="toggle-replies-to-replies-btn" 
+                                    data-commentaire-id="${reponseId}" 
+                                    style="background: none; border: none; color: var(--accent-purple); font-weight: 600; cursor: pointer; padding: 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; transition: all 0.3s ease;"
+                                    onmouseover="this.style.textDecoration='underline'"
+                                    onmouseout="this.style.textDecoration='none'"
+                                >
+                                    <span class="toggle-icon">▼</span>
+                                    <span class="toggle-text">Voir 1 réponse à cette réponse</span>
+                                </button>
+                            </div>
+                        `;
+                        
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = toggleHTML;
+                        const newToggleBtn = tempDiv.firstElementChild;
+                        
+                        // Ajouter le bouton avant la div des réponses
+                        repliesToRepliesDiv.parentNode.insertBefore(newToggleBtn, repliesToRepliesDiv);
+                        
+                        // Initialiser l'event listener du bouton
+                        const toggleButton = newToggleBtn.querySelector('.toggle-replies-to-replies-btn');
+                        if (toggleButton) {
+                            toggleButton.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const commentaireId = this.getAttribute('data-commentaire-id');
+                                console.log('🔄 Basculement des réponses aux réponses pour:', commentaireId);
+                                toggleRepliesToReplies(commentaireId);
+                            });
+                        }
+                        
+                        toggleBtn = toggleButton;
+                        console.log('✅ Bouton toggle réponses aux réponses créé');
+                    }
+                } else {
+                    // Bouton existant, mettre à jour le texte
+                    toggleBtn.style.display = 'flex';
+                    const toggleText = toggleBtn.querySelector('.toggle-text');
+                    if (toggleText) {
+                        toggleText.textContent = `Voir 1 réponse à cette réponse`;
+                    }
+                }
+            }
+        }
+
+        // Fonctions pour les favoris
+        function checkFavoriteStatus(oeuvreId) {
+            fetch(`/collections/verifier/${oeuvreId}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateFavoriteButton(oeuvreId, data.isFavorite);
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la vérification des favoris:', error);
+                });
+        }
+
+        function toggleFavorite(oeuvreId, button) {
+            fetch(`/collections/toggle/${oeuvreId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFavoriteButton(oeuvreId, data.isFavorite);
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la modification des favoris', 'error');
+            });
+        }
+
+        function updateFavoriteButton(oeuvreId, isFavorite) {
+            const button = document.getElementById(`favorite-btn-${oeuvreId}`);
+            const icon = document.getElementById(`favorite-icon-${oeuvreId}`);
+            const text = document.getElementById(`favorite-text-${oeuvreId}`);
+            
+            if (isFavorite) {
+                button.classList.add('favorited');
+                icon.textContent = '❤️';
+                text.textContent = 'Retirer des favoris';
+            } else {
+                button.classList.remove('favorited');
+                icon.textContent = '🤍';
+                text.textContent = 'Ajouter aux favoris';
+            }
+        }
+        </script>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <!-- Informations condensées -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">📖 Informations</h3>
+            <div class="sidebar-details">
+                <div class="sidebar-detail-item">
+                    <span>Type</span>
+                    <span>{{ oeuvre.type|default('MANGA') }}</span>
+                </div>
+                <div class="sidebar-detail-item">
+                    <span>Chapitres</span>
+                    <span>{{ oeuvre.chapitres|length }}</span>
+                </div>
+                {% if oeuvre.datePublication %}
+                <div class="sidebar-detail-item">
+                    <span>Année</span>
+                    <span>{{ oeuvre.datePublication|date('Y') }}</span>
+                </div>
+                {% endif %}
+                {% if oeuvre.auteur %}
+                <div class="sidebar-detail-item">
+                    <span>Auteur</span>
+                    <span>{{ oeuvre.auteur.nom }}</span>
+                </div>
+                {% endif %}
+                {% if oeuvre.tags|length > 0 %}
+                <div class="sidebar-detail-item">
+                    <span>Genres</span>
+                    <span>{{ oeuvre.tags|length }} genre(s)</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions principales -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">⚡ Actions</h3>
+            <div class="sidebar-actions">
+                {% if oeuvre.chapitres|length > 0 %}
+                {% set firstChapter = oeuvre.chapitres|first %}
+                {% if firstChapter.mangadxChapterId %}
+                    <a href="{{ path('mangadx_chapter_show', {id: firstChapter.mangadxChapterId}) }}" class="sidebar-btn sidebar-btn-primary">
+                        📖 Lire
+                    </a>
+                {% else %}
+                    <a href="{{ path('app_chapitre_show', {id: firstChapter.id}) }}" class="sidebar-btn sidebar-btn-primary">
+                        📖 Lire
+                    </a>
+                {% endif %}
                 {% endif %}
                 
-                <div class="chapitre-actions">
-                    {% if chapitre.mangadxChapterId %}
-                        <a href="{{ path('mangadx_chapter_show', {id: chapitre.mangadxChapterId}) }}" class="btn btn-primary">
-                            Lire le chapitre
-                        </a>
-                    {% else %}
-                        <a href="{{ path('app_chapitre_show', {id: chapitre.id}) }}" class="btn btn-primary">
-                            Lire le chapitre (local)
-                        </a>
-                    {% endif %}
-                    <span class="chapitre-meta">
-                        Ajouté le {{ chapitre.createdAt|date('d/m/Y') }}
-                    </span>
-                </div>
+                <!-- Bouton favori -->
+                {% if is_granted('ROLE_USER') %}
+                <button 
+                    id="favorite-btn-{{ oeuvre.id }}"
+                    class="sidebar-btn sidebar-btn-favorite"
+                    onclick="toggleFavorite({{ oeuvre.id }}, this)"
+                    data-oeuvre-id="{{ oeuvre.id }}"
+                >
+                    <span id="favorite-icon-{{ oeuvre.id }}">🤍</span>
+                    <span id="favorite-text-{{ oeuvre.id }}">Ajouter aux favoris</span>
+                </button>
+                {% endif %}
+                
+                <a href="{{ path('app_oeuvre_list') }}" class="sidebar-btn sidebar-btn-secondary">
+                    📚 Catalogue
+                </a>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <div class="empty-state">
-            <div class="empty-state-icon">📚</div>
-            <h3>Aucun chapitre disponible</h3>
-            <p>Cette œuvre n'a pas encore de chapitres.</p>
+
+        <!-- Administration (si admin) -->
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">🔐 Admin</h3>
+            <div class="sidebar-actions">
+                <a href="{{ path('admin_oeuvre_edit', {id: oeuvre.id}) }}" class="sidebar-btn sidebar-btn-warning">
+                    ✏️ Éditer
+                </a>
+                <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="sidebar-btn sidebar-btn-info">
+                    📖 Chapitres
+                </a>
+                <a href="{{ path('admin_chapitre_new', {id: oeuvre.id}) }}" class="sidebar-btn sidebar-btn-success">
+                    ➕ Nouveau
+                </a>
+            </div>
         </div>
         {% endif %}
-    </section>
-</main>
+    </aside>
+</div>
+
+<!-- Styles pour les onglets et le bouton favori -->
+<style>
+/* Styles pour les onglets */
+.tab-btn {
+    background: rgba(139, 92, 246, 0.1) !important;
+    color: var(--text-secondary) !important;
+    border: none !important;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 1rem 2rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.tab-btn.active {
+    background: var(--accent-purple) !important;
+    color: white !important;
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: var(--text-primary) !important;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Styles pour le bouton favori */
+.sidebar-btn-favorite {
+    background: linear-gradient(135deg, #e11d48, #be185d) !important;
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.sidebar-btn-favorite:hover {
+    background: linear-gradient(135deg, #be185d, #9d174d) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4) !important;
+}
+
+.sidebar-btn-favorite.favorited {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+}
+
+.sidebar-btn-favorite.favorited:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+}
+
+/* Styles pour les étoiles de notation */
+.star, .star-main {
+    transition: all 0.2s ease !important;
+    user-select: none !important;
+}
+
+.star:hover, .star-main:hover {
+    transform: scale(1.2) !important;
+    filter: brightness(1.2) !important;
+}
+
+/* Animation pour les étoiles sélectionnées */
+@keyframes starGlow {
+    0% { text-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
+    50% { text-shadow: 0 0 12px rgba(251, 191, 36, 0.8), 0 0 20px rgba(251, 191, 36, 0.4); }
+    100% { text-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
+}
+
+.star.selected, .star-main.selected {
+    animation: starGlow 2s ease-in-out infinite;
+}
+
+/* Effet de pulsation pour les étoiles au hover */
+.star:hover, .star-main:hover {
+    animation: starGlow 1s ease-in-out infinite;
+}
+</style>
+
+<!-- Script de nettoyage et finalisation -->
+<script>
+    // Nettoyage lors du déchargement de la page
+    window.addEventListener('beforeunload', function() {
+        console.log('🧹 Nettoyage final de la page');
+        // Ne pas nettoyer le sessionStorage pour garder l'état de rechargement
+    });
+    
+    // Fonction de diagnostic pour le débogage
+    window.debugPageState = function() {
+        console.log('🔍 État de la page:');
+        console.log('- Utilisateur connecté:', document.body.dataset.user);
+        console.log('- Onglets actifs:', document.querySelectorAll('.tab-btn.active').length);
+        console.log('- Boutons de like:', document.querySelectorAll('.like-btn').length);
+        console.log('- Étoiles de notation:', document.querySelectorAll('.star, .star-main').length);
+        console.log('- Formulaires de réponse:', document.querySelectorAll('[id^="reply-form-"]').length);
+        console.log('- SessionStorage:', Object.keys(sessionStorage));
+        console.log('- Fonctions disponibles:', {
+            initTabs: typeof initTabs === 'function',
+            initLikeButtons: typeof initLikeButtons === 'function',
+            initReplies: typeof initReplies === 'function',
+            initRatingStars: typeof initRatingStars === 'function'
+        });
+    };
+    
+    // Exposer les fonctions principales pour le débogage
+    window.pageFunctions = {
+        initTabs,
+        initLikeButtons,
+        initReplies,
+        initRatingStars,
+        showNotification,
+        debugPageState
+    };
+    
+    // Fonction de test pour forcer un rechargement
+    window.forceReload = function() {
+        console.log('🔄 Forçage du rechargement...');
+        sessionStorage.removeItem(window.reloadDebug?.pageKey || `oeuvre_{{ oeuvre.id }}_loaded`);
+        window.location.reload(true);
+    };
+    
+    // Fonction pour vérifier l'état du rechargement
+    window.checkReloadState = function() {
+        const pageKey = `oeuvre_{{ oeuvre.id }}_loaded`;
+        const lastLoad = sessionStorage.getItem(pageKey);
+        console.log('🔍 État du rechargement:');
+        console.log('- Clé de page:', pageKey);
+        console.log('- Dernier chargement:', lastLoad ? new Date(parseInt(lastLoad)).toLocaleString() : 'Jamais');
+        console.log('- Temps écoulé:', lastLoad ? Math.floor((Date.now() - parseInt(lastLoad)) / 1000) + 's' : 'N/A');
+        console.log('- Nécessite rechargement:', window.reloadDebug?.needsReload() || 'Fonction non disponible');
+    };
+    
+    // Fonction de test pour les réponses
+    window.testToggleReplies = function(commentaireId) {
+        console.log('🧪 Test manuel du toggle pour commentaire:', commentaireId);
+        toggleReplies(commentaireId);
+    };
+    
+    // Fonction de test pour les réponses aux réponses
+    window.testToggleRepliesToReplies = function(commentaireId) {
+        console.log('🧪 Test manuel du toggle réponses aux réponses pour commentaire:', commentaireId);
+        toggleRepliesToReplies(commentaireId);
+    };
+    
+    // Fonction de test pour diagnostiquer un bouton spécifique
+    window.testToggleButton = function(commentaireId) {
+        console.log('🔍 Diagnostic du bouton toggle pour:', commentaireId);
+        const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
+        const repliesDiv = document.getElementById(`replies-to-replies-${commentaireId}`);
+        
+        console.log('Bouton trouvé:', !!toggleBtn);
+        console.log('Div trouvée:', !!repliesDiv);
+        
+        if (toggleBtn) {
+            console.log('Bouton HTML:', toggleBtn.outerHTML);
+            console.log('Bouton visible:', toggleBtn.offsetParent !== null);
+            console.log('Bouton cliquable:', toggleBtn.style.pointerEvents !== 'none');
+        }
+        
+        if (repliesDiv) {
+            console.log('Div HTML:', repliesDiv.outerHTML);
+            console.log('Div visible:', repliesDiv.offsetParent !== null);
+            console.log('Div display:', repliesDiv.style.display);
+        }
+    };
+    
+    // Fonction pour forcer l'initialisation des boutons de toggle des réponses aux réponses
+    window.forceInitRepliesToReplies = function() {
+        console.log('🔧 Forçage de l\'initialisation des boutons de toggle des réponses aux réponses');
+        const toggleRepliesToRepliesButtons = document.querySelectorAll('.toggle-replies-to-replies-btn');
+        console.log('🔘 Boutons trouvés:', toggleRepliesToRepliesButtons.length);
+        
+        toggleRepliesToRepliesButtons.forEach((button, index) => {
+            console.log(`🔘 Initialisation du bouton ${index}:`, button.getAttribute('data-commentaire-id'));
+            
+            // Supprimer tous les event listeners existants
+            const newButton = button.cloneNode(true);
+            if (button.parentNode) {
+                button.parentNode.replaceChild(newButton, button);
+            }
+            
+            // Ajouter l'event listener
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const commentaireId = this.getAttribute('data-commentaire-id');
+                console.log('🔄 Clic détecté sur bouton toggle réponses aux réponses:', commentaireId);
+                toggleRepliesToReplies(commentaireId);
+            });
+            
+            console.log(`✅ Bouton ${index} initialisé`);
+        });
+        
+        console.log('✅ Initialisation forcée terminée');
+    };
+    
+    // Fonction pour tester l'ajout de réponses aux réponses
+    window.testAddReplyToReply = function(reponseId, contenu = 'Test réponse à une réponse') {
+        console.log('🧪 Test d\'ajout de réponse à une réponse pour:', reponseId);
+        
+        // Simuler les données de réponse
+        const reponseData = {
+            id: Date.now(), // ID temporaire
+            contenu: contenu,
+            auteur: {
+                email: '{{ app.user.email }}'
+            },
+            createdAt: new Date().toISOString()
+        };
+        
+        // Tester l'ajout
+        addNewReplyToReply(reponseId, reponseData);
+        updateReplyToReplyCount(reponseId, 1);
+        
+        console.log('✅ Test terminé');
+    };
+    
+    // Fonction pour diagnostiquer les réponses
+    window.debugReplies = function() {
+        console.log('🔍 Diagnostic des réponses:');
+        const toggleButtons = document.querySelectorAll('.toggle-replies-btn');
+        const repliesDivs = document.querySelectorAll('[id^="replies-"]');
+        const replyToReplyButtons = document.querySelectorAll('.reply-to-reply-btn');
+        const toggleRepliesToRepliesButtons = document.querySelectorAll('.toggle-replies-to-replies-btn');
+        const repliesToRepliesDivs = document.querySelectorAll('[id^="replies-to-replies-"]');
+        
+        console.log('- Boutons toggle réponses:', toggleButtons.length);
+        console.log('- Divs réponses:', repliesDivs.length);
+        console.log('- Boutons réponse aux réponses:', replyToReplyButtons.length);
+        console.log('- Boutons toggle réponses aux réponses:', toggleRepliesToRepliesButtons.length);
+        console.log('- Divs réponses aux réponses:', repliesToRepliesDivs.length);
+        
+        toggleButtons.forEach((btn, i) => {
+            console.log(`  Bouton toggle ${i}:`, {
+                id: btn.getAttribute('data-commentaire-id'),
+                text: btn.textContent.trim(),
+                visible: btn.offsetParent !== null
+            });
+        });
+        
+        repliesDivs.forEach((div, i) => {
+            console.log(`  Div réponses ${i}:`, {
+                id: div.id,
+                display: div.style.display,
+                children: div.children.length,
+                visible: div.offsetParent !== null
+            });
+        });
+        
+        replyToReplyButtons.forEach((btn, i) => {
+            console.log(`  Bouton réponse aux réponses ${i}:`, {
+                id: btn.getAttribute('data-commentaire-id'),
+                text: btn.textContent.trim(),
+                visible: btn.offsetParent !== null
+            });
+        });
+        
+        toggleRepliesToRepliesButtons.forEach((btn, i) => {
+            console.log(`  Bouton toggle réponses aux réponses ${i}:`, {
+                id: btn.getAttribute('data-commentaire-id'),
+                text: btn.textContent.trim(),
+                visible: btn.offsetParent !== null
+            });
+        });
+        
+        repliesToRepliesDivs.forEach((div, i) => {
+            console.log(`  Div réponses aux réponses ${i}:`, {
+                id: div.id,
+                display: div.style.display,
+                children: div.children.length,
+                visible: div.offsetParent !== null
+            });
+        });
+    };
+    
+    console.log('🎉 Page entièrement chargée et initialisée');
+    console.log('💡 Utilisez window.forceReload() pour forcer un rechargement');
+    console.log('💡 Utilisez window.checkReloadState() pour vérifier l\'état');
+    console.log('💡 Utilisez window.debugReplies() pour diagnostiquer les réponses');
+    console.log('💡 Utilisez window.testToggleReplies(id) pour tester le toggle manuellement');
+    console.log('💡 Utilisez window.testToggleRepliesToReplies(id) pour tester le toggle des réponses aux réponses');
+    console.log('💡 Utilisez window.testToggleButton(id) pour diagnostiquer un bouton spécifique');
+    console.log('💡 Utilisez window.forceInitRepliesToReplies() pour forcer l\'initialisation des boutons');
+    console.log('💡 Utilisez window.testAddReplyToReply(id, contenu) pour tester l\'ajout de réponses aux réponses');
+</script>
 {% endblock %} 

@@ -53,4 +53,19 @@ class TagRepository extends ServiceEntityRepository
         
         return $tag;
     }
+
+    /**
+     * Trouve les tags les plus populaires (les plus utilisés)
+     */
+    public function findPopularTags(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('t')
+            ->select('t')
+            ->join('t.oeuvres', 'o')
+            ->groupBy('t.id')
+            ->orderBy('COUNT(o.id)', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 } 

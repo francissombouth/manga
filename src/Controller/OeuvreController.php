@@ -17,6 +17,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+
+
 #[Route('/oeuvres')]
 class OeuvreController extends AbstractController
 {
@@ -34,81 +36,106 @@ class OeuvreController extends AbstractController
     #[Route('', name: 'app_oeuvre_list', methods: ['GET'])]
     public function list(Request $request): Response
     {
+        // Récupérer les paramètres de recherche et de filtrage
+        $tagId = $request->query->get('tag') ? $request->query->getInt('tag') : null;
+        $search = $request->query->get('search', '');
+        $auteurId = $request->query->get('auteur') ? $request->query->getInt('auteur') : null;
+        $type = $request->query->get('type');
+        
         // Si c'est une requête JSON/API, retourner du JSON
         if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
             $page = $request->query->getInt('page', 1);
-            $limit = $request->query->getInt('limit', 10);
-            $type = $request->query->get('type');
-            $auteurId = $request->query->getInt('auteur_id');
-            $tagId = $request->query->getInt('tag_id');
+            $limit = $request->query->getInt('limit', 12);
 
-            $criteria = [];
-            if ($type) {
-                $criteria['type'] = $type;
+            // Utiliser la nouvelle méthode de recherche corrigée
+            if (!empty($search) || $auteurId || $tagId) {
+                $oeuvres = $this->oeuvreRepository->search(
+                    query: !empty($search) ? $search : '',
+                    auteurId: $auteurId ?: null,
+                    tagId: $tagId ?: null
+                );
+                // Pagination manuelle pour la recherche
+                $total = count($oeuvres);
+                $oeuvres = array_slice($oeuvres, ($page - 1) * $limit, $limit);
+            } else {
+                // Pas de recherche, récupérer toutes les œuvres
+                $oeuvres = $this->oeuvreRepository->findBy([], ['titre' => 'ASC'], $limit, ($page - 1) * $limit);
+                $total = $this->oeuvreRepository->count([]);
             }
-            if ($auteurId) {
-                $criteria['auteur'] = $auteurId;
-            }
-
-            $oeuvres = $this->oeuvreRepository->findBy($criteria, ['titre' => 'ASC'], $limit, ($page - 1) * $limit);
-            $total = $this->oeuvreRepository->count($criteria);
 
             return $this->json([
-                'items' => $oeuvres,
-                'total' => $total,
+                'hydra:member' => $oeuvres,
+                'hydra:totalItems' => $total,
                 'page' => $page,
                 'limit' => $limit,
                 'pages' => ceil($total / $limit)
             ], Response::HTTP_OK, [], ['groups' => 'oeuvre:read']);
         }
 
-        // Sinon, afficher la vue HTML
-        $oeuvres = $this->oeuvreRepository->findAllWithAuteurAndChapitres();
+        // Si on filtre par tag, récupérer uniquement les œuvres avec ce tag
+        if ($tagId) {
+            $oeuvres = $this->oeuvreRepository->findByTag($tagId, 100, 0);
+            $totalOeuvres = $this->oeuvreRepository->countByTag($tagId);
+            $totalChapitres = array_sum(array_map(fn($oeuvre) => $oeuvre->getChapitres()->count(), $oeuvres));
+        } elseif (!empty($search) || $auteurId) {
+            // Si on fait une recherche textuelle ou par auteur, utiliser la méthode de recherche
+            $oeuvres = $this->oeuvreRepository->search(
+                query: $search,
+                auteurId: $auteurId ?: null,
+                tagId: null
+            );
+            $totalOeuvres = count($oeuvres);
+            $totalChapitres = array_sum(array_map(fn($oeuvre) => $oeuvre->getChapitres()->count(), $oeuvres));
+        } else {
+            // Utiliser la méthode optimisée qui limite à 100 œuvres et calcule les stats en SQL
+            $oeuvresWithStats = $this->oeuvreRepository->findWithStats(100);
         
-        // Si on a moins de 50 œuvres, auto-alimenter depuis l'API
-        if (count($oeuvres) < 50) {
-            $this->autoFeedFromApi();
-            // Recharger les œuvres après l'import
-            $oeuvres = $this->oeuvreRepository->findAllWithAuteurAndChapitres();
-        }
+            // Transformer les résultats pour le template
+            $processedOeuvres = [];
+            $totalChapitres = 0;
         
-        // Calculer les statistiques pour chaque œuvre
-        $oeuvresWithStats = [];
-        $dateLimit = new \DateTimeImmutable('-7 days');
-        
-        foreach ($oeuvres as $oeuvre) {
-            $chapitres = $oeuvre->getChapitres();
-            $hasNewChapter = false;
-            $latestChapterDate = null;
-            
-            foreach ($chapitres as $chapitre) {
-                if ($chapitre->getCreatedAt() > $dateLimit) {
-                    $hasNewChapter = true;
-                }
-                if (!$latestChapterDate || $chapitre->getCreatedAt() > $latestChapterDate) {
-                    $latestChapterDate = $chapitre->getCreatedAt();
-                }
-            }
-            
-            $oeuvresWithStats[] = [
+            foreach ($oeuvresWithStats as $result) {
+                $oeuvre = $result[0]; // L'entité Oeuvre
+                $chapitresCount = (int)$result['chapitres_count'];
+                $latestChapterDate = $result['latest_chapter_date'];
+                $newChaptersCount = (int)$result['new_chapters_count'];
+                
+                $processedOeuvres[] = [
                 'oeuvre' => $oeuvre,
-                'chapitres_count' => $chapitres->count(),
-                'has_new_chapter' => $hasNewChapter,
+                    'chapitres_count' => $chapitresCount,
+                    'has_new_chapter' => $newChaptersCount > 0,
                 'latest_chapter_date' => $latestChapterDate
             ];
+                
+                $totalChapitres += $chapitresCount;
         }
         
-        // Trier par date de dernier chapitre (plus récent en premier)
-        usort($oeuvresWithStats, function($a, $b) {
-            $dateA = $a['latest_chapter_date'] ?? new \DateTimeImmutable('1970-01-01');
-            $dateB = $b['latest_chapter_date'] ?? new \DateTimeImmutable('1970-01-01');
-            return $dateB <=> $dateA;
-        });
+            // Extraire les œuvres pour le template (rester compatible avec l'ancien format)
+            $oeuvres = array_map(function($item) {
+                return $item['oeuvre'];
+            }, $processedOeuvres);
+            $totalOeuvres = count($processedOeuvres);
+        }
+
+        // Calculer le nombre total d'auteurs uniques
+        $totalAuteurs = $this->entityManager->createQuery(
+            'SELECT COUNT(DISTINCT a.id) FROM App\Entity\Auteur a JOIN a.oeuvres o'
+        )->getSingleScalarResult();
+
+        // Récupérer tous les tags pour le dropdown de recherche
+        $allTags = $this->tagRepository->findBy([], ['nom' => 'ASC']);
+        
+        // Récupérer les tags populaires (les plus utilisés)
+        $popularTags = $this->tagRepository->findPopularTags(8);
 
         return $this->render('oeuvre/collection.html.twig', [
-            'oeuvres_with_stats' => $oeuvresWithStats,
-            'total_oeuvres' => count($oeuvres),
-            'total_chapitres' => array_sum(array_column($oeuvresWithStats, 'chapitres_count')),
+            'oeuvres' => $oeuvres,
+            'totalOeuvres' => $totalOeuvres,
+            'totalChapitres' => $totalChapitres,
+            'totalAuteurs' => $totalAuteurs,
+            'allTags' => $allTags,
+            'popularTags' => $popularTags,
+            'selectedTag' => $tagId ? $this->tagRepository->find($tagId) : null,
         ]);
     }
 
@@ -118,21 +145,23 @@ class OeuvreController extends AbstractController
         $oeuvre = $this->oeuvreRepository->find($id);
 
         if (!$oeuvre) {
-            // Si c'est une requête AJAX ou avec Accept: application/json, retourner JSON
             if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             throw $this->createNotFoundException('Œuvre non trouvée');
         }
 
-        // Si c'est une requête AJAX ou avec Accept: application/json, retourner JSON
-        if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
-            return $this->json($oeuvre, Response::HTTP_OK, [], ['groups' => 'oeuvre:read']);
-        }
+        // Récupération des commentaires pour l'affichage initial
+        $commentaires = $oeuvre->getCommentaires()->toArray();
+        usort($commentaires, fn($a, $b) => $b->getCreatedAt() <=> $a->getCreatedAt());
+        
+        // Note: La moyenne est maintenant calculée côté API avec les nouvelles entités OeuvreNote
+        $onglet = $request->query->get('onglet', 'chapitres');
 
-        // Sinon, afficher la vue HTML
         return $this->render('oeuvre/show.html.twig', [
             'oeuvre' => $oeuvre,
+            'commentaires' => $commentaires,
+            'onglet' => $onglet,
         ]);
     }
 

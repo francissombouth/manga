@@ -1,17 +1,500 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}MangaThèque - Votre collection de mangas{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>📚</text></svg>">
+        
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        
+        <!-- Styles -->
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {% block stylesheets %}{% endblock %}
+        <style>
+            /* Menu burger styles */
+            .burger-menu {
+                display: none;
+                flex-direction: column;
+                justify-content: space-between;
+                width: 24px;
+                height: 20px;
+                cursor: pointer;
+                z-index: 1001;
+                transition: all 0.3s ease;
+            }
 
+            .burger-line {
+                width: 100%;
+                height: 3px;
+                background: white;
+                border-radius: 2px;
+                transition: all 0.3s ease;
+                transform-origin: center;
+            }
+
+            .burger-menu.active .burger-line:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .burger-menu.active .burger-line:nth-child(2) {
+                opacity: 0;
+            }
+
+            .burger-menu.active .burger-line:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+
+            .mobile-nav-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 999;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .mobile-nav-overlay.active {
+                opacity: 1;
+            }
+
+            .mobile-nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: min(300px, 85vw);
+                height: 100%;
+                background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+                z-index: 1000;
+                transition: right 0.3s ease;
+                border-left: 1px solid var(--border-color);
+                backdrop-filter: blur(20px);
+                overflow-y: auto;
+            }
+
+            .mobile-nav.active {
+                right: 0;
+            }
+
+            .mobile-nav-header {
+                padding: 2rem 1.5rem 1rem;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .mobile-nav-brand {
+                font-size: 1.3rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                text-decoration: none;
+            }
+
+            .mobile-nav-close {
+                background: none;
+                border: none;
+                color: var(--text-primary);
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+
+            .mobile-nav-close:hover {
+                background: var(--bg-card-hover);
+                color: var(--accent-purple);
+            }
+
+            .mobile-nav-content {
+                padding: 1rem 0;
+            }
+
+            .mobile-nav-section {
+                margin-bottom: 1.5rem;
+            }
+
+            .mobile-nav-section-title {
+                padding: 0 1.5rem 0.5rem;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .mobile-nav-links {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .mobile-nav-link {
+                display: block;
+                padding: 1rem 1.5rem;
+                color: var(--text-primary);
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                border-left: 3px solid transparent;
+            }
+
+            .mobile-nav-link:hover {
+                background: rgba(139, 92, 246, 0.1);
+                color: var(--accent-purple);
+                border-left-color: var(--accent-purple);
+                text-decoration: none;
+            }
+
+            .mobile-nav-link.admin-link {
+                background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+                color: white;
+                border-left-color: white;
+            }
+
+            .mobile-nav-link.register-link {
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                border-left-color: white;
+            }
+
+            .mobile-nav-link.logout-link:hover {
+                background: rgba(239, 68, 68, 0.1);
+                color: #ef4444;
+                border-left-color: #ef4444;
+            }
+
+            .mobile-search {
+                padding: 1rem 1.5rem;
+                border-top: 1px solid var(--border-color);
+                margin-top: 1rem;
+            }
+
+            .mobile-search-form {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .mobile-search-input {
+                flex: 1;
+                background: var(--bg-card);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 0.8rem;
+                color: var(--text-primary);
+                font-size: 0.9rem;
+            }
+
+            .mobile-search-input:focus {
+                outline: none;
+                border-color: var(--accent-purple);
+                box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            }
+
+            .mobile-search-btn {
+                background: var(--accent-purple);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 0.8rem 1rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .mobile-search-btn:hover {
+                background: var(--accent-purple-dark);
+                transform: translateY(-1px);
+            }
+
+            /* Navigation desktop/mobile */
+            .navbar-nav {
+                display: flex;
+            }
+            
+            .search-box {
+                display: flex;
+            }
+            
+            .burger-menu {
+                display: none;
+            }
+
+            /* Responsive breakpoints */
+            @media (max-width: 900px) {
+                .navbar-nav {
+                    display: none !important;
+                }
+                .search-box {
+                    display: none !important;
+                }
+                .burger-menu {
+                    display: flex !important;
+                }
+                .navbar-container {
+                    flex-wrap: nowrap;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .mobile-nav {
+                    width: 90vw !important;
+                    right: -90vw !important;
+                }
+                
+                .mobile-nav.active {
+                    right: 0 !important;
+                }
+                .navbar-brand {
+                    font-size: 1.2rem;
+                    word-break: break-word;
+                }
+                .mobile-nav-brand {
+                    font-size: 1.2rem;
+                    word-break: break-word;
+                }
+                .navbar-container {
+                    padding: 0 0.5rem;
+                    max-width: 100%;
+                }
+                .search-input, .mobile-search-input {
+                    max-width: 100%;
+                    min-width: 0;
+                }
+            }
+            
+                            /* Prévention globale du dépassement pleine largeur */
+                @media (max-width: 768px) {
+                    * {
+                        max-width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .navbar-container, .container, .main-container {
+                        max-width: 100vw;
+                        margin: 0;
+                        overflow-x: hidden;
+                    }
+                    
+                    /* Navigation mobile pleine largeur */
+                    .mobile-nav {
+                        width: 85vw !important;
+                        right: -85vw !important;
+                    }
+                    
+                    .mobile-nav.active {
+                        right: 0 !important;
+                    }
+                }
+        </style>
+    </head>
+    <body>
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="{{ path('app_home') }}" class="navbar-brand">
+                    📚 MangaThèque
+                </a>
+                
+                <!-- Menu desktop -->
+                <ul class="navbar-nav" id="main-nav">
+                    <li><a href="{{ path('app_oeuvre_list') }}" class="nav-link">📚 Catalogue</a></li>
+                    {% if app.user %}
+                        <li><a href="{{ path('app_favoris') }}" class="nav-link">❤️ Mes Favoris</a></li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li><a href="{{ path('admin_dashboard') }}" class="nav-link admin-link">🔐 Admin</a></li>
+                        {% endif %}
+                        <li><a href="{{ path('app_profile') }}" class="nav-link">👤 Mon Profil</a></li>
+                        <li><a href="{{ path('app_logout') }}" class="nav-link logout-link">🚪 Déconnexion</a></li>
+                    {% else %}
+                        <li><a href="{{ path('app_login') }}" class="nav-link">🔑 Connexion</a></li>
+                        <li><a href="{{ path('app_register') }}" class="nav-link register-link">✨ Inscription</a></li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Recherche desktop -->
+                <div class="search-box">
+                    <form action="{{ path('app_oeuvre_list') }}" method="GET" style="display: flex; gap: 0.5rem;">
+                        <input type="text" name="search" placeholder="Rechercher par titre, auteur ou genre..." class="search-input" value="{{ app.request.get('search', '') }}">
+                        <button type="submit" class="btn-primary" style="padding: 0.5rem 1rem;">🔍</button>
+                    </form>
+                </div>
+
+                <!-- Menu burger -->
+                <div class="burger-menu" id="burger-menu">
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                    <div class="burger-line"></div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Overlay mobile -->
+        <div class="mobile-nav-overlay" id="mobile-overlay"></div>
+
+        <!-- Menu mobile -->
+        <div class="mobile-nav" id="mobile-nav">
+            <div class="mobile-nav-header">
+                <a href="{{ path('app_home') }}" class="mobile-nav-brand">📚 MangaThèque</a>
+                <button class="mobile-nav-close" id="mobile-nav-close">×</button>
+            </div>
+
+            <div class="mobile-nav-content">
+                <!-- Navigation principale -->
+                <div class="mobile-nav-section">
+                    <div class="mobile-nav-section-title">Navigation</div>
+                    <ul class="mobile-nav-links">
+                        <li><a href="{{ path('app_oeuvre_list') }}" class="mobile-nav-link">📚 Catalogue</a></li>
+                        {% if app.user %}
+                            <li><a href="{{ path('app_favoris') }}" class="mobile-nav-link">❤️ Mes Favoris</a></li>
+                            <li><a href="{{ path('app_profile') }}" class="mobile-nav-link">👤 Mon Profil</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {% if app.user %}
+                    <!-- Administration (si admin) -->
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <div class="mobile-nav-section">
+                            <div class="mobile-nav-section-title">Administration</div>
+                            <ul class="mobile-nav-links">
+                                <li><a href="{{ path('admin_dashboard') }}" class="mobile-nav-link admin-link">🔐 Dashboard Admin</a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Compte -->
+                    <div class="mobile-nav-section">
+                        <div class="mobile-nav-section-title">Compte</div>
+                        <ul class="mobile-nav-links">
+                            <li><a href="{{ path('app_logout') }}" class="mobile-nav-link logout-link">🚪 Déconnexion</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <!-- Authentification -->
+                    <div class="mobile-nav-section">
+                        <div class="mobile-nav-section-title">Connexion</div>
+                        <ul class="mobile-nav-links">
+                            <li><a href="{{ path('app_login') }}" class="mobile-nav-link">🔑 Connexion</a></li>
+                            <li><a href="{{ path('app_register') }}" class="mobile-nav-link register-link">✨ Inscription</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recherche mobile -->
+            <div class="mobile-search">
+                <form action="{{ path('app_oeuvre_list') }}" method="GET" class="mobile-search-form">
+                    <input type="text" name="search" placeholder="Rechercher..." class="mobile-search-input" value="{{ app.request.get('search', '') }}">
+                    <button type="submit" class="mobile-search-btn">🔍</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Messages Flash -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-message flash-{{ type }}" style="position: fixed; top: 80px; right: 10px; left: 10px; z-index: 1000; background: {% if type == 'success' %}linear-gradient(135deg, #10b981, #059669){% elseif type == 'error' %}linear-gradient(135deg, #ef4444, #dc2626){% else %}var(--accent-purple){% endif %}; color: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: var(--shadow-lg); font-weight: 600; max-width: calc(100vw - 20px); animation: slideInRight 0.3s ease; box-sizing: border-box;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>{% if type == 'success' %}✅{% elseif type == 'error' %}❌{% else %}ℹ️{% endif %}</span>
+                        <span>{{ message }}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; margin-left: auto; padding: 0;">×</button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <!-- Contenu principal -->
+        {% block body %}{% endblock %}
+
+        <!-- Scripts -->
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
+
+        <script>
+            // Menu burger functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const burgerMenu = document.getElementById('burger-menu');
+                const mobileNav = document.getElementById('mobile-nav');
+                const mobileOverlay = document.getElementById('mobile-overlay');
+                const mobileNavClose = document.getElementById('mobile-nav-close');
+                const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+                function openMobileMenu() {
+                    burgerMenu.classList.add('active');
+                    mobileNav.classList.add('active');
+                    mobileOverlay.style.display = 'block';
+                    mobileOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                function closeMobileMenu() {
+                    burgerMenu.classList.remove('active');
+                    mobileNav.classList.remove('active');
+                    mobileOverlay.classList.remove('active');
+                    setTimeout(() => {
+                        mobileOverlay.style.display = 'none';
+                    }, 300);
+                    document.body.style.overflow = '';
+                }
+
+                // Toggle menu burger
+                burgerMenu.addEventListener('click', function() {
+                    if (mobileNav.classList.contains('active')) {
+                        closeMobileMenu();
+                    } else {
+                        openMobileMenu();
+                    }
+                });
+
+                // Fermer avec le bouton X
+                mobileNavClose.addEventListener('click', closeMobileMenu);
+
+                // Fermer en cliquant sur l'overlay
+                mobileOverlay.addEventListener('click', closeMobileMenu);
+
+                // Fermer en cliquant sur un lien
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        // Petit délai pour permettre la navigation
+                        setTimeout(closeMobileMenu, 100);
+                    });
+                });
+
+                // Fermer avec la touche Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+                        closeMobileMenu();
+                    }
+                });
+
+                // Gérer le redimensionnement de la fenêtre
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 900 && mobileNav.classList.contains('active')) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+
+            // Auto-hide flash messages
+            setTimeout(function() {
+                const flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(message => {
+                    message.style.animation = 'fadeOut 0.5s ease forwards';
+                    setTimeout(() => {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                });
+            }, 5000);
+        </script>
     </body>
 </html>

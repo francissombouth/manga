@@ -21,19 +21,28 @@ class ImageProxyController extends AbstractController
     }
 
     #[Route('/proxy/image', name: 'image_proxy', methods: ['GET'])]
-    public function proxyImage(string $url = null): Response
+    public function proxyImage(): Response
     {
-        // Récupérer l'URL depuis les paramètres
-        $url = $_GET['url'] ?? $url;
+        // Récupérer l'URL depuis les paramètres de requête
+        $url = $_GET['url'] ?? null;
         
         if (!$url) {
+            $this->logger->warning('Proxy image: URL manquante');
             return $this->createPlaceholderResponse();
         }
 
+        // Décoder l'URL si elle est encodée
+        $url = urldecode($url);
+        
+        $this->logger->info('Proxy image demandé pour: ' . $url);
+
         // Vérifier que l'URL provient bien de MangaDx
         if (!$this->isMangaDxUrl($url)) {
+            $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url]);
             return $this->createPlaceholderResponse();
         }
+
+        $this->logger->info('Proxy image: URL autorisée, récupération en cours...');
 
         try {
             // Headers pour imiter une requête depuis MangaDx
@@ -76,19 +85,21 @@ class ImageProxyController extends AbstractController
     private function isMangaDxUrl(string $url): bool
     {
         $allowedDomains = [
-            'uploads.mangadx.org',
             'uploads.mangadex.org',
             'mangadx.org',
             'mangadex.org',
             'api.mangadx.org',
-            'api.mangadex.org'
+            'api.mangadex.org',
+            'mangadx.network',
+            'mangadex.network'
         ];
 
         $parsedUrl = parse_url($url);
         $host = $parsedUrl['host'] ?? '';
 
         foreach ($allowedDomains as $domain) {
-            if (str_ends_with($host, $domain)) {
+            // Vérifier si l'host se termine par le domaine (pour inclure les sous-domaines)
+            if (str_ends_with($host, $domain) || str_ends_with($host, '.' . $domain)) {
                 return true;
             }
         }

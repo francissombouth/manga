@@ -1,0 +1,374 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Favoris - Mangatek{% endblock %}
+
+{% block body %}
+<div class="main-container">
+    <!-- Contenu principal -->
+    <main>
+        <div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Mes Favoris</h1>
+        <p class="text-gray-300">Retrouvez toutes vos œuvres favorites</p>
+    </div>
+
+    {% if oeuvres is empty %}
+        <div class="text-center py-12">
+            <div class="text-gray-400 mb-4">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-2">Aucun favori pour le moment</h3>
+            <p class="text-gray-400 mb-6">Commencez à ajouter des œuvres à vos favoris pour les retrouver ici</p>
+            <a href="{{ path('app_oeuvre_list') }}" class="inline-flex items-center px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Découvrir des œuvres
+            </a>
+        </div>
+    {% else %}
+        <div class="manga-grid">
+            {% for oeuvre in oeuvres %}
+                <div class="manga-card">
+                    <a href="{{ path('app_oeuvre_show', {'id': oeuvre.id}) }}" class="manga-card-link">
+                        <div class="manga-cover-container">
+                            {% if oeuvre.couverture %}
+                                <img src="{{ path('image_proxy') }}?url={{ oeuvre.couverture|url_encode }}" 
+                                     alt="{{ oeuvre.titre }}" 
+                                     class="manga-cover"
+                                     loading="lazy"
+                                     onerror="this.src='{{ path('image_proxy') }}';">
+                            {% else %}
+                                <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
+                                    📖
+                                </div>
+                            {% endif %}
+                            <!-- Cœur favori en haut à droite -->
+                            <button 
+                                class="btn-favorite coeur-favori favorited"
+                                onclick="event.stopPropagation(); event.preventDefault(); toggleFavorite({{ oeuvre.id }}, this)"
+                                data-oeuvre-id="{{ oeuvre.id }}"
+                                title="Retirer des favoris"
+                            >
+                                <span class="favorite-icon" id="favorite-icon-{{ oeuvre.id }}">❤️</span>
+                            </button>
+                        </div>
+                        <div class="manga-info">
+                            <h3 class="manga-title">{{ oeuvre.titre }}</h3>
+                            <p class="manga-author">
+                                {% if oeuvre.auteur %}
+                                    {{ oeuvre.auteur.nom }}
+                                {% else %}
+                                    Auteur inconnu
+                                {% endif %}
+                            </p>
+                            <div class="manga-meta">
+                                <span class="manga-type">{{ oeuvre.type|default('MANGA') }}</span>
+                                <span class="chapters-count">{{ oeuvre.chapitres|length }} ch.</span>
+                            </div>
+                            {% if oeuvre.tags|length > 0 %}
+                            <div style="margin: 1rem 0; display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                                {% for tag in oeuvre.tags|slice(0, 3) %}
+                                <a href="{{ path('app_oeuvre_list', {tag: tag.id}) }}" 
+                                   style="background: rgba(225, 29, 72, 0.1); color: #e11d48; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; text-decoration: none; border: 1px solid rgba(225, 29, 72, 0.3); transition: all 0.3s ease;"
+                                   onmouseover="this.style.background='#e11d48'; this.style.color='white'"
+                                   onmouseout="this.style.background='rgba(225, 29, 72, 0.1)'; this.style.color='#e11d48'">
+                                    {{ tag.nom }}
+                                </a>
+                                {% endfor %}
+                                {% if oeuvre.tags|length > 3 %}
+                                <span style="color: var(--text-secondary); font-size: 0.7rem; padding: 0.2rem 0.4rem;">+{{ oeuvre.tags|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            {% set collection = collections|filter(c => c.oeuvre.id == oeuvre.id)|first %}
+                            {% if collection %}
+                                <p style="color: var(--text-secondary); font-size: 0.7rem; margin: 0.5rem 0;">
+                                    Ajouté le {{ collection.dateAjout|date('d/m/Y') }}
+                                </p>
+                            {% endif %}
+                            {% set latestChapter = oeuvre.chapitres|first %}
+                            {% if latestChapter and latestChapter.createdAt > ("now"|date_modify('-2 days')) %}
+                                <div class="new-badge">NEW</div>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    </main>
+    <aside class="sidebar">
+        <!-- Section des statistiques -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                📊 Statistiques des Favoris
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Œuvres favorites</span>
+                    <span style="color: var(--accent-purple); font-weight: 600;">{{ oeuvres|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Auteurs différents</span>
+                    <span style="color: var(--accent-purple); font-weight: 600;">{{ auteursUniques }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Total chapitres</span>
+                    <span style="color: var(--accent-purple); font-weight: 600;">{{ oeuvres|map(o => o.chapitres|length)|reduce((a, b) => a + b, 0) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des actions -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                ⚡ Actions
+            </h3>
+            <div class="sidebar-actions">
+                <a href="{{ path('app_oeuvre_list') }}" class="sidebar-btn sidebar-btn-secondary">
+                    📚 Catalogue
+                </a>
+                {% if oeuvres|length > 0 %}
+                <button 
+                    onclick="clearAllFavorites()"
+                    class="sidebar-btn sidebar-btn-danger"
+                    style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; cursor: pointer; transition: all 0.3s ease;"
+                >
+                    🗑️ Vider les favoris
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section des genres populaires dans les favoris -->
+        {% if oeuvres|length > 0 %}
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                🎭 Genres dans vos favoris
+            </h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% set allTags = [] %}
+                {% for oeuvre in oeuvres %}
+                    {% for tag in oeuvre.tags %}
+                        {% set allTags = allTags|merge([tag]) %}
+                    {% endfor %}
+                {% endfor %}
+                
+                {% set uniqueTags = [] %}
+                {% for tag in allTags %}
+                    {% if tag.id not in uniqueTags|map(t => t.id) %}
+                        {% set uniqueTags = uniqueTags|merge([tag]) %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% for tag in uniqueTags|slice(0, 8) %}
+                <a href="{{ path('app_oeuvre_list', {tag: tag.id}) }}" 
+                   style="background: linear-gradient(135deg, #e11d48, #be185d); color: white; padding: 0.3rem 0.8rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-decoration: none; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.2rem;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(225, 29, 72, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    {{ tag.nom }}
+                </a>
+                {% else %}
+                <p style="color: var(--text-secondary); font-size: 0.8rem; font-style: italic;">Aucun genre dans vos favoris</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </aside>
+</div>
+
+<script>
+function toggleFavorite(oeuvreId, button) {
+    fetch(`/collections/toggle/${oeuvreId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.isFavorite) {
+                button.classList.add('bg-red-500', 'hover:bg-red-600');
+                button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                button.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>';
+            } else {
+                button.classList.remove('bg-red-500', 'hover:bg-red-600');
+                button.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path></svg>';
+            }
+            
+            // Afficher une notification
+            showNotification(data.message, data.success ? 'success' : 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showNotification('Erreur lors de la modification des favoris', 'error');
+    });
+}
+
+function removeFromFavorites(oeuvreId, button) {
+    if (confirm('Êtes-vous sûr de vouloir retirer cette œuvre de vos favoris ?')) {
+        fetch(`/collections/retirer/${oeuvreId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Supprimer la carte de l'interface
+                const card = button.closest('.bg-surface');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // Vérifier s'il reste des favoris
+                    const remainingCards = document.querySelectorAll('.bg-surface');
+                    if (remainingCards.length === 0) {
+                        location.reload(); // Recharger pour afficher le message "aucun favori"
+                    }
+                }, 300);
+                
+                showNotification(data.message, 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showNotification('Erreur lors de la suppression', 'error');
+        });
+    }
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-300 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+function clearAllFavorites() {
+    if (confirm('Êtes-vous sûr de vouloir vider tous vos favoris ? Cette action est irréversible.')) {
+        const cards = document.querySelectorAll('.manga-card');
+        let removedCount = 0;
+        
+        cards.forEach((card, index) => {
+            const oeuvreId = card.querySelector('[data-oeuvre-id]').getAttribute('data-oeuvre-id');
+            
+            setTimeout(() => {
+                fetch(`/collections/retirer/${oeuvreId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                            removedCount++;
+                            
+                            if (removedCount === cards.length) {
+                                location.reload(); // Recharger pour afficher le message "aucun favori"
+                            }
+                        }, 300);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+            }, index * 100); // Délai progressif pour l'animation
+        });
+        
+        showNotification('Suppression des favoris en cours...', 'success');
+    }
+}
+</script>
+
+<style>
+.manga-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+@media (max-width: 1200px) {
+  .manga-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .manga-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .sidebar {
+    display: none;
+  }
+  .main-container {
+    flex-direction: column;
+  }
+}
+.manga-card {
+              min-width: 0;
+            max-width: 100vw;
+}
+.manga-title, .manga-author, .manga-meta {
+  word-break: break-word;
+}
+.manga-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.manga-card-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+}
+.manga-cover-container {
+    position: relative;
+}
+.coeur-favori {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+.coeur-favori.favorited {
+    color: #e11d48;
+}
+.coeur-favori:not(.favorited) {
+    color: #aaa;
+}
+.coeur-favori:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %} 

@@ -1,454 +1,207 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}MangaThèque - Accueil{% endblock %}
-
-{% block stylesheets %}
-<style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-    }
-    
-    .header {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 1rem 0;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-    }
-    
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-    
-    .nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .logo {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #4a5568;
-        text-decoration: none;
-    }
-    
-    .nav-links {
-        display: flex;
-        gap: 2rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .nav-links a {
-        color: #4a5568;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
-    
-    .nav-links a:hover {
-        color: #667eea;
-    }
-    
-    .hero {
-        text-align: center;
-        padding: 4rem 0;
-        color: white;
-    }
-    
-    .hero h1 {
-        font-size: 3.5rem;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .hero p {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-    }
-    
-    .stats {
-        display: flex;
-        justify-content: center;
-        gap: 3rem;
-        margin-bottom: 3rem;
-    }
-    
-    .stat-card {
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        padding: 2rem;
-        border-radius: 15px;
-        text-align: center;
-        min-width: 150px;
-    }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-    
-    .content-section {
-        background: white;
-        margin: 2rem 0;
-        padding: 3rem 0;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    
-    .section-title {
-        text-align: center;
-        font-size: 2.5rem;
-        margin-bottom: 2rem;
-        color: #4a5568;
-    }
-    
-    .oeuvres-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-top: 2rem;
-    }
-    
-    .oeuvre-card {
-        background: #ffffff;
-        border-radius: 20px;
-        padding: 1.5rem;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-        position: relative;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-    }
-    
-    .oeuvre-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-    }
-    
-    .new-badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        font-size: 0.75rem;
-        font-weight: bold;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        box-shadow: 0 2px 10px rgba(240, 147, 251, 0.4);
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-    
-    .oeuvre-header {
-        margin-bottom: 1rem;
-    }
-    
-    .oeuvre-title {
-        font-size: 1.4rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        color: #2d3748;
-        line-height: 1.3;
-    }
-    
-    .oeuvre-author {
-        color: #718096;
-        font-style: italic;
-        margin: 0;
-        font-size: 0.9rem;
-    }
-    
-    .oeuvre-info {
-        margin-bottom: 1rem;
-    }
-    
-    .oeuvre-type {
-        margin-bottom: 0.8rem;
-    }
-    
-    .type-badge {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-size: 0.7rem;
-        font-weight: bold;
-        padding: 0.2rem 0.6rem;
-        border-radius: 15px;
-        letter-spacing: 0.5px;
-    }
-    
-    .oeuvre-stats {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 0.8rem;
-    }
-    
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        font-size: 0.85rem;
-        color: #4a5568;
-    }
-    
-    .stat-item .icon {
-        font-size: 1rem;
-    }
-    
-    .oeuvre-description {
-        color: #4a5568;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
-    
-    .oeuvre-actions {
-        display: flex;
-        gap: 0.8rem;
-        justify-content: flex-start;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.3s;
-        border: none;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-secondary {
-        background: #f7fafc;
-        color: #4a5568;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.3s;
-        border: 2px solid #e2e8f0;
-    }
-    
-    .btn-secondary:hover {
-        background: #edf2f7;
-        border-color: #cbd5e0;
-        transform: translateY(-2px);
-    }
-    
-    .btn {
-        display: inline-block;
-        padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 25px;
-        font-weight: 500;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
-    }
-    
-    .feature-card {
-        text-align: center;
-        padding: 2rem;
-    }
-    
-    .feature-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .feature-title {
-        font-size: 1.3rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
-        color: #4a5568;
-    }
-    
-    .footer {
-        background: #2d3748;
-        color: white;
-        text-align: center;
-        padding: 2rem 0;
-        margin-top: 3rem;
-    }
-    
-    @media (max-width: 768px) {
-        .hero h1 {
-            font-size: 2.5rem;
-        }
-        
-        .stats {
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .nav-links {
-            gap: 1rem;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}MangaThèque - Votre collection de mangas{% endblock %}
 
 {% block body %}
-<header class="header">
-    <div class="container">
-        <nav class="nav">
-            <a href="{{ path('app_home') }}" class="logo">🎌 MangaThèque</a>
-            <ul class="nav-links">
-                <li><a href="/oeuvres">Œuvres</a></li>
-                <li><a href="{{ path('mangadx_home') }}">MangaDx</a></li>
-                <li><a href="/api/docs">API</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
-
-<main>
-    <section class="hero">
-        <div class="container">
-            <h1>Bienvenue dans votre MangaThèque</h1>
-            <p>Découvrez, lisez et suivez vos mangas et manhwas favoris</p>
-            
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-number">{{ total_oeuvres }}</div>
-                    <div>Mangas/Manhwas</div>
+<div class="main-container">
+    <!-- Contenu principal -->
+    <main>
+        <!-- Header héroïque -->
+        <div class="collection-header">
+            <h1 class="collection-title">🔥 MangaThèque</h1>
+            <p class="collection-subtitle">Découvrez, lisez et collectionnez vos mangas préférés</p>
+            <div class="collection-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ totalOeuvres }}</span>
+                    <span class="stat-label">Mangas</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ total_chapitres }}</div>
-                    <div>Chapitres</div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ totalChapitres }}</span>
+                    <span class="stat-label">Chapitres</span>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number">{{ oeuvres_with_stats|filter(o => o.has_new_chapter)|length }}</div>
-                    <div>Nouveautés</div>
-                </div>
-            </div>
-            
-            <a href="/oeuvres" class="btn">Explorer les Mangas</a>
-        </div>
-    </section>
-
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">Fonctionnalités</h2>
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">🎌</div>
-                    <h3 class="feature-title">Gestion des Mangas</h3>
-                    <p>Ajoutez, organisez et suivez vos mangas et manhwas favoris</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3 class="feature-title">Suivi de Lecture</h3>
-                    <p>Suivez votre progression de lecture chapitre par chapitre</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🏷️</div>
-                    <h3 class="feature-title">Tags et Collections</h3>
-                    <p>Classez par genre : Shônen, Seinen, Isekai, Romance et plus</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔍</div>
-                    <h3 class="feature-title">Recherche Avancée</h3>
-                    <p>Trouvez rapidement vos séries grâce à la recherche intelligente</p>
+                <div class="stat-item">
+                    <span class="stat-number">{{ totalAuteurs }}</span>
+                    <span class="stat-label">Auteurs</span>
                 </div>
             </div>
         </div>
-    </section>
 
-    {% if oeuvres_with_stats %}
-    <section class="content-section">
-        <div class="container">
-            <h2 class="section-title">Collection Manga/Manhwa</h2>
-            <div class="oeuvres-grid">
-                {% for item in oeuvres_with_stats %}
-                {% set oeuvre = item.oeuvre %}
-                <div class="oeuvre-card">
-                    {% if item.has_new_chapter %}
-                    <div class="new-badge">NEW</div>
-                    {% endif %}
-                    
-                    <div class="oeuvre-header">
-                        <h3 class="oeuvre-title">{{ oeuvre.titre }}</h3>
-                        {% if oeuvre.auteur %}
-                        <p class="oeuvre-author">par {{ oeuvre.auteur.nom }}{% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}</p>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="oeuvre-info">
-                        <div class="oeuvre-type">
-                            <span class="type-badge">{{ oeuvre.type|upper }}</span>
+        <!-- Section Popular Today -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    🔥 Popular Today
+                </h2>
+                <a href="{{ path('app_oeuvre_list') }}" class="section-link">VIEW ALL</a>
+            </div>
+
+            {% if oeuvres is not empty %}
+                <div class="manga-grid">
+                    {% for oeuvre in oeuvres|slice(0, 6) %}
+                        <div class="manga-card">
+                            <!-- Badge nouveau si récent -->
+                            {% if oeuvre.chapitres|length > 0 %}
+                                {% set latestChapter = oeuvre.chapitres|first %}
+                                {% if latestChapter.createdAt|date('Y-m-d') == "now"|date('Y-m-d') %}
+                                    <div class="new-badge">NEW</div>
+                                {% endif %}
+                            {% endif %}
+
+                            <!-- Couverture du manga -->
+                            <div class="manga-cover-container">
+                                {% if oeuvre.couverture %}
+                                    <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" class="manga-cover">
+                                {% else %}
+                                    <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
+                                        📖
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Informations du manga -->
+                            <div class="manga-info">
+                                <h3 class="manga-title">{{ oeuvre.titre }}</h3>
+                                <p class="manga-author">
+                                    {% if oeuvre.auteur %}
+                                        {{ oeuvre.auteur.nom }}
+                                    {% else %}
+                                        Auteur inconnu
+                                    {% endif %}
+                                </p>
+
+                                <div class="manga-meta">
+                                    <span class="manga-type">{{ oeuvre.type|default('MANGA') }}</span>
+                                    <span class="chapters-count">{{ oeuvre.chapitres|length }} ch.</span>
+                                </div>
+
+                                <div class="manga-actions">
+                                    <a href="{{ path('app_oeuvre_show', {'id': oeuvre.id}) }}" class="btn-read">
+                                        Lire Maintenant
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="oeuvre-stats">
-                            <span class="stat-item">
-                                <i class="icon">📖</i>
-                                {{ item.chapitres_count }} chapitre{{ item.chapitres_count > 1 ? 's' : '' }}
-                            </span>
-                            {% if item.latest_chapter_date %}
-                            <span class="stat-item">
-                                <i class="icon">🗓️</i>
-                                {{ item.latest_chapter_date|date('d/m/Y') }}
-                            </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>Bienvenue sur MangaThèque</h3>
+                    <p>Commencez votre aventure manga dès maintenant !</p>
+                    <a href="{{ path('app_register') }}" class="btn-primary">
+                        🚀 Créer un compte
+                    </a>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- Section Latest Updates -->
+        {% if oeuvres|length > 6 %}
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    📅 Latest Updates
+                </h2>
+                <a href="{{ path('app_oeuvre_list') }}" class="section-link">VIEW ALL</a>
+            </div>
+
+            <div class="manga-grid">
+                {% for oeuvre in oeuvres|slice(6, 6) %}
+                    <div class="manga-card">
+                        <!-- Couverture du manga -->
+                        <div class="manga-cover-container">
+                            {% if oeuvre.couverture %}
+                                <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" class="manga-cover">
+                            {% else %}
+                                <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
+                                    📖
+                                </div>
                             {% endif %}
                         </div>
+
+                        <!-- Informations du manga -->
+                        <div class="manga-info">
+                            <h3 class="manga-title">{{ oeuvre.titre }}</h3>
+                            <p class="manga-author">
+                                {% if oeuvre.auteur %}
+                                    {{ oeuvre.auteur.nom }}
+                                {% else %}
+                                    Auteur inconnu
+                                {% endif %}
+                            </p>
+
+                            <div class="manga-meta">
+                                <span class="manga-type">{{ oeuvre.type|default('MANGA') }}</span>
+                                <span class="chapters-count">{{ oeuvre.chapitres|length }} ch.</span>
+                            </div>
+
+                            <div class="manga-actions">
+                                <a href="{{ path('app_oeuvre_show', {'id': oeuvre.id}) }}" class="btn-read">
+                                    Lire Maintenant
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    
-                    {% if oeuvre.resume %}
-                    <p class="oeuvre-description">{{ oeuvre.resume|slice(0, 120) }}{% if oeuvre.resume|length > 120 %}...{% endif %}</p>
-                    {% endif %}
-                    
-                    <div class="oeuvre-actions">
-                        <a href="/oeuvres/{{ oeuvre.id }}" class="btn btn-primary">Voir le manga</a>
-                        {% if item.chapitres_count > 0 %}
-                        <a href="/chapitres/oeuvre/{{ oeuvre.id }}" class="btn btn-secondary">Lire</a>
-                        {% endif %}
-                    </div>
-                </div>
                 {% endfor %}
             </div>
-        </div>
-    </section>
-    {% endif %}
-</main>
+        </section>
+        {% endif %}
+    </main>
 
-<footer class="footer">
-    <div class="container">
-        <p>&copy; 2024 MangaThèque - Votre collection de mangas et manhwas</p>
-    </div>
-</footer>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                📈 ASURA SCANS TRENDING THIS WEEK
+            </h3>
+            <ul class="trending-list">
+                {% set trendingMangas = oeuvres|slice(0, 5) %}
+                {% for oeuvre in trendingMangas %}
+                    <li class="trending-item">
+                        <div class="trending-rank">{{ loop.index }}</div>
+                        <div class="trending-info">
+                            <div class="trending-title">{{ oeuvre.titre }}</div>
+                            <div class="trending-chapters">{{ oeuvre.chapitres|length }} chapters</div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Section des actions rapides -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                ⚡ Actions Rapides
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="{{ path('app_oeuvre_list') }}" class="btn-primary" style="text-align: center; padding: 0.5rem;">
+                    📚 Catalogue
+                </a>
+                {% if not app.user %}
+                    <a href="{{ path('app_register') }}" class="btn-primary" style="text-align: center; background: linear-gradient(135deg, #10b981, #059669); padding: 0.5rem;">
+                        🚀 S'inscrire
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section des statistiques -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">
+                📊 Statistiques
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Mangas</span>
+                    <span style="color: var(--accent-purple); font-weight: 600;">{{ totalOeuvres }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Chapitres</span>
+                    <span style="color: var(--accent-purple); font-weight: 600;">{{ totalChapitres }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+
 {% endblock %} 

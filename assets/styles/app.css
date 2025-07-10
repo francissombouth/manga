@@ -1,3 +1,8 @@
+/* Thème Asura Scans pour MangaThèque */
+@import url('./asura-theme.css');
+
+/* Styles additionnels si nécessaire */
 body {
-    background-color: skyblue;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }

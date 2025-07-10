@@ -21,6 +21,9 @@ class Tag
     #[Groups(['tag:read'])]
     private ?string $nom = null;
 
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $mangadxId = null;
+
     #[ORM\ManyToMany(targetEntity: Oeuvre::class, mappedBy: 'tags')]
     private Collection $oeuvres;
 
@@ -46,6 +49,17 @@ class Tag
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
+        return $this;
+    }
+
+    public function getMangadxId(): ?string
+    {
+        return $this->mangadxId;
+    }
+
+    public function setMangadxId(?string $mangadxId): static
+    {
+        $this->mangadxId = $mangadxId;
         return $this;
     }
 

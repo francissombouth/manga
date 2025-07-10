@@ -5,6 +5,9 @@ namespace App\Controller;
 use App\Service\MangaDxService;
 use App\Service\MangaDxImportService;
 use App\Repository\OeuvreRepository;
+use App\Repository\ChapitreRepository;
+use App\Entity\Chapitre;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +20,9 @@ class MangaDxController extends AbstractController
     public function __construct(
         private MangaDxService $mangaDxService,
         private MangaDxImportService $importService,
-        private OeuvreRepository $oeuvreRepository
+        private OeuvreRepository $oeuvreRepository,
+        private ChapitreRepository $chapitreRepository,
+        private EntityManagerInterface $entityManager
     ) {
     }
 
@@ -176,8 +181,21 @@ class MangaDxController extends AbstractController
 
         $chapter = $this->formatChapterData($chapterData);
         
-        // Récupérer les pages
-        $pages = $this->mangaDxService->getChapterPages($id);
+        // Récupérer les pages depuis MangaDX
+        $pagesUrls = $this->mangaDxService->getChapterPages($id);
+        
+        // Synchroniser avec la base de données locale
+        $this->syncChapterToDatabase($id, $chapterData, $pagesUrls);
+        
+        $pages = [];
+        foreach ($pagesUrls as $index => $url) {
+            // Utiliser le proxy d'images pour éviter les problèmes CORS
+            $proxyUrl = $this->generateUrl('image_proxy', ['url' => $url]);
+            $pages[] = [
+                'url' => $proxyUrl,
+                'index' => $index + 1
+            ];
+        }
         $chapter['pages'] = $pages;
 
         // Récupérer les infos du manga
@@ -228,6 +246,7 @@ class MangaDxController extends AbstractController
 
         return $this->render('mangadx/chapter_show.html.twig', [
             'chapter' => $chapter,
+            'pages' => $pages,
             'manga' => $manga,
             'previousChapter' => $previousChapter,
             'nextChapter' => $nextChapter,
@@ -238,6 +257,27 @@ class MangaDxController extends AbstractController
     public function testImage(): Response
     {
         return $this->render('test_image.html.twig');
+    }
+
+    #[Route('/api/chapter/{mangadxChapterId}/pages', name: 'mangadx_api_chapter_pages', methods: ['GET'])]
+    public function getChapterPages(string $mangadxChapterId): JsonResponse
+    {
+        try {
+            // Récupérer les pages depuis MangaDX
+            $pagesUrls = $this->mangaDxService->getChapterPages($mangadxChapterId);
+            
+            return $this->json([
+                'success' => true,
+                'pages' => $pagesUrls,
+                'count' => count($pagesUrls)
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
+        }
     }
 
     private function formatChapterData(array $chapterData): array
@@ -339,5 +379,94 @@ class MangaDxController extends AbstractController
             'et' => 'Estonien',
             default => 'Inconnu'
         };
+    }
+
+    /**
+     * Synchronise un chapitre MangaDX avec la base de données locale
+     */
+    private function syncChapterToDatabase(string $mangadxChapterId, array $chapterData, array $pagesUrls): void
+    {
+        try {
+            // Chercher si le chapitre existe déjà en base
+            $chapitreLocal = $this->chapitreRepository->findOneByMangadxChapterId($mangadxChapterId);
+            
+            // Récupérer le manga ID depuis les relations
+            $mangaId = null;
+            foreach ($chapterData['relationships'] as $rel) {
+                if ($rel['type'] === 'manga') {
+                    $mangaId = $rel['id'];
+                    break;
+                }
+            }
+            
+            if (!$mangaId) {
+                return; // Pas de manga associé, on ne peut pas créer le chapitre
+            }
+            
+            // Chercher l'œuvre locale correspondante
+            $oeuvreLocale = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangaId]);
+            
+            if (!$oeuvreLocale) {
+                return; // L'œuvre n'existe pas en local, on ne crée pas le chapitre
+            }
+            
+            $attributes = $chapterData['attributes'] ?? [];
+            
+            if ($chapitreLocal) {
+                // Ne synchroniser que si le chapitre local n'a pas déjà des pages 
+                // ou si on a effectivement récupéré des pages de l'API
+                $currentPages = $chapitreLocal->getPages() ?? [];
+                $shouldSync = empty($currentPages) || (count($pagesUrls) > 0 && count($pagesUrls) != count($currentPages));
+                
+                if ($shouldSync && count($pagesUrls) > 0) {
+                    $chapitreLocal->setPages($pagesUrls);
+                    $chapitreLocal->setUpdatedAt(new \DateTimeImmutable());
+                    $this->entityManager->persist($chapitreLocal);
+                    
+                    $this->addFlash('success', sprintf(
+                        'Pages du chapitre "%s" synchronisées (%d page(s))',
+                        $chapitreLocal->getTitre(),
+                        count($pagesUrls)
+                    ));
+                } else if (count($pagesUrls) == 0) {
+                    // Ne pas afficher de message pour 0 pages pour éviter le spam
+                    return;
+                }
+            } else {
+                // Créer un nouveau chapitre seulement si on a des pages
+                if (count($pagesUrls) > 0) {
+                    $nouveauChapitre = new Chapitre();
+                    $nouveauChapitre->setTitre($attributes['title'] ?? 'Chapitre ' . ($attributes['chapter'] ?? '?'));
+                    $nouveauChapitre->setOeuvre($oeuvreLocale);
+                    $nouveauChapitre->setPages($pagesUrls);
+                    $nouveauChapitre->setMangadxChapterId($mangadxChapterId);
+                    
+                    // Déterminer l'ordre automatiquement
+                    $dernierChapitre = $this->chapitreRepository->createQueryBuilder('c')
+                        ->where('c.oeuvre = :oeuvre')
+                        ->setParameter('oeuvre', $oeuvreLocale)
+                        ->orderBy('c.ordre', 'DESC')
+                        ->setMaxResults(1)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+                    
+                    $ordre = $dernierChapitre ? $dernierChapitre->getOrdre() + 1 : 1;
+                    $nouveauChapitre->setOrdre($ordre);
+                    
+                    $this->entityManager->persist($nouveauChapitre);
+                    $this->addFlash('success', sprintf(
+                        'Chapitre "%s" créé avec %d page(s)',
+                        $nouveauChapitre->getTitre(),
+                        count($pagesUrls)
+                    ));
+                }
+            }
+            
+            $this->entityManager->flush();
+            
+        } catch (\Exception $e) {
+            // En cas d'erreur, on continue sans bloquer l'affichage
+            error_log('Erreur synchronisation chapitre: ' . $e->getMessage());
+        }
     }
 } 

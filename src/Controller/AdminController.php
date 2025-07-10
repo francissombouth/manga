@@ -16,6 +16,7 @@ use App\Service\AdminPagesService;
 use App\Form\OeuvreType;
 use App\Form\ChapitreType;
 use App\Form\AuteurType;
+use App\Form\TagType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\MangaDxTagService;
 
 #[Route('/admin')]
 #[IsGranted('ROLE_ADMIN')]
@@ -68,18 +70,12 @@ class AdminController extends AbstractController
         $limit = 10;
         $search = $request->query->get('search', '');
 
-        // AUTO-ALIMENTATION : Si moins de 100 œuvres en BDD, importer depuis l'API
-        $totalOeuvres = $this->oeuvreRepository->count([]);
-        if ($totalOeuvres < 100) {
-            $this->autoImportFromCatalog();
-        }
-
         if ($search) {
             $oeuvres = $this->oeuvreRepository->findByTitre($search);
             $total = count($oeuvres);
             $oeuvres = array_slice($oeuvres, ($page - 1) * $limit, $limit);
         } else {
-            $oeuvres = $this->oeuvreRepository->findBy([], ['updatedAt' => 'DESC'], $limit, ($page - 1) * $limit);
+            $oeuvres = $this->oeuvreRepository->findAllWithRelations($limit, ($page - 1) * $limit);
             $total = $this->oeuvreRepository->count([]);
         }
 
@@ -253,7 +249,7 @@ class AdminController extends AbstractController
                             count($oeuvre->getChapitres())
                         ));
                         
-                        return $this->redirectToRoute('admin_oeuvre_show', ['id' => $oeuvre->getId()]);
+                        return $this->redirectToRoute('admin_oeuvre_edit', ['id' => $oeuvre->getId()]);
                     }
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Erreur lors de l\'import : ' . $e->getMessage());
@@ -261,148 +257,129 @@ class AdminController extends AbstractController
             } else {
                 $this->addFlash('error', 'Veuillez saisir un ID MangaDx valide.');
             }
-        }
-
-        return $this->render('admin/import_mangadx.html.twig');
-    }
-
-    #[Route('/import-popular', name: 'admin_import_popular', methods: ['GET', 'POST'])]
-    public function importPopular(Request $request): Response
-    {
-        if ($request->isMethod('POST')) {
-            $limit = (int) $request->request->get('limit', 20);
-            $rating = $request->request->get('rating', 'safe');
-            $status = $request->request->get('status', '');
-            $dryRun = $request->request->get('dry_run', false);
-
-            try {
-                // Construire la commande
-                $command = 'php bin/console app:import-popular-mangas';
-                $command .= ' --limit=' . $limit;
-                $command .= ' --rating=' . $rating;
-                if ($status) {
-                    $command .= ' --status=' . $status;
-                }
-                if ($dryRun) {
-                    $command .= ' --dry-run';
+            
+            // Redirection après traitement du formulaire pour éviter l'erreur Turbo
+            return $this->redirectToRoute('admin_import_mangadx');
                 }
 
-                // Exécuter la commande en arrière-plan
-                if (PHP_OS_FAMILY === 'Windows') {
-                    $output = shell_exec($command . ' 2>&1');
-                } else {
-                    $output = shell_exec($command . ' 2>&1');
-                }
+        // Fournir les statistiques pour le template
+        $totalOeuvres = $this->oeuvreRepository->count([]);
+        $totalChapitres = $this->chapitreRepository->count([]);
 
-                if ($dryRun) {
-                    $this->addFlash('info', 'Simulation terminée. Consultez les logs pour voir les résultats.');
-                } else {
-                    $this->addFlash('success', 'Import massif lancé ! L\'opération peut prendre plusieurs minutes.');
-                }
-
-                // Optionnel : afficher la sortie de la commande
-                if ($output) {
-                    $this->addFlash('info', 'Sortie de la commande : ' . substr($output, 0, 500) . '...');
-                }
-
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors du lancement de l\'import : ' . $e->getMessage());
-            }
-        }
-
-        return $this->render('admin/import_popular.html.twig');
+        return $this->render('admin/import_mangadx.html.twig', [
+            'totalOeuvres' => $totalOeuvres,
+            'totalChapitres' => $totalChapitres,
+        ]);
     }
 
     #[Route('/import-massive', name: 'admin_import_massive', methods: ['GET', 'POST'])]
     public function importMassive(Request $request): Response
     {
         if ($request->isMethod('POST')) {
-            $limit = (int) $request->request->get('limit', 50);
+            $limit = (int) $request->request->get('limit', 10);
+            $category = $request->request->get('category', 'popular');
             $force = $request->request->get('force', false);
             $dryRun = $request->request->get('dry_run', false);
 
             try {
-                // Construire la commande
-                $command = 'php bin/console app:import-massive-data';
-                $command .= ' --limit=' . $limit;
-                if ($force) {
-                    $command .= ' --force';
-                }
-                if ($dryRun) {
-                    $command .= ' --dry-run';
-                }
-
-                // Exécuter la commande en arrière-plan
-                if (PHP_OS_FAMILY === 'Windows') {
-                    $output = shell_exec($command . ' 2>&1');
+                // Utiliser directement le service d'import au lieu de shell_exec
+                $successes = 0;
+                $errors = 0;
+                
+                if (!$dryRun) {
+                    // Vider la base si l'option force est cochée
+                    if ($force) {
+                        $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
+                        $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
+                        $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
+                        $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
+                        $this->entityManager->flush();
+                        $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
+                    }
+                    
+                    // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
+                    $offset = 0;
+                    $batchSize = $limit * 2; // Récupérer plus d'œuvres pour compenser celles qui existent déjà
+                    
+                    while ($successes < $limit && $offset < 500) { // Limite de sécurité à 500 pour éviter les boucles infinies
+                        $oeuvresData = match($category) {
+                            'popular' => $this->mangaDxService->getPopularManga($batchSize, $offset),
+                            'latest' => $this->mangaDxService->getLatestManga($batchSize, $offset),
+                            'random' => $this->mangaDxService->getRandomManga($batchSize),
+                            default => $this->mangaDxService->getPopularManga($batchSize, $offset)
+                    };
+                        
+                        if (empty($oeuvresData)) {
+                            break; // Plus d'œuvres disponibles
+                        }
+                    
+                    foreach ($oeuvresData as $oeuvreData) {
+                            if ($successes >= $limit) {
+                                break; // On a atteint le nombre voulu
+                            }
+                            
+                        try {
+                            $mangadxId = $oeuvreData['id'];
+                            
+                                // Si force est activé, on importe tout sans vérifier l'existence
+                                if ($force) {
+                                    $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                                    if ($oeuvre) {
+                                        $successes++;
+                                    } else {
+                                        $errors++;
+                                    }
+                                } else {
+                            // Vérifier si l'œuvre existe déjà
+                            $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
+                            if (!$existingOeuvre) {
+                                // Importer l'œuvre complète
+                                $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                                if ($oeuvre) {
+                                    $successes++;
+                                } else {
+                                    $errors++;
+                                        }
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            $errors++;
+                            }
+                        }
+                        
+                        $offset += $batchSize;
+                    }
+                    
+                    if ($successes > 0) {
+                        $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
+                    }
+                    if ($errors > 0) {
+                        $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
+                    }
                 } else {
-                    $output = shell_exec($command . ' 2>&1');
-                }
-
-                if ($dryRun) {
-                    $this->addFlash('info', 'Simulation terminée. Consultez les logs pour voir les résultats.');
-                } else {
-                    $this->addFlash('success', 'Import massif de données lancé ! ' . $limit . ' œuvres ont été générées.');
-                }
-
-                // Optionnel : afficher la sortie de la commande
-                if ($output && strpos($output, 'importées avec succès') !== false) {
-                    $this->addFlash('success', 'Import terminé avec succès !');
+                    // Mode simulation - estimer le nombre d'œuvres qui seraient importées
+                    $currentCount = $this->oeuvreRepository->count([]);
+                    $simulationMessage = "Simulation : {$limit} nouvelles œuvres seraient importées depuis MangaDx ({$category})";
+                    if ($force) {
+                        $simulationMessage .= " - Base de données aurait été vidée avant import (actuellement {$currentCount} œuvres)";
+                    } else {
+                        $simulationMessage .= " (en plus des {$currentCount} œuvres existantes)";
+                    }
+                    $this->addFlash('info', $simulationMessage);
                 }
 
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors du lancement de l\'import : ' . $e->getMessage());
+                $this->addFlash('error', 'Erreur lors de l\'import : ' . $e->getMessage());
             }
+            
+            // Redirection après traitement du formulaire
+            return $this->redirectToRoute('admin_import_massive');
         }
 
         return $this->render('admin/import_massive.html.twig');
     }
 
-    /**
-     * Auto-importe des œuvres depuis le catalogue MangaDx pour alimenter l'administration
-     */
-    private function autoImportFromCatalog(): void
-    {
-        try {
-            // Importer 96 œuvres populaires pour avoir un bon catalogue d'administration
-            $popularMangasData = $this->mangaDxService->getPopularManga(96, 0);
-            
-            $importedCount = 0;
-            foreach ($popularMangasData as $mangaData) {
-                try {
-                    // Vérifier si l'œuvre existe déjà
-                    $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangaData['id']]);
-                    if (!$existingOeuvre) {
-                        // Importer l'œuvre avec tous ses chapitres et détails
-                        $oeuvre = $this->importService->importOrUpdateOeuvre($mangaData['id']);
-                        if ($oeuvre) {
-                            $importedCount++;
-                        }
-                    }
-                    
-                    // Limiter à 50 imports pour éviter les timeouts
-                    if ($importedCount >= 50) {
-                        break;
-                    }
-                } catch (\Exception $e) {
-                    // Si l'import d'une œuvre échoue, on continue avec les autres
-                    continue;
-                }
-            }
-            
-            if ($importedCount > 0) {
-                $this->addFlash('success', "$importedCount nouvelles œuvres ont été automatiquement importées depuis le catalogue MangaDx !");
-            }
-        } catch (\Exception $e) {
-            // Si l'API ne répond pas, on utilise la commande de génération locale
-            try {
-                shell_exec('php bin/console app:import-massive-data --limit=50 > /dev/null 2>&1 &');
-                $this->addFlash('info', "Auto-génération de données lancée (API MangaDx indisponible)");
-            } catch (\Exception $e) {
-                // Si tout échoue, on ignore silencieusement
-            }
-        }
-    }
+
 
     // GESTION DES AUTEURS
     #[Route('/auteurs', name: 'admin_auteurs')]
@@ -484,5 +461,205 @@ class AdminController extends AbstractController
         $this->auteurRepository->remove($auteur, true);
         $this->addFlash('success', 'L\'auteur a été supprimé avec succès !');
         return $this->redirectToRoute('admin_auteurs');
+    }
+
+    // === GESTION DES UTILISATEURS ET RÔLES ===
+
+    #[Route('/users', name: 'admin_users')]
+    public function users(Request $request): Response
+    {
+        $userRepository = $this->entityManager->getRepository(\App\Entity\User::class);
+        
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $search = $request->query->get('search', '');
+
+        if ($search) {
+            $users = $userRepository->createQueryBuilder('u')
+                ->where('u.nom LIKE :search OR u.email LIKE :search')
+                ->setParameter('search', '%' . $search . '%')
+                ->orderBy('u.createdAt', 'DESC')
+                ->getQuery()
+                ->getResult();
+            $total = count($users);
+            $users = array_slice($users, ($page - 1) * $limit, $limit);
+        } else {
+            $users = $userRepository->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+            $total = $userRepository->count([]);
+        }
+
+        $totalPages = ceil($total / $limit);
+
+        return $this->render('admin/users/list.html.twig', [
+            'users' => $users,
+            'current_page' => $page,
+            'total_pages' => $totalPages,
+            'search' => $search,
+            'total' => $total
+        ]);
+    }
+
+    #[Route('/users/{id}/edit-roles', name: 'admin_user_edit_roles')]
+    public function editUserRoles(\App\Entity\User $user, Request $request): Response
+    {
+        if ($request->isMethod('POST')) {
+            $roles = $request->request->all('roles');
+            
+            // Filtrer les rôles valides
+            $validRoles = ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SUPER_ADMIN'];
+            $newRoles = array_intersect($roles, $validRoles);
+            
+            // ROLE_USER est toujours présent
+            if (!in_array('ROLE_USER', $newRoles)) {
+                $newRoles[] = 'ROLE_USER';
+            }
+
+            $user->setRoles($newRoles);
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            
+            $this->entityManager->flush();
+            
+            $this->addFlash('success', sprintf(
+                'Les rôles de %s ont été mis à jour avec succès !',
+                $user->getNom()
+            ));
+            
+            return $this->redirectToRoute('admin_users');
+        }
+
+        return $this->render('admin/users/edit_roles.html.twig', [
+            'user' => $user,
+            'available_roles' => [
+                'ROLE_USER' => 'Utilisateur',
+                'ROLE_ADMIN' => 'Administrateur',
+                'ROLE_SUPER_ADMIN' => 'Super Administrateur'
+            ]
+        ]);
+    }
+
+    #[Route('/users/{id}/toggle-admin', name: 'admin_user_toggle_admin', methods: ['POST'])]
+    public function toggleAdminRole(\App\Entity\User $user): Response
+    {
+        if ($user->isAdmin()) {
+            // Retirer les droits admin (garder seulement ROLE_USER)
+            $user->setRoles(['ROLE_USER']);
+            $message = sprintf('%s n\'est plus administrateur.', $user->getNom());
+        } else {
+            // Donner les droits admin
+            $user->addRole('ROLE_ADMIN');
+            $message = sprintf('%s est maintenant administrateur.', $user->getNom());
+        }
+
+        $user->setUpdatedAt(new \DateTimeImmutable());
+        $this->entityManager->flush();
+        
+        $this->addFlash('success', $message);
+        
+        return $this->redirectToRoute('admin_users');
+    }
+
+    #[Route('/users/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
+    public function deleteUser(\App\Entity\User $user): Response
+    {
+        // Empêcher l'utilisateur de se supprimer lui-même
+        if ($user === $this->getUser()) {
+            $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte !');
+            return $this->redirectToRoute('admin_users');
+        }
+
+        $userName = $user->getNom();
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+        
+        $this->addFlash('success', sprintf('L\'utilisateur %s a été supprimé avec succès.', $userName));
+        
+        return $this->redirectToRoute('admin_users');
+    }
+
+    #[Route('/tags', name: 'admin_tags')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function tags(TagRepository $tagRepository): Response
+    {
+        $tags = $tagRepository->findAll();
+        
+        return $this->render('admin/tags/list.html.twig', [
+            'tags' => $tags,
+            'title' => 'Gestion des Genres'
+        ]);
+    }
+
+    #[Route('/tags/new', name: 'admin_tag_new')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function tagNew(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $tag = new Tag();
+        $form = $this->createForm(TagType::class, $tag);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($tag);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Genre créé avec succès !');
+            return $this->redirectToRoute('admin_tags');
+        }
+
+        return $this->render('admin/tags/form.html.twig', [
+            'form' => $form->createView(),
+            'title' => 'Nouveau Genre',
+            'tag' => $tag
+        ]);
+    }
+
+    #[Route('/tags/{id}/edit', name: 'admin_tag_edit')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function tagEdit(Request $request, Tag $tag, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(TagType::class, $tag);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Genre modifié avec succès !');
+            return $this->redirectToRoute('admin_tags');
+        }
+
+        return $this->render('admin/tags/form.html.twig', [
+            'form' => $form->createView(),
+            'title' => 'Modifier le Genre',
+            'tag' => $tag
+        ]);
+    }
+
+    #[Route('/tags/{id}/delete', name: 'admin_tag_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function tagDelete(Tag $tag, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier si le tag est utilisé par des œuvres
+        if ($tag->getOeuvres()->count() > 0) {
+            $this->addFlash('error', 'Impossible de supprimer ce genre car il est utilisé par ' . $tag->getOeuvres()->count() . ' œuvre(s).');
+            return $this->redirectToRoute('admin_tags');
+        }
+
+        $entityManager->remove($tag);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Genre supprimé avec succès !');
+        return $this->redirectToRoute('admin_tags');
+    }
+
+    #[Route('/sync-tags', name: 'app_sync_tags')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function syncTags(MangaDxTagService $tagService): Response
+    {
+        try {
+            $tags = $tagService->syncAllTags();
+            $this->addFlash('success', count($tags) . ' genres synchronisés avec MangaDex !');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la synchronisation : ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_dashboard');
     }
 } 

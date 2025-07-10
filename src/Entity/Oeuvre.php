@@ -95,6 +95,12 @@ class Oeuvre
     #[ORM\OneToMany(mappedBy: 'oeuvre', targetEntity: Statut::class, orphanRemoval: true)]
     private Collection $statuts;
 
+    #[ORM\OneToMany(mappedBy: 'oeuvre', targetEntity: Commentaire::class, orphanRemoval: true)]
+    private Collection $commentaires;
+
+    #[ORM\OneToMany(mappedBy: 'oeuvre', targetEntity: OeuvreNote::class, orphanRemoval: true)]
+    private Collection $notes;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -107,6 +113,8 @@ class Oeuvre
         $this->tags = new ArrayCollection();
         $this->collections = new ArrayCollection();
         $this->statuts = new ArrayCollection();
+        $this->commentaires = new ArrayCollection();
+        $this->notes = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -282,6 +290,82 @@ class Oeuvre
             }
         }
         return $this;
+    }
+
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+    }
+
+    public function addCommentaire(Commentaire $commentaire): self
+    {
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires[] = $commentaire;
+            $commentaire->setOeuvre($this);
+        }
+        return $this;
+    }
+
+    public function removeCommentaire(Commentaire $commentaire): self
+    {
+        if ($this->commentaires->removeElement($commentaire)) {
+            if ($commentaire->getOeuvre() === $this) {
+                $commentaire->setOeuvre(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(OeuvreNote $note): self
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes[] = $note;
+            $note->setOeuvre($this);
+        }
+        return $this;
+    }
+
+    public function removeNote(OeuvreNote $note): self
+    {
+        if ($this->notes->removeElement($note)) {
+            if ($note->getOeuvre() === $this) {
+                $note->setOeuvre(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getAverageNote(): ?float
+    {
+        if ($this->notes->isEmpty()) {
+            return null;
+        }
+
+        $total = 0;
+        foreach ($this->notes as $note) {
+            $total += $note->getNote();
+        }
+
+        return round($total / $this->notes->count(), 2);
+    }
+
+    public function getUserNote(?User $user): ?OeuvreNote
+    {
+        if (!$user) {
+            return null;
+        }
+
+        foreach ($this->notes as $note) {
+            if ($note->getUser() === $user) {
+                return $note;
+            }
+        }
+        return null;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable

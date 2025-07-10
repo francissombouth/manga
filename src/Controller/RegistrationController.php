@@ -41,15 +41,24 @@ class RegistrationController extends AbstractController
                 )
             );
 
+            // 🚀 Donner automatiquement le rôle ADMIN aux nouveaux comptes
+            $user->setRoles(['ROLE_ADMIN']);
+
             $entityManager->persist($user);
             $entityManager->flush();
 
+            // Ajouter un message de succès
+            $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous êtes maintenant connecté.');
+
             // Connecter l'utilisateur automatiquement après l'inscription
-            return $userAuthenticator->authenticateUser(
+            $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,
                 $request
             );
+
+            // Redirection explicite pour éviter l'erreur Turbo
+            return $this->redirectToRoute('app_oeuvre_list');
         }
 
         return $this->render('registration/register.html.twig', [

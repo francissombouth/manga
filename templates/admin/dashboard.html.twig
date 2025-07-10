@@ -3,7 +3,6 @@
 {% block title %}Administration - MangaThèque{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
 <style>
 .admin-container {
     min-height: 100vh;
@@ -245,7 +244,7 @@
 {% endblock %}
 
 {% block body %}
-{% include 'partials/_navigation.html.twig' %}
+
 
 <div class="admin-container">
     <div class="container">
@@ -279,9 +278,9 @@
                 <div class="stat-label">Auteurs</div>
             </div>
             <div class="stat-card">
-                <span class="stat-icon">🏷️</span>
+                <span class="stat-icon">🎭</span>
                 <div class="stat-number">{{ stats.total_tags }}</div>
-                <div class="stat-label">Tags</div>
+                <div class="stat-label">Genres</div>
             </div>
         </div>
 
@@ -297,20 +296,17 @@
                     <span>➕</span>
                     <span>Ajouter une œuvre MangaDx</span>
                 </a>
-                <a href="{{ path('admin_import_mangadx') }}" class="action-btn" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); border-color: #ff6b6b; color: white;">
+                <a href="{{ path('admin_import_mangadx') }}" class="action-btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-color: #3b82f6; color: white;">
                     <span>📥</span>
-                    <span>Import depuis API</span>
+                    <span>Import depuis MangaDx API</span>
                 </a>
-                <a href="{{ path('admin_import_popular') }}" class="action-btn" style="background: linear-gradient(135deg, #ffa726, #ff8f00); border-color: #ffa726; color: white;">
-                    <span>🚀</span>
-                    <span>Import API</span>
-                </a>
-                <a href="{{ path('admin_import_massive') }}" class="action-btn primary" style="background: linear-gradient(135deg, #66bb6a, #43a047); border-color: #66bb6a;">
+                <a href="{{ path('admin_import_massive') }}" class="action-btn primary" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981;">
                     <span>🏭</span>
-                    <span>Données MASSIVES</span>
+                    <span>Génération de Données Massives</span>
                 </a>
                 <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-                    💡 Vous pouvez ajouter des œuvres de l'API MangaDx et modifier leurs données localement.
+                    💡 <strong>Import MangaDx:</strong> Importez des mangas spécifiques depuis l'API MangaDx avec leur ID.<br>
+                    🏭 <strong>Génération Massive:</strong> Créez un grand nombre d'œuvres fictives pour tester l'application.
                 </div>
             </div>
 
@@ -326,6 +322,40 @@
                 </a>
                 <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
                     💡 Gérez les auteurs de vos mangas et manhwas.
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h3>🎭 Gestion des Genres</h3>
+                <a href="{{ path('admin_tags') }}" class="action-btn">
+                    <span>🎭</span>
+                    <span>Voir tous les genres</span>
+                </a>
+                <a href="{{ path('admin_tag_new') }}" class="action-btn">
+                    <span>➕</span>
+                    <span>Ajouter un genre</span>
+                </a>
+                <a href="{{ path('app_sync_tags') }}" class="action-btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-color: #8b5cf6; color: white;">
+                    <span>🔄</span>
+                    <span>Synchroniser avec MangaDex</span>
+                </a>
+                <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                    💡 Gérez les genres de vos mangas. Synchronisez avec MangaDex pour récupérer les genres officiels.
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h3>🔐 Gestion des Utilisateurs</h3>
+                <a href="{{ path('admin_users') }}" class="action-btn">
+                    <span>👨‍👩‍👧‍👦</span>
+                    <span>Voir tous les utilisateurs</span>
+                </a>
+                <a href="{{ path('app_register') }}" class="action-btn">
+                    <span>➕</span>
+                    <span>Créer un compte admin</span>
+                </a>
+                <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                    💡 Gérez les comptes utilisateurs et leurs rôles d'accès.
                 </div>
             </div>
 

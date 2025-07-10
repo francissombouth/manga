@@ -15,10 +15,17 @@ import {
   Select,
   MenuItem,
   Pagination,
+  useTheme,
+  useMediaQuery,
+  Skeleton,
 } from '@mui/material';
 import axios from 'axios';
 
 function Oeuvres() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  
   const [oeuvres, setOeuvres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,38 +88,69 @@ function Oeuvres() {
 
   const handlePageChange = (event, value) => {
     setPage(value);
+    // Scroll to top on page change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
     return (
-      <Container>
-        <Typography>Chargement...</Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+        <Box sx={{ mb: 4 }}>
+          <Skeleton variant="text" width="200px" height={40} />
+        </Box>
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {[1, 2, 3].map((item) => (
+            <Grid item xs={12} md={4} key={item}>
+              <Skeleton variant="rectangular" height={56} />
+            </Grid>
+          ))}
+        </Grid>
+        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item}>
+              <Skeleton variant="rectangular" height={200} />
+              <Skeleton variant="text" sx={{ mt: 1 }} />
+              <Skeleton variant="text" width="60%" />
+            </Grid>
+          ))}
+        </Grid>
       </Container>
     );
   }
 
   if (error) {
     return (
-      <Container>
-        <Typography color="error">{error}</Typography>
+      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+        <Typography color="error" variant="h6" align="center">
+          {error}
+        </Typography>
       </Container>
     );
   }
 
   return (
-    <Container>
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+      <Box sx={{ mb: { xs: 3, sm: 4 } }}>
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{ 
+            fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+            textAlign: { xs: 'center', sm: 'left' }
+          }}
+        >
           Œuvres
         </Typography>
 
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           <Grid item xs={12} md={4}>
             <TextField
               fullWidth
               label="Rechercher"
               value={search}
               onChange={handleSearchChange}
+              sx={{ backgroundColor: 'background.paper' }}
             />
           </Grid>
           <Grid item xs={12} md={4}>
@@ -123,6 +161,7 @@ function Oeuvres() {
                 value={filters.auteur}
                 onChange={handleFilterChange}
                 label="Auteur"
+                sx={{ backgroundColor: 'background.paper' }}
               >
                 <MenuItem value="">Tous</MenuItem>
                 {auteurs.map((auteur) => (
@@ -141,6 +180,7 @@ function Oeuvres() {
                 value={filters.tag}
                 onChange={handleFilterChange}
                 label="Tag"
+                sx={{ backgroundColor: 'background.paper' }}
               >
                 <MenuItem value="">Tous</MenuItem>
                 {tags.map((tag) => (
@@ -153,7 +193,7 @@ function Oeuvres() {
           </Grid>
         </Grid>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
           {oeuvres.map((oeuvre) => (
             <Grid item key={oeuvre.id} xs={12} sm={6} md={4}>
               <Card
@@ -164,32 +204,61 @@ function Oeuvres() {
                   display: 'flex',
                   flexDirection: 'column',
                   textDecoration: 'none',
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: (theme) => theme.shadows[8],
+                  },
                 }}
               >
                 <CardMedia
                   component="img"
-                  height="200"
+                  sx={{
+                    height: { xs: 250, sm: 200 },
+                    objectFit: 'cover',
+                  }}
                   image={oeuvre.image || '/placeholder.jpg'}
                   alt={oeuvre.titre}
                 />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="h2">
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography 
+                    gutterBottom 
+                    variant="h5" 
+                    component="h2"
+                    sx={{ 
+                      fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                      lineHeight: 1.3,
+                      mb: 1
+                    }}
+                  >
                     {oeuvre.titre}
                   </Typography>
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     gutterBottom
+                    sx={{ mb: 1.5 }}
                   >
                     {oeuvre.auteur.nom} {oeuvre.auteur.prenom}
                   </Typography>
-                  <Box sx={{ mt: 1 }}>
+                  <Box sx={{ 
+                    mt: 'auto',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 0.5
+                  }}>
                     {oeuvre.tags.map((tag) => (
                       <Chip
                         key={tag.id}
                         label={tag.nom}
-                        size="small"
-                        sx={{ mr: 0.5, mb: 0.5 }}
+                        size={isMobile ? "medium" : "small"}
+                        sx={{ 
+                          borderRadius: '16px',
+                          '&:hover': {
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                          }
+                        }}
                       />
                     ))}
                   </Box>
@@ -199,14 +268,29 @@ function Oeuvres() {
           ))}
         </Grid>
 
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-          />
-        </Box>
+        {totalPages > 1 && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              mt: { xs: 3, sm: 4 },
+              mb: { xs: 2, sm: 0 }
+            }}
+          >
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size={isMobile ? "small" : "medium"}
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }
+              }}
+            />
+          </Box>
+        )}
       </Box>
     </Container>
   );

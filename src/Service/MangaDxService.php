@@ -486,4 +486,65 @@ class MangaDxService
             'content_rating' => $attributes['contentRating'] ?? 'safe'
         ];
     }
+
+    /**
+     * Récupère les mangas les plus récents avec pagination
+     */
+    public function getLatestManga(int $limit = 50, int $offset = 0): array
+    {
+        try {
+            // Limiter selon les contraintes de l'API MangaDx (maximum 100)
+            $limit = min($limit, 100);
+            
+            // Vérifier que offset + limit <= 10000
+            if ($offset + $limit > 10000) {
+                $limit = 10000 - $offset;
+                if ($limit <= 0) {
+                    return [];
+                }
+            }
+            
+            $response = $this->httpClient->request('GET', self::BASE_URL . '/manga', [
+                'query' => [
+                    'limit' => $limit,
+                    'offset' => $offset,
+                    'includes' => ['author', 'artist', 'cover_art'],
+                    'hasAvailableChapters' => true,
+                    'order' => ['createdAt' => 'desc'],
+                    'availableTranslatedLanguage' => ['en', 'fr'],
+                    'contentRating' => self::ALLOWED_CONTENT_RATINGS
+                ],
+                'headers' => [
+                    'User-Agent' => 'MangaTheque/1.0 (Educational Project)'
+                ]
+            ]);
+
+            $data = $response->toArray();
+            return $data['data'] ?? [];
+        } catch (\Exception $e) {
+            $this->logger->error('Erreur lors de la récupération des mangas récents: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Récupère des mangas aléatoires (simulation via recherche populaire avec offset aléatoire)
+     */
+    public function getRandomManga(int $limit = 50): array
+    {
+        try {
+            // Limiter selon les contraintes de l'API MangaDx (maximum 100)
+            $limit = min($limit, 100);
+            
+            // Générer un offset aléatoire raisonnable (entre 0 et 5000 pour avoir du contenu)
+            $maxOffset = min(5000, 10000 - $limit);
+            $randomOffset = rand(0, $maxOffset);
+            
+            // Utiliser la recherche populaire avec un offset aléatoire
+            return $this->getPopularManga($limit, $randomOffset);
+        } catch (\Exception $e) {
+            $this->logger->error('Erreur lors de la récupération de mangas aléatoires: ' . $e->getMessage());
+            return [];
+        }
+    }
 } 

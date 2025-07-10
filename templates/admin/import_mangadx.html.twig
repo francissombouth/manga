@@ -1,184 +1,486 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Import MangaDx - Administration{% endblock %}
+{% block title %}Import MangaDx API - Administration{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+.admin-container {
+    min-height: 100vh;
+    background: var(--bg-primary);
+    padding: 2rem 0;
+}
+
+.admin-header {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.admin-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.back-btn {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    color: var(--text-primary);
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    z-index: 3;
+}
+
+.back-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.import-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 20px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.import-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border: 2px solid var(--border-secondary);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-help {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+.form-help code {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.import-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    border: none;
+    padding: 1.2rem 2rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.import-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.info-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-secondary);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.step-item:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.step-number {
+    background: var(--accent-primary);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.step-content h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin: 0 0 0.3rem 0;
+}
+
+.step-content small {
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.stat-item h4 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-item small {
+    opacity: 0.9;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warning-card {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.warning-title {
+    color: #f59e0b;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.warning-list {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.warning-list li {
+    margin-bottom: 0.3rem;
+}
+
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #10b981;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-header {
+        padding: 1.5rem;
+    }
+    
+    .back-btn {
+        position: static;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    
+    .admin-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}
 
 {% block body %}
-{% include 'partials/_navigation.html.twig' %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-download"></i> Import depuis MangaDx API
-                    </h4>
-                    <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour aux œuvres
-                    </a>
-                </div>
-                
-                <div class="card-body">
-                    {% for flash_type, flash_messages in app.flashes %}
-                        {% for flash_message in flash_messages %}
-                            <div class="alert alert-{{ flash_type == 'error' ? 'danger' : flash_type }} alert-dismissible fade show">
-                                {{ flash_message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="admin-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="admin-header">
+            <a href="{{ path('admin_oeuvres') }}" class="back-btn">
+                ← Retour aux œuvres
+            </a>
+            <h1 class="admin-title">
+                📥 Import depuis MangaDx API
+            </h1>
+            <p class="admin-subtitle">Importez des mangas directement depuis l'API MangaDx avec leur ID unique</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'error' ? 'danger' : type }}">
+                    {{ message }}
                             </div>
                         {% endfor %}
                     {% endfor %}
 
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="card border-primary">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0">🚀 Importer une œuvre</h5>
-                                </div>
-                                <div class="card-body">
+        <!-- Contenu principal -->
+        <div class="content-grid">
+            <!-- Formulaire d'import -->
+            <div class="import-card">
+                <h2 class="card-title">
+                    🚀 Importer une œuvre MangaDx
+                </h2>
+                
                                     <form method="post">
-                                        <div class="mb-3">
+                    <div class="form-group">
                                             <label for="mangadx_id" class="form-label">
-                                                <strong>ID MangaDx</strong>
+                            ID MangaDx de l'œuvre
                                             </label>
                                             <input 
                                                 type="text" 
-                                                class="form-control" 
+                            class="form-input" 
                                                 id="mangadx_id" 
                                                 name="mangadx_id" 
-                                                placeholder="exemple: a96676e5-8ae2-425e-b549-7f15dd34a6d8"
+                            placeholder="a96676e5-8ae2-425e-b549-7f15dd34a6d8"
                                                 required
                                             >
-                                            <div class="form-text">
+                        <div class="form-help">
                                                 💡 Trouvez l'ID dans l'URL MangaDx : <code>https://mangadx.org/title/<mark>a96676e5-8ae2-425e-b549-7f15dd34a6d8</mark></code>
                                             </div>
                                         </div>
                                         
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="fas fa-download"></i> Importer l'œuvre
+                    <button type="submit" class="import-btn">
+                        📥 Importer l'œuvre et ses chapitres
                                             </button>
-                                        </div>
                                     </form>
                                 </div>
+
+            <!-- Sidebar d'informations -->
+            <div>
+                <!-- Guide -->
+                <div class="info-card">
+                    <h3 class="info-title">
+                        ℹ️ Comment procéder ?
+                    </h3>
+                    <ol class="step-list">
+                        <li class="step-item">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <h6>Trouvez une œuvre</h6>
+                                <small>Allez sur MangaDx.org et cherchez l'œuvre désirée</small>
+                            </div>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <h6>Copiez l'ID</h6>
+                                <small>L'ID unique se trouve dans l'URL de la page de l'œuvre</small>
+                            </div>
+                                        </li>
+                        <li class="step-item">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <h6>Importez</h6>
+                                <small>L'œuvre, ses métadonnées et chapitres seront automatiquement récupérés</small>
+                            </div>
+                        </li>
+                        <li class="step-item">
+                            <span class="step-number">✓</span>
+                            <div class="step-content">
+                                <h6>Personnalisez</h6>
+                                <small>Vous pouvez ensuite modifier l'œuvre localement selon vos besoins</small>
+                            </div>
+                        </li>
+                    </ol>
                             </div>
                             
-                            <div class="card mt-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0">📋 Commandes utiles</h5>
-                                </div>
-                                <div class="card-body">
-                                    <h6>Import par commande :</h6>
-                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:sync-mangadx &lt;mangadx-id&gt;</code></pre>
-                                    
-                                    <h6 class="mt-3">Synchroniser toutes les œuvres :</h6>
-                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:sync-mangadx --update-all</code></pre>
-                                    
-                                    <h6 class="mt-3">Charger des données d'exemple :</h6>
-                                    <pre class="bg-dark text-light p-3 rounded"><code>php bin/console app:load-sample-data</code></pre>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="card border-info">
-                                <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0">ℹ️ Comment ça marche ?</h5>
-                                </div>
-                                <div class="card-body">
-                                    <ol class="list-unstyled">
-                                        <li class="mb-2">
-                                            <span class="badge bg-primary me-2">1</span>
-                                            <strong>Trouvez une œuvre</strong><br>
-                                            <small class="text-muted">Allez sur MangaDx.org et cherchez l'œuvre désirée</small>
-                                        </li>
-                                        <li class="mb-2">
-                                            <span class="badge bg-primary me-2">2</span>
-                                            <strong>Copiez l'ID</strong><br>
-                                            <small class="text-muted">L'ID est dans l'URL de la page de l'œuvre</small>
-                                        </li>
-                                        <li class="mb-2">
-                                            <span class="badge bg-primary me-2">3</span>
-                                            <strong>Importez</strong><br>
-                                            <small class="text-muted">L'œuvre et ses chapitres seront automatiquement récupérés</small>
-                                        </li>
-                                        <li>
-                                            <span class="badge bg-success me-2">✓</span>
-                                            <strong>Modifiez</strong><br>
-                                            <small class="text-muted">Vous pouvez ensuite personnaliser l'œuvre localement</small>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
-
-                            <div class="card border-warning mt-3">
-                                <div class="card-header bg-warning text-dark">
-                                    <h6 class="mb-0">⚠️ Important</h6>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="small mb-0">
-                                        <li>Les données sont sauvegardées dans votre BDD</li>
-                                        <li>Vous pouvez modifier les œuvres après import</li>
-                                        <li>La synchronisation met à jour les chapitres</li>
-                                        <li>Les modifications locales sont préservées</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            
-                            <div class="card border-success mt-3">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">📊 Statistiques</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row text-center">
-                                        <div class="col-6">
-                                            <h4 class="text-primary">{{ total_oeuvres|default(0) }}</h4>
+                <!-- Statistiques -->
+                <div class="stats-card">
+                    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.3rem;">📊 Statistiques actuelles</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <h4>{{ totalOeuvres|default(0) }}</h4>
                                             <small>Œuvres</small>
                                         </div>
-                                        <div class="col-6">
-                                            <h4 class="text-success">{{ total_chapitres|default(0) }}</h4>
+                        <div class="stat-item">
+                            <h4>{{ totalChapitres|default(0) }}</h4>
                                             <small>Chapitres</small>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+
+                <!-- Avertissements -->
+                <div class="warning-card">
+                    <div class="warning-title">
+                        ⚠️ Points importants
                     </div>
+                    <ul class="warning-list">
+                        <li>Les données sont sauvegardées dans votre base de données</li>
+                        <li>Vous pouvez modifier les œuvres après import</li>
+                                                    <li>Les genres et auteurs sont automatiquement créés</li>
+                        <li>L'import peut prendre quelques minutes pour les gros mangas</li>
+                        <li>Les modifications locales sont préservées lors des mises à jour</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.card {
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-pre code {
-    font-size: 0.9em;
-}
-
-.badge {
-    font-size: 0.8em;
-}
-
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-}
-</style>
-{% endblock %}
-
-{% block javascripts %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %} 

@@ -23,6 +23,7 @@ class MangaDxImportService
         private OeuvreRepository $oeuvreRepository,
         private AuteurRepository $auteurRepository,
         private TagRepository $tagRepository,
+        private MangaDxTagService $tagService,
         private LoggerInterface $logger
     ) {
     }
@@ -289,27 +290,59 @@ class MangaDxImportService
     }
 
     /**
-     * Traite les tags depuis les relations MangaDx
+     * Traite les tags depuis les relations MangaDx (plus direct et efficace)
      */
     private function processTags(Oeuvre $oeuvre, array $relationships): void
     {
-        foreach ($relationships as $relation) {
-            if ($relation['type'] === 'tag' && isset($relation['attributes'])) {
-                $tagName = $relation['attributes']['name']['en'] ?? null;
+        $this->logger->info("🏷️ Début du traitement des genres pour l'œuvre: " . $oeuvre->getTitre());
+        
+        $tagsAssociated = 0;
+        $tagRelations = array_filter($relationships, function($rel) {
+            return $rel['type'] === 'tag' && isset($rel['attributes']) && $rel['attributes']['group'] === 'genre';
+        });
+        
+        $this->logger->info("📊 Relations genres trouvées: " . count($tagRelations));
+        
+        foreach ($tagRelations as $tagRelation) {
+            $mangadxId = $tagRelation['id'];
+            $attributes = $tagRelation['attributes'];
+            $tagName = $attributes['name']['fr'] ?? $attributes['name']['en'] ?? null;
+            
+            if ($tagName) {
+                // Chercher d'abord par mangadxId
+                $tag = $this->tagRepository->findOneBy(['mangadxId' => $mangadxId]);
                 
-                if ($tagName) {
-                    // Chercher si le tag existe déjà
+                // Si pas trouvé, chercher par nom
+                if (!$tag) {
                     $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
                     
                     if (!$tag) {
+                        // Créer le nouveau tag
                         $tag = new Tag();
                         $tag->setNom($tagName);
+                        $tag->setMangadxId($mangadxId);
                         $this->entityManager->persist($tag);
+                        $this->logger->info("✅ Nouveau genre créé: " . $tagName);
+                    } else if (!$tag->getMangadxId()) {
+                        // Mettre à jour l'ID MangaDex si le tag existe mais n'a pas d'ID
+                        $tag->setMangadxId($mangadxId);
+                        $this->logger->info("🔄 ID MangaDex ajouté au genre existant: " . $tagName);
                     }
-                    
+                }
+                
+                // Associer le tag à l'œuvre s'il n'est pas déjà associé
+                if (!$oeuvre->getTags()->contains($tag)) {
                     $oeuvre->addTag($tag);
+                    $tagsAssociated++;
+                    $this->logger->info("🔗 Genre associé à l'œuvre: " . $tagName);
                 }
             }
+        }
+        
+        if ($tagsAssociated === 0) {
+            $this->logger->warning("⚠️ Aucun genre n'a été associé à l'œuvre");
+        } else {
+            $this->logger->info("✅ {$tagsAssociated} genres associés avec succès !");
         }
     }
 
@@ -329,7 +362,7 @@ class MangaDxImportService
                         $fileName = $coverData['data']['attributes']['fileName'];
                         
                         // Construire l'URL de la couverture
-                        $coverUrl = "https://uploads.mangadx.org/covers/{$oeuvre->getMangadxId()}/{$fileName}";
+                        $coverUrl = "https://uploads.mangadex.org/covers/{$oeuvre->getMangadxId()}/{$fileName}";
                         $oeuvre->setCouverture($coverUrl);
                         break;
                     }

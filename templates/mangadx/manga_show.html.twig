@@ -3,7 +3,6 @@
 {% block title %}{{ manga.title }} - MangaThèque{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
 <style>
 /* Styles spécifiques VortexScans pour la page de détail manga */
 .breadcrumb {
@@ -93,7 +92,7 @@
     color: var(--accent-primary);
 }
 
-.manga-tags {
+.manga-genres {
     display: flex;
     flex-wrap: wrap;
     gap: 0.8rem;
@@ -499,7 +498,7 @@ function showNotification(message, type = 'info') {
 {% endblock %} 
 
 {% block body %}
-{% include 'partials/_navigation.html.twig' %}
+
 
 <div class="breadcrumb">
     <div class="container">
@@ -556,7 +555,7 @@ function showNotification(message, type = 'info') {
                 </div>
                 
                 {% if manga.tags %}
-                    <div class="manga-tags">
+                    <div class="manga-genres">
                         {% for tag in manga.tags %}
                             <span class="tag">{{ tag }}</span>
                         {% endfor %}

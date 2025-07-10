@@ -3,7 +3,6 @@
 {% block title %}{{ title }} - Administration{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
 <style>
 .admin-container {
     min-height: 100vh;
@@ -287,7 +286,7 @@
 {% endblock %}
 
 {% block body %}
-{% include 'partials/_navigation.html.twig' %}
+
 
 <div class="admin-container">
     <div class="form-container">
@@ -357,6 +356,36 @@
                 </div>
             {% endif %}
 
+            <!-- Aperçu des pages existantes -->
+            {% if chapitre.pages and chapitre.pages|length > 0 %}
+            <div class="form-group">
+                <label class="form-label">📖 Pages actuelles ({{ chapitre.pages|length }})</label>
+                <div style="background: var(--bg-card); border: 2px solid var(--border-secondary); border-radius: 12px; padding: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                        {% for page in chapitre.pages %}
+                        <div style="background: var(--gradient-card); border: 1px solid var(--border-secondary); border-radius: 10px; padding: 1rem;">
+                            <div style="text-align: center; margin-bottom: 0.5rem;">
+                                <strong style="color: var(--accent-primary);">Page {{ loop.index }}</strong>
+                            </div>
+                            <div style="background: var(--bg-primary); border-radius: 8px; overflow: hidden; margin-bottom: 0.5rem; height: 250px; display: flex; align-items: center; justify-content: center;">
+                                <img src="{{ page }}" alt="Page {{ loop.index }}" style="max-width: 100%; max-height: 100%; object-fit: contain;" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                                     loading="lazy">
+                                <div style="display: none; flex-direction: column; align-items: center; color: var(--text-secondary); padding: 1rem;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🖼️</div>
+                                    <span style="font-size: 0.9rem;">Image non disponible</span>
+                                </div>
+                            </div>
+                            <div style="background: var(--bg-primary); border-radius: 6px; padding: 0.5rem; word-break: break-all; font-size: 0.8rem; color: var(--text-secondary); max-height: 60px; overflow-y: auto;">
+                                {{ page }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="form-group">
                 {{ form_label(form.pages) }}
                 <div class="pages-collection" data-prototype="{{ form_widget(form.pages.vars.prototype)|e('html_attr') }}" data-index="{{ form.pages|length }}">
@@ -368,8 +397,13 @@
                     <div class="pages-list">
                         {% for pageForm in form.pages %}
                             <div class="page-item">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
                                     <strong style="color: var(--text-primary);">Page {{ loop.index }}</strong>
+                                    {% if pageForm.vars.value %}
+                                        <div style="flex: 1; background: var(--bg-primary); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.8rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                            URL actuelle: {{ pageForm.vars.value|slice(0, 60) }}{% if pageForm.vars.value|length > 60 %}...{% endif %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 {{ form_widget(pageForm) }}
                                 {{ form_errors(pageForm) }}
@@ -380,12 +414,25 @@
                         {% endfor %}
                     </div>
                     
-                    <button type="button" class="add-page-btn" onclick="addPage()">
-                        ➕ Ajouter une page
-                    </button>
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
+                        <button type="button" class="add-page-btn" onclick="addPage()">
+                            ➕ Ajouter une page
+                        </button>
+                        
+                        {% if chapitre.mangadxChapterId %}
+                        <button type="button" id="manual-fetch-btn" class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; display: none;">
+                            🔄 Re-synchroniser MangaDX
+                        </button>
+                        <div id="fetch-status" style="color: var(--text-secondary); font-size: 0.9rem;">
+                            🔄 Récupération automatique des pages MangaDX...
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {{ form_errors(form.pages) }}
             </div>
+
+            {{ form_rest(form) }}
 
             <div class="form-actions">
                 <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="btn btn-secondary">
@@ -452,6 +499,152 @@ function updatePageNumbers() {
 }
 
 // Initialiser les numéros de page au chargement
-document.addEventListener('DOMContentLoaded', updatePageNumbers);
+document.addEventListener('DOMContentLoaded', function() {
+    updatePageNumbers();
+    
+    // Récupération automatique des pages MangaDX si disponible
+    const mangadxChapterId = '{{ chapitre.mangadxChapterId }}';
+    if (mangadxChapterId && mangadxChapterId !== '') {
+        // Vérifier si c'est la première fois (chapitre sans pages en BDD)
+        const existingPages = document.querySelectorAll('.page-item').length;
+        const hasExistingPagesInDB = {{ chapitre.pages|length > 0 ? 'true' : 'false' }};
+        
+        if (existingPages === 0 && !hasExistingPagesInDB) {
+            // Premier chargement d'un chapitre MangaDX sans pages en BDD
+            console.log('🤖 Première récupération automatique des pages MangaDX...');
+            fetchMangaDxPages();
+        } else {
+            const status = document.getElementById('fetch-status');
+            const manualBtn = document.getElementById('manual-fetch-btn');
+            
+            if (status) {
+                if (hasExistingPagesInDB) {
+                    status.textContent = `ℹ️ ${existingPages} page(s) - Modifiées manuellement`;
+                } else if (existingPages > 0) {
+                    status.textContent = `ℹ️ ${existingPages} page(s) - En cours d'édition`;
+                }
+            }
+            
+            // Afficher le bouton de re-synchronisation manuelle
+            if (manualBtn) {
+                manualBtn.style.display = 'inline-block';
+                manualBtn.addEventListener('click', function() {
+                    if (confirm('⚠️ Voulez-vous vraiment re-synchroniser avec MangaDX ?\n\nCela remplacera toutes les pages actuelles par celles de MangaDX.')) {
+                        console.log('🔄 Re-synchronisation manuelle demandée');
+                        fetchMangaDxPages();
+                    }
+                });
+            }
+            
+            console.log('ℹ️ Pages existantes détectées, pas de récupération automatique');
+        }
+    }
+});
+
+// Fonction pour récupérer les pages depuis MangaDX
+async function fetchMangaDxPages() {
+    const status = document.getElementById('fetch-status');
+    const mangadxChapterId = '{{ chapitre.mangadxChapterId }}';
+    
+    if (!mangadxChapterId) {
+        console.error('Aucun ID MangaDX trouvé pour ce chapitre');
+        if (status) status.textContent = '❌ Aucun ID MangaDX';
+        return;
+    }
+    
+    // Afficher le statut de chargement
+    if (status) status.textContent = '🔄 Récupération des pages depuis MangaDX...';
+    
+    try {
+        console.log('🔍 Récupération des pages pour le chapitre MangaDX:', mangadxChapterId);
+        
+        const response = await fetch(`/mangadx/api/chapter/${mangadxChapterId}/pages`);
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Pages récupérées avec succès:', data.pages);
+            console.log('📊 Nombre de pages:', data.count);
+            
+            // Log chaque URL individuellement
+            data.pages.forEach((url, index) => {
+                console.log(`📄 Page ${index + 1}:`, url);
+            });
+            
+            if (status) {
+                const isManual = document.getElementById('manual-fetch-btn') && document.getElementById('manual-fetch-btn').style.display !== 'none';
+                status.textContent = `✅ ${data.count} page(s) récupérée(s) ${isManual ? 'manuellement' : 'automatiquement'}`;
+            }
+            
+            // Injecter les URLs dans le formulaire
+            injectPagesIntoForm(data.pages);
+            
+            // Cacher le bouton de re-synchronisation après usage
+            const manualBtn = document.getElementById('manual-fetch-btn');
+            if (manualBtn && manualBtn.style.display !== 'none') {
+                setTimeout(() => {
+                    manualBtn.style.display = 'none';
+                }, 2000);
+            }
+            
+        } else {
+            console.error('❌ Erreur lors de la récupération:', data.error);
+            if (status) status.textContent = `❌ Erreur: ${data.error}`;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur réseau:', error);
+        if (status) status.textContent = '❌ Erreur de connexion';
+    }
+}
+
+// Fonction pour injecter les pages dans le formulaire
+function injectPagesIntoForm(pages) {
+    const collection = document.querySelector('.pages-collection');
+    const list = collection.querySelector('.pages-list');
+    
+    console.log('💉 Injection des pages dans le formulaire...');
+    
+    // Vider les pages existantes
+    list.innerHTML = '';
+    
+    // Ajouter chaque page
+    pages.forEach((pageUrl, index) => {
+        console.log(`➕ Ajout de la page ${index + 1}:`, pageUrl);
+        
+        const prototype = collection.dataset.prototype;
+        const newForm = prototype.replace(/__name__/g, index);
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'page-item';
+        wrapper.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <strong style="color: var(--text-primary);">Page ${index + 1}</strong>
+                <div style="flex: 1; background: var(--bg-primary); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.8rem; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    URL MangaDX: ${pageUrl.slice(0, 60)}${pageUrl.length > 60 ? '...' : ''}
+                </div>
+            </div>
+            ${newForm}
+            <button type="button" class="page-remove-btn" onclick="removePage(this)">
+                🗑️ Supprimer
+            </button>
+        `;
+        
+        list.appendChild(wrapper);
+        
+        // Définir la valeur de l'input
+        const input = wrapper.querySelector('input');
+        if (input) {
+            input.value = pageUrl;
+        }
+    });
+    
+    // Mettre à jour l'index de la collection
+    collection.dataset.index = pages.length;
+    
+    console.log('✅ Injection terminée!', pages.length, 'pages ajoutées');
+    
+    // Mettre à jour les numéros
+    updatePageNumbers();
+}
 </script>
 {% endblock %} 

@@ -2,32 +2,33 @@
 
 namespace App\Command;
 
-use App\Entity\Oeuvre;
-use App\Entity\Auteur;
-use App\Entity\Tag;
-use App\Entity\Chapitre;
+use App\Service\MangaDxService;
+use App\Service\MangaDxImportService;
 use App\Repository\OeuvreRepository;
-use App\Repository\AuteurRepository;
-use App\Repository\TagRepository;
+use App\Repository\ChapitreRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Psr\Log\LoggerInterface;
 
 #[AsCommand(
     name: 'app:import-massive-data',
-    description: 'Importe massivement des données simulées dans la base de données',
+    description: 'Importe massivement des œuvres depuis MangaDx pour alimenter la base de données',
 )]
 class ImportMassiveDataCommand extends Command
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
+        private MangaDxService $mangaDxService,
+        private MangaDxImportService $importService,
         private OeuvreRepository $oeuvreRepository,
-        private AuteurRepository $auteurRepository,
-        private TagRepository $tagRepository
+        private ChapitreRepository $chapitreRepository,
+        private EntityManagerInterface $entityManager,
+        private LoggerInterface $logger
     ) {
         parent::__construct();
     }
@@ -35,305 +36,255 @@ class ImportMassiveDataCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Nombre maximum d\'œuvres à créer', 50)
-            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Supprimer les données existantes avant l\'import')
-            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Simulation sans import réel')
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Nombre d\'œuvres à importer', 50)
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Vider la base avant import (DESTRUCTEUR)')
+            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Mode simulation (aucune sauvegarde)')
+            ->addOption('start-offset', 's', InputOption::VALUE_OPTIONAL, 'Décalage de départ pour la pagination', 0)
+            ->addOption('category', 'c', InputOption::VALUE_OPTIONAL, 'Catégorie à importer (popular, latest, random)', 'popular')
+            ->setHelp('Cette commande importe massivement des œuvres depuis MangaDx pour créer une base de données complète.
+            
+Exemples :
+- Importer 50 mangas populaires : php bin/console app:import-massive-data
+- Importer 100 derniers mangas : php bin/console app:import-massive-data --limit=100 --category=latest
+- Mode simulation : php bin/console app:import-massive-data --dry-run
+- Vider et recréer : php bin/console app:import-massive-data --force --limit=200')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        
         $limit = (int) $input->getOption('limit');
         $force = $input->getOption('force');
         $dryRun = $input->getOption('dry-run');
+        $startOffset = (int) $input->getOption('start-offset');
+        $category = $input->getOption('category');
 
-        $io->title('🚀 Import Massif de Données Simulées');
-
-        if ($dryRun) {
-            $io->note('🔍 Mode simulation activé - Aucun import ne sera effectué');
-        }
-
-        if ($force && !$dryRun) {
-            $io->warning('⚠️ Mode force activé - Les données existantes seront supprimées');
-            if (!$io->confirm('Êtes-vous sûr de vouloir continuer ?', false)) {
-                return Command::SUCCESS;
-            }
-            
-            $this->clearExistingData($io);
-        }
-
-        // Générer les données massives
-        $massiveData = $this->generateMassiveData($limit);
-
-        $io->section(sprintf('📊 Génération de %d œuvres avec leurs données', count($massiveData)));
+        $io->title('🏭 Import Massif depuis MangaDx');
         
-        if ($dryRun) {
-            $this->displayDataPreview($io, $massiveData);
-            return Command::SUCCESS;
+        // Validation des paramètres
+        if ($limit <= 0 || $limit > 500) {
+            $io->error('La limite doit être entre 1 et 500');
+            return Command::FAILURE;
         }
 
-        // Import réel
-        $progressBar = $io->createProgressBar(count($massiveData));
-        $progressBar->start();
-
-        $imported = 0;
-        $errors = 0;
-
-        // Pré-créer tous les tags et auteurs pour éviter les conflits
-        $this->preCreateTagsAndAuthors($massiveData);
-
-        foreach ($massiveData as $data) {
-            $progressBar->setMessage($data['titre']);
-            
-            try {
-                $this->createOeuvreFromData($data);
-                $imported++;
-                
-                // Flush par batch pour optimiser
-                if ($imported % 5 === 0) {
-                    $this->entityManager->flush();
-                    $this->entityManager->clear(); // Nettoyer le cache
-                }
-                
-            } catch (\Exception $e) {
-                $errors++;
-                $io->error(sprintf('Erreur pour "%s": %s', $data['titre'], $e->getMessage()));
-                // Continuer même en cas d'erreur
-                $this->entityManager->clear();
-            }
-
-            $progressBar->advance();
+        if (!in_array($category, ['popular', 'latest', 'random'])) {
+            $io->error('Catégorie invalide. Utilise: popular, latest, ou random');
+            return Command::FAILURE;
         }
 
-        // Flush final
-        $this->entityManager->flush();
-        
-        $progressBar->finish();
-        $io->newLine(2);
-
-        // Résumé
-        $io->section('📊 Résumé de l\'import');
+        // Affichage des paramètres
+        $io->section('📋 Paramètres');
         $io->table(
-            ['Statut', 'Nombre'],
+            ['Paramètre', 'Valeur'],
             [
-                ['✅ Importés', $imported],
-                ['❌ Erreurs', $errors],
-                ['📚 Total traité', count($massiveData)]
+                ['Limite', $limit],
+                ['Catégorie', $category],
+                ['Décalage', $startOffset],
+                ['Mode simulation', $dryRun ? '✅ Oui' : '❌ Non'],
+                ['Vider la base', $force ? '⚠️ Oui' : '❌ Non'],
             ]
         );
 
-        if ($imported > 0) {
-            $io->success(sprintf(
-                '🎉 %d œuvre(s) ont été importées avec succès !',
-                $imported
-            ));
-            
-            $io->text([
-                '💡 Votre base de données est maintenant remplie avec de nombreuses œuvres.',
-                '🔄 Vous pouvez consulter les données dans l\'interface d\'administration.',
-            ]);
+        if ($force && !$dryRun) {
+            $io->warning('ATTENTION : L\'option --force va SUPPRIMER toutes les œuvres existantes !');
+            if (!$io->confirm('Êtes-vous absolument sûr de vouloir continuer ?')) {
+                $io->note('Opération annulée');
+                return Command::SUCCESS;
+            }
         }
 
-        return $errors === 0 ? Command::SUCCESS : Command::FAILURE;
+        // Statistiques avant import
+        $statsAvant = $this->getStats();
+        $io->section('📊 Statistiques avant import');
+        $io->table(
+            ['Type', 'Nombre'],
+            [
+                ['Œuvres', $statsAvant['oeuvres']],
+                ['Chapitres', $statsAvant['chapitres']],
+            ]
+        );
+
+        // Vider la base si demandé
+        if ($force && !$dryRun) {
+            $io->section('🧹 Nettoyage de la base de données');
+            $this->clearDatabase($io);
+        }
+
+        // Import des œuvres
+        $io->section("📥 Import de {$limit} œuvres ({$category})");
+        
+        $progressBar = $io->createProgressBar($limit);
+        $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | ⏱️ %elapsed:6s% | 📚 %message%');
+        $progressBar->setMessage('Initialisation...');
+
+        $successes = 0;
+        $errors = 0;
+        $skipped = 0;
+        $errorMessages = [];
+
+        try {
+            // Récupérer la liste des œuvres depuis MangaDx
+            $oeuvresData = $this->getOeuvresFromMangaDx($category, $limit, $startOffset);
+            
+            if (empty($oeuvresData)) {
+                $io->error('Aucune œuvre trouvée sur MangaDx');
+                return Command::FAILURE;
+            }
+
+            $progressBar->start();
+
+            foreach ($oeuvresData as $index => $oeuvreData) {
+                $mangadxId = $oeuvreData['id'];
+                $title = $oeuvreData['attributes']['title']['en'] ?? $oeuvreData['attributes']['title']['fr'] ?? array_values($oeuvreData['attributes']['title'])[0] ?? 'Titre inconnu';
+                
+                $progressBar->setMessage($title);
+                
+                try {
+                    // Vérifier si l'œuvre existe déjà
+                    $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
+                    
+                    if ($existingOeuvre) {
+                        $skipped++;
+                        $progressBar->advance();
+                        continue;
+                    }
+
+                    if (!$dryRun) {
+                        // Importer l'œuvre complète
+                        $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                        
+                        if ($oeuvre) {
+                            $successes++;
+                            $this->logger->info("Œuvre importée avec succès", [
+                                'title' => $oeuvre->getTitre(),
+                                'mangadx_id' => $mangadxId,
+                                'chapters_count' => count($oeuvre->getChapitres())
+                            ]);
+                        } else {
+                            $errors++;
+                            $errorMessages[] = "Échec import: {$title}";
+                        }
+                    } else {
+                        // Mode simulation
+                        $successes++;
+                        $this->logger->info("Simulation import", [
+                            'title' => $title,
+                            'mangadx_id' => $mangadxId
+                        ]);
+                    }
+
+                } catch (\Exception $e) {
+                    $errors++;
+                    $errorMessages[] = "Erreur {$title}: " . $e->getMessage();
+                    $this->logger->error("Erreur import œuvre", [
+                        'title' => $title,
+                        'mangadx_id' => $mangadxId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
+                $progressBar->advance();
+
+                // Petite pause pour éviter le rate limiting
+                if (($index + 1) % 5 === 0) {
+                    usleep(500000); // 0.5 secondes
+                }
+            }
+
+            $progressBar->finish();
+            $io->newLine(2);
+
+        } catch (\Exception $e) {
+            $progressBar->finish();
+            $io->newLine(2);
+            $io->error('Erreur lors de la récupération des données MangaDx: ' . $e->getMessage());
+            return Command::FAILURE;
+        }
+
+        // Statistiques finales
+        $statsApres = $this->getStats();
+        $io->section('📊 Résultats de l\'import');
+        
+        $io->table(
+            ['Résultat', 'Nombre', 'Détail'],
+            [
+                ['✅ Succès', $successes, $dryRun ? 'Simulés' : 'Importés réellement'],
+                ['⏭️ Ignorés', $skipped, 'Œuvres déjà existantes'],
+                ['❌ Erreurs', $errors, 'Échecs d\'import'],
+                ['📚 Total œuvres', $statsApres['oeuvres'], "Avant: {$statsAvant['oeuvres']}"],
+                ['📖 Total chapitres', $statsApres['chapitres'], "Avant: {$statsAvant['chapitres']}"],
+            ]
+        );
+
+        // Afficher les erreurs s'il y en a
+        if (!empty($errorMessages)) {
+            $io->section('❌ Erreurs rencontrées');
+            foreach (array_slice($errorMessages, 0, 10) as $error) {
+                $io->text("• {$error}");
+            }
+            if (count($errorMessages) > 10) {
+                $io->text('... et ' . (count($errorMessages) - 10) . ' autres erreurs');
+            }
+        }
+
+        // Message final
+        if ($dryRun) {
+            $io->success("Simulation terminée ! {$successes} œuvres auraient été importées.");
+        } else {
+            $io->success("{$successes} œuvres importées avec succès depuis MangaDx !");
+        }
+
+        return Command::SUCCESS;
     }
 
-    private function clearExistingData(SymfonyStyle $io): void
+    private function getOeuvresFromMangaDx(string $category, int $limit, int $offset): array
     {
-        $io->text('🗑️ Suppression des données existantes...');
-        
-        // Supprimer dans l'ordre pour respecter les contraintes
+        try {
+            return match($category) {
+                'popular' => $this->mangaDxService->getPopularManga($limit, $offset),
+                'latest' => $this->mangaDxService->getLatestManga($limit, $offset),
+                'random' => $this->mangaDxService->getRandomManga($limit),
+                default => []
+            };
+        } catch (\Exception $e) {
+            $this->logger->error("Erreur récupération œuvres MangaDx", [
+                'category' => $category,
+                'limit' => $limit,
+                'offset' => $offset,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    private function getStats(): array
+    {
+        return [
+            'oeuvres' => $this->oeuvreRepository->count([]),
+            'chapitres' => $this->chapitreRepository->count([]),
+        ];
+    }
+
+    private function clearDatabase(SymfonyStyle $io): void
+    {
+        $io->text('Suppression des chapitres...');
         $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\CollectionUser')->execute(); 
-        $this->entityManager->createQuery('DELETE FROM App\Entity\Statut')->execute();
+        
+        $io->text('Suppression des œuvres...');
         $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
         
-        $io->text('✅ Données supprimées');
+        $io->text('Réinitialisation des séquences...');
+        try {
+            // PostgreSQL utilise des séquences, pas AUTO_INCREMENT
+            $this->entityManager->getConnection()->executeStatement('ALTER SEQUENCE chapitre_id_seq RESTART WITH 1');
+            $this->entityManager->getConnection()->executeStatement('ALTER SEQUENCE oeuvre_id_seq RESTART WITH 1');
+        } catch (\Exception $e) {
+            // Si les séquences n'existent pas ou si on est sur MySQL, ignorer l'erreur
+            $io->note('Impossible de réinitialiser les séquences: ' . $e->getMessage());
+        }
+        
+        $io->success('Base de données nettoyée !');
     }
-
-    private function generateMassiveData(int $limit): array
-    {
-        $genres = ['Action', 'Aventure', 'Comédie', 'Drame', 'Fantastique', 'Romance', 'Mystère', 'Horreur', 'Sci-Fi', 'Slice of Life', 'Sport', 'Surnaturel', 'Thriller', 'Historique', 'Mecha', 'Musical', 'Psychologique'];
-        $types = ['Manga', 'Manhwa', 'Manhua', 'Webtoon', 'Light Novel'];
-        $statuts = ['En cours', 'Terminé', 'En pause', 'Annulé'];
-        
-        $prefixesTitres = [
-            'The Chronicles of', 'Legend of', 'Tales of', 'Adventures of', 'Story of', 'World of',
-            'Mystery of', 'Secret of', 'Return of', 'Rise of', 'Fall of', 'Quest for',
-            'Battle of', 'War of', 'Peace of', 'Dragon', 'Phoenix', 'Shadow', 'Light',
-            'Dark', 'Golden', 'Silver', 'Crystal', 'Magic', 'Sacred', 'Lost', 'Hidden'
-        ];
-        
-        $suffixesTitres = [
-            'Academy', 'Kingdom', 'Empire', 'Realm', 'Land', 'Island', 'City', 'Tower',
-            'Castle', 'Temple', 'School', 'University', 'Guild', 'Order', 'Clan',
-            'Hunter', 'Warrior', 'Mage', 'Knight', 'Prince', 'Princess', 'King', 'Queen',
-            'Master', 'Hero', 'Legend', 'Saga', 'Chronicles', 'Dreams', 'Nightmares'
-        ];
-
-        $auteurs = [
-            'Akira Toriyama', 'Masashi Kishimoto', 'Eiichiro Oda', 'Tite Kubo', 'Hajime Isayama',
-            'Kentaro Miura', 'Naoki Urasawa', 'Makoto Yukimura', 'Hiromu Arakawa', 'Koyoharu Gotouge',
-            'SIU', 'Chugong', 'TurtleMe', 'Sang-Shik Lim', 'Yongje Park', 'Moonjo', 'Redice Studio',
-            'Studio Ppatta', 'Carnby Kim', 'Ylab', 'Naver Webtoon', 'Kakao Webtoon', 'LINE Webtoon'
-        ];
-
-        $data = [];
-        
-        for ($i = 1; $i <= $limit; $i++) {
-            $titre = $prefixesTitres[array_rand($prefixesTitres)] . ' ' . $suffixesTitres[array_rand($suffixesTitres)];
-            
-            // Éviter les doublons de titre
-            $titre .= ' ' . ($i > 30 ? 'Vol. ' . rand(1, 10) : '');
-            
-            $type = $types[array_rand($types)];
-            $auteur = $auteurs[array_rand($auteurs)];
-            $statut = $statuts[array_rand($statuts)];
-            
-            // Sélectionner 2-5 genres aléatoires
-            $genreCount = rand(2, 5);
-            $selectedGenres = array_rand(array_flip($genres), $genreCount);
-            if (!is_array($selectedGenres)) {
-                $selectedGenres = [$selectedGenres];
-            }
-            
-            // Générer une date de publication aléatoire (entre 2000 et 2024)
-            $year = rand(2000, 2024);
-            $month = rand(1, 12);
-            $day = rand(1, 28);
-            
-            // Générer un résumé aléatoire
-            $resumeTemplates = [
-                "Dans un monde où [CONCEPT], [PROTAGONISTE] doit [OBJECTIF] pour [RAISON]. Avec l'aide de [ALLIES], il/elle affronte [ANTAGONISTE] dans une quête épique.",
-                "[PROTAGONISTE] découvre qu'il/elle possède [POUVOIR]. Maintenant, il/elle doit apprendre à maîtriser ce don pour [OBJECTIF] et sauver [LIEU].",
-                "L'histoire suit [PROTAGONISTE], un(e) [PROFESSION] qui se retrouve impliqué(e) dans [SITUATION]. Entre [CONFLIT] et [ROMANCE], une aventure commence.",
-                "Dans l'académie de [LIEU], [PROTAGONISTE] doit prouver sa valeur. Mais quand [MENACE] apparaît, tout change et une bataille pour [ENJEU] commence."
-            ];
-            
-            $concepts = ['la magie existe', 'les monstres menacent l\'humanité', 'les dimensions se chevauchent', 'la technologie a évolué'];
-            $protagonistes = ['un jeune héros', 'une guerrière déterminée', 'un étudiant ordinaire', 'une princesse rebelle'];
-            $objectifs = ['sauver le monde', 'retrouver sa famille', 'maîtriser ses pouvoirs', 'découvrir la vérité'];
-            $raisons = ['protéger ses amis', 'venger sa famille', 'accomplir son destin', 'sauver son royaume'];
-            
-            $resume = str_replace(
-                ['[CONCEPT]', '[PROTAGONISTE]', '[OBJECTIF]', '[RAISON]'],
-                [
-                    $concepts[array_rand($concepts)],
-                    $protagonistes[array_rand($protagonistes)],
-                    $objectifs[array_rand($objectifs)],
-                    $raisons[array_rand($raisons)]
-                ],
-                $resumeTemplates[array_rand($resumeTemplates)]
-            );
-            
-            $data[] = [
-                'titre' => $titre,
-                'auteur' => $auteur,
-                'type' => $type,
-                'resume' => $resume,
-                'datePublication' => "$year-$month-$day",
-                'couverture' => '/covers/generated/' . strtolower(str_replace(' ', '-', $titre)) . '.jpg',
-                'tags' => $selectedGenres,
-                'statut' => $statut,
-                'chapitres' => rand(5, 200) // Nombre de chapitres aléatoire
-            ];
-        }
-        
-        return $data;
-    }
-
-    private function displayDataPreview(SymfonyStyle $io, array $data): void
-    {
-        $io->section('📋 Aperçu des données qui seraient créées');
-        
-        $preview = array_slice($data, 0, 5);
-        foreach ($preview as $item) {
-            $io->text(sprintf(
-                '• %s (%s) par %s - %d chapitres - Tags: %s',
-                $item['titre'],
-                $item['type'],
-                $item['auteur'],
-                $item['chapitres'],
-                implode(', ', $item['tags'])
-            ));
-        }
-        
-        if (count($data) > 5) {
-            $io->text(sprintf('... et %d autres œuvres', count($data) - 5));
-        }
-    }
-
-    private function preCreateTagsAndAuthors(array $massiveData): void
-    {
-        // Extraire tous les tags uniques
-        $allTags = [];
-        $allAuthors = [];
-        
-        foreach ($massiveData as $data) {
-            $allAuthors[] = $data['auteur'];
-            $allTags = array_merge($allTags, $data['tags']);
-        }
-        
-        $allTags = array_unique($allTags);
-        $allAuthors = array_unique($allAuthors);
-        
-        // Créer tous les auteurs manquants
-        foreach ($allAuthors as $authorName) {
-            $auteur = $this->auteurRepository->findOneBy(['nom' => $authorName]);
-            if (!$auteur) {
-                $auteur = new Auteur();
-                $auteur->setNom($authorName);
-                $this->entityManager->persist($auteur);
-            }
-        }
-        
-        // Créer tous les tags manquants
-        foreach ($allTags as $tagName) {
-            $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
-            if (!$tag) {
-                $tag = new Tag();
-                $tag->setNom($tagName);
-                $this->entityManager->persist($tag);
-            }
-        }
-        
-        $this->entityManager->flush();
-    }
-
-    private function createOeuvreFromData(array $data): void
-    {
-        // Récupérer l'auteur (doit exister maintenant)
-        $auteur = $this->auteurRepository->findOneBy(['nom' => $data['auteur']]);
-
-        // Créer l'œuvre
-        $oeuvre = new Oeuvre();
-        $oeuvre->setTitre($data['titre']);
-        $oeuvre->setType($data['type']);
-        $oeuvre->setResume($data['resume']);
-        $oeuvre->setCouverture($data['couverture']);
-        $oeuvre->setDatePublication(new \DateTime($data['datePublication']));
-        $oeuvre->setAuteur($auteur);
-
-        // Ajouter les tags (doivent exister maintenant)
-        foreach ($data['tags'] as $tagName) {
-            $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
-            if ($tag) {
-                $oeuvre->addTag($tag);
-            }
-        }
-
-        $this->entityManager->persist($oeuvre);
-
-        // Créer quelques chapitres
-        $nombreChapitres = min($data['chapitres'], 20); // Limiter pour éviter de trop charger
-        for ($i = 1; $i <= $nombreChapitres; $i++) {
-            $chapitre = new Chapitre();
-            $chapitre->setTitre("Chapitre $i");
-            $chapitre->setOrdre($i);
-            $chapitre->setOeuvre($oeuvre);
-            $chapitre->setPages([]); // Pages vides
-            
-            $this->entityManager->persist($chapitre);
-        }
-    }
-} 
+}

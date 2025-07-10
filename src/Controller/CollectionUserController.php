@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\CollectionUser;
+use App\Entity\Oeuvre;
 use App\Repository\CollectionUserRepository;
 use App\Repository\OeuvreRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,6 +64,148 @@ class CollectionUserController extends AbstractController
             'limit' => $limit,
             'pages' => ceil($total / $limit)
         ], Response::HTTP_OK, [], ['groups' => 'collection:read']);
+    }
+
+    #[Route('/favoris', name: 'app_favoris')]
+    #[IsGranted('ROLE_USER')]
+    public function favoris(): Response
+    {
+        $user = $this->getUser();
+        $collections = $this->collectionUserRepository->findBy(['user' => $user], ['dateAjout' => 'DESC']);
+
+        $oeuvres = [];
+        $auteursUniques = [];
+        foreach ($collections as $collection) {
+            $oeuvre = $collection->getOeuvre();
+            $oeuvres[] = $oeuvre;
+            
+            // Compter les auteurs uniques
+            if ($oeuvre->getAuteur()) {
+                $auteursUniques[$oeuvre->getAuteur()->getId()] = $oeuvre->getAuteur();
+            }
+        }
+
+        return $this->render('collection/favoris.html.twig', [
+            'oeuvres' => $oeuvres,
+            'collections' => $collections,
+            'auteursUniques' => count($auteursUniques)
+        ]);
+    }
+
+    #[Route('/ajouter/{id}', name: 'app_collection_add', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function ajouterFavoris(Oeuvre $oeuvre): JsonResponse
+    {
+        $user = $this->getUser();
+
+        // Vérifier si l'œuvre est déjà dans les favoris
+        $existingCollection = $this->collectionUserRepository->findOneBy([
+            'user' => $user,
+            'oeuvre' => $oeuvre
+        ]);
+
+        if ($existingCollection) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Cette œuvre est déjà dans vos favoris'
+            ], 400);
+        }
+
+        // Créer une nouvelle collection
+        $collection = new CollectionUser();
+        $collection->setUser($user);
+        $collection->setOeuvre($oeuvre);
+
+        $this->entityManager->persist($collection);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Œuvre ajoutée aux favoris',
+            'isFavorite' => true
+        ]);
+    }
+
+    #[Route('/retirer/{id}', name: 'app_collection_remove', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function retirerFavoris(Oeuvre $oeuvre): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $collection = $this->collectionUserRepository->findOneBy([
+            'user' => $user,
+            'oeuvre' => $oeuvre
+        ]);
+
+        if (!$collection) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Cette œuvre n\'est pas dans vos favoris'
+            ], 400);
+        }
+
+        $this->entityManager->remove($collection);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Œuvre retirée des favoris',
+            'isFavorite' => false
+        ]);
+    }
+
+    #[Route('/toggle/{id}', name: 'app_collection_toggle', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function toggleFavoris(Oeuvre $oeuvre): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $collection = $this->collectionUserRepository->findOneBy([
+            'user' => $user,
+            'oeuvre' => $oeuvre
+        ]);
+
+        if ($collection) {
+            // Retirer des favoris
+            $this->entityManager->remove($collection);
+            $this->entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Œuvre retirée des favoris',
+                'isFavorite' => false
+            ]);
+        } else {
+            // Ajouter aux favoris
+            $collection = new CollectionUser();
+            $collection->setUser($user);
+            $collection->setOeuvre($oeuvre);
+
+            $this->entityManager->persist($collection);
+            $this->entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Œuvre ajoutée aux favoris',
+                'isFavorite' => true
+            ]);
+        }
+    }
+
+    #[Route('/verifier/{id}', name: 'app_collection_check')]
+    #[IsGranted('ROLE_USER')]
+    public function verifierFavoris(Oeuvre $oeuvre): JsonResponse
+    {
+        $user = $this->getUser();
+
+        $collection = $this->collectionUserRepository->findOneBy([
+            'user' => $user,
+            'oeuvre' => $oeuvre
+        ]);
+
+        return new JsonResponse([
+            'isFavorite' => $collection !== null
+        ]);
     }
 
     #[Route('/{id}', name: 'app_collection_show', methods: ['GET'])]

@@ -1,8 +1,47 @@
 
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: manga-backend
+    ports:
+      - "8000:80"
+    depends_on:
+      - database
+    environment:
+      - APP_ENV=prod
+      - APP_SECRET=${APP_SECRET:-your-secret-key}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=16&charset=utf8
+      - MAILER_DSN=smtp://mailer:1025
+    volumes:
+      - ./var/logs:/var/www/html/var/log:rw
+      - ./public/uploads:/var/www/html/public/uploads:rw
+    restart: unless-stopped
+    networks:
+      - manga-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: manga-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    restart: unless-stopped
+    networks:
+      - manga-network
+
 ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    container_name: manga-database
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
       # You should definitely change the password in production
@@ -17,9 +56,18 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - manga-network
 ###< doctrine/doctrine-bundle ###
 
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:
 ###< doctrine/doctrine-bundle ###
+
+networks:
+  manga-network:
+    driver: bridge

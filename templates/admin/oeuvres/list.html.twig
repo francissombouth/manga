@@ -3,7 +3,6 @@
 {% block title %}Gestion des Œuvres - Administration{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('assets/css/vortex-theme.css') }}">
 <style>
 .admin-container {
     min-height: 100vh;
@@ -301,7 +300,7 @@
 {% endblock %}
 
 {% block body %}
-{% include 'partials/_navigation.html.twig' %}
+
 
 <div class="admin-container">
     <div class="container">
@@ -388,8 +387,8 @@
                                     {{ oeuvre.updatedAt|date('d/m/Y H:i') }}
                                 </td>
                                 <td class="actions-cell">
-                                    <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="btn btn-secondary btn-sm">
-                                        📖 Chapitres
+                                    <a href="{{ path('app_oeuvre_show', {id: oeuvre.id}) }}" class="btn btn-secondary btn-sm">
+                                        📖 Voir l'œuvre
                                     </a>
                                     <a href="{{ path('admin_oeuvre_edit', {id: oeuvre.id}) }}" class="btn btn-secondary btn-sm">
                                         ✏️ Éditer
