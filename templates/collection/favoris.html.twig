@@ -6,23 +6,23 @@
 <div class="main-container">
     <!-- Contenu principal -->
     <main>
-        <div class="container mx-auto px-4 py-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">Mes Favoris</h1>
-        <p class="text-gray-300">Retrouvez toutes vos œuvres favorites</p>
+        <div class="container">
+    <div class="collection-header">
+        <h1 class="collection-title">Mes Favoris</h1>
+        <p class="collection-subtitle">Retrouvez toutes vos œuvres favorites</p>
     </div>
 
     {% if oeuvres is empty %}
-        <div class="text-center py-12">
-            <div class="text-gray-400 mb-4">
-                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="empty-state">
+            <div style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                <svg style="width: 4rem; height: 4rem; margin: 0 auto; display: block;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-2">Aucun favori pour le moment</h3>
-            <p class="text-gray-400 mb-6">Commencez à ajouter des œuvres à vos favoris pour les retrouver ici</p>
-            <a href="{{ path('app_oeuvre_list') }}" class="inline-flex items-center px-4 py-2 bg-accent-primary hover:bg-accent-secondary text-white font-medium rounded-lg transition-colors">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h3>Aucun favori pour le moment</h3>
+            <p>Commencez à ajouter des œuvres à vos favoris pour les retrouver ici</p>
+            <a href="{{ path('app_oeuvre_list') }}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Découvrir des œuvres
@@ -192,13 +192,11 @@ function toggleFavorite(oeuvreId, button) {
     .then(data => {
         if (data.success) {
             if (data.isFavorite) {
-                button.classList.add('bg-red-500', 'hover:bg-red-600');
-                button.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                button.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>';
+                button.classList.add('favorited');
+                button.innerHTML = '<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>';
             } else {
-                button.classList.remove('bg-red-500', 'hover:bg-red-600');
-                button.classList.add('bg-gray-600', 'hover:bg-gray-700');
-                button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path></svg>';
+                button.classList.remove('favorited');
+                button.innerHTML = '<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 20 20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path></svg>';
             }
             
             // Afficher une notification
@@ -223,14 +221,14 @@ function removeFromFavorites(oeuvreId, button) {
         .then(data => {
             if (data.success) {
                 // Supprimer la carte de l'interface
-                const card = button.closest('.bg-surface');
+                const card = button.closest('.manga-card');
                 card.style.opacity = '0';
                 card.style.transform = 'scale(0.9)';
                 setTimeout(() => {
                     card.remove();
                     
                     // Vérifier s'il reste des favoris
-                    const remainingCards = document.querySelectorAll('.bg-surface');
+                    const remainingCards = document.querySelectorAll('.manga-card');
                     if (remainingCards.length === 0) {
                         location.reload(); // Recharger pour afficher le message "aucun favori"
                     }
@@ -248,9 +246,17 @@ function removeFromFavorites(oeuvreId, button) {
 
 function showNotification(message, type) {
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-300 ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        z-index: 50;
+        transition: all 0.3s ease;
+        background-color: ${type === 'success' ? '#10b981' : '#ef4444'};
+    `;
     notification.textContent = message;
     
     document.body.appendChild(notification);

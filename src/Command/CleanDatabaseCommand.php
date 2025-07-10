@@ -38,15 +38,32 @@ class CleanDatabaseCommand extends Command
 
             // Supprimer dans l'ordre pour respecter les contraintes de clés étrangères
             $tables = [
-                'App\Entity\Chapitre' => 'chapitres',
+                'App\Entity\OeuvreNote' => 'notes d\'œuvres',
+                'App\Entity\CommentaireLike' => 'likes de commentaires',
+                'App\Entity\Commentaire' => 'commentaires',
                 'App\Entity\CollectionUser' => 'collections utilisateurs',
-                'App\Entity\Oeuvre' => 'œuvres',
-                'App\Entity\Auteur' => 'auteurs',
-                'App\Entity\Tag' => 'tags',
-                'App\Entity\Statut' => 'statuts'
+                'App\Entity\Statut' => 'statuts',
+                'App\Entity\Chapitre' => 'chapitres'
             ];
 
             foreach ($tables as $entity => $label) {
+                $count = $this->entityManager->createQuery("DELETE FROM $entity")->execute();
+                $io->text("✅ {$count} {$label} supprimés");
+            }
+
+            // Supprimer les relations Many-to-Many (tables de liaison)
+            $io->text('Suppression des relations oeuvre-tag...');
+            $count = $this->entityManager->getConnection()->executeStatement('DELETE FROM oeuvre_tag');
+            $io->text("✅ {$count} relations oeuvre-tag supprimées");
+
+            // Supprimer les entités principales
+            $mainTables = [
+                'App\Entity\Oeuvre' => 'œuvres',
+                'App\Entity\Auteur' => 'auteurs',
+                'App\Entity\Tag' => 'tags'
+            ];
+
+            foreach ($mainTables as $entity => $label) {
                 $count = $this->entityManager->createQuery("DELETE FROM $entity")->execute();
                 $io->text("✅ {$count} {$label} supprimés");
             }

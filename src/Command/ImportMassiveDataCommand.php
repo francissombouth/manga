@@ -269,8 +269,24 @@ Exemples :
 
     private function clearDatabase(SymfonyStyle $io): void
     {
+        // Supprimer dans l'ordre correct pour respecter les contraintes de clé étrangère
+        
+        $io->text('Suppression des notes et commentaires...');
+        $this->entityManager->createQuery('DELETE FROM App\Entity\OeuvreNote')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\CommentaireLike')->execute();
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Commentaire')->execute();
+        
+        $io->text('Suppression des collections utilisateurs...');
+        $this->entityManager->createQuery('DELETE FROM App\Entity\CollectionUser')->execute();
+        
+        $io->text('Suppression des statuts...');
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Statut')->execute();
+        
         $io->text('Suppression des chapitres...');
         $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
+        
+        $io->text('Suppression des relations oeuvre-tag...');
+        $this->entityManager->getConnection()->executeStatement('DELETE FROM oeuvre_tag');
         
         $io->text('Suppression des œuvres...');
         $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
@@ -278,11 +294,26 @@ Exemples :
         $io->text('Réinitialisation des séquences...');
         try {
             // PostgreSQL utilise des séquences, pas AUTO_INCREMENT
-            $this->entityManager->getConnection()->executeStatement('ALTER SEQUENCE chapitre_id_seq RESTART WITH 1');
-            $this->entityManager->getConnection()->executeStatement('ALTER SEQUENCE oeuvre_id_seq RESTART WITH 1');
+            $sequencesToReset = [
+                'oeuvre_note_id_seq',
+                'commentaire_like_id_seq', 
+                'commentaire_id_seq',
+                'collection_user_id_seq',
+                'statut_id_seq',
+                'chapitre_id_seq',
+                'oeuvre_id_seq'
+            ];
+            
+            foreach ($sequencesToReset as $sequence) {
+                try {
+                    $this->entityManager->getConnection()->executeStatement("ALTER SEQUENCE {$sequence} RESTART WITH 1");
+                } catch (\Exception $e) {
+                    // Ignorer si la séquence n'existe pas
+                }
+            }
         } catch (\Exception $e) {
             // Si les séquences n'existent pas ou si on est sur MySQL, ignorer l'erreur
-            $io->note('Impossible de réinitialiser les séquences: ' . $e->getMessage());
+            $io->note('Impossible de réinitialiser certaines séquences: ' . $e->getMessage());
         }
         
         $io->success('Base de données nettoyée !');

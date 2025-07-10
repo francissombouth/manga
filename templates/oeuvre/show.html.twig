@@ -262,26 +262,57 @@
                         </div>
                         {% endif %}
 
-                        <!-- Section de notation placée après le résumé -->
+                        <!-- Section de notation épurée -->
                         {% if app.user %}
-                        <div id="rating-section-main" class="rating-section">
-                            <h3 style="color: var(--text-primary); margin-bottom: 1.5rem; font-size: 1.5rem;">⭐ Noter cette œuvre</h3>
-                            <div style="display: flex; align-items: center; gap: min(1rem, 2vw); margin-bottom: 1rem; flex-wrap: wrap; max-width: 100%;">
-                                <div id="star-rating-main" class="star-rating" style="max-width: 100%;">
-                                    <span class="star star-main" data-rating="1">⭐</span>
-                                    <span class="star star-main" data-rating="2">⭐</span>
-                                    <span class="star star-main" data-rating="3">⭐</span>
-                                    <span class="star star-main" data-rating="4">⭐</span>
-                                    <span class="star star-main" data-rating="5">⭐</span>
-                                </div>
-                                <span id="current-rating-text-main" style="color: var(--text-secondary); font-weight: 600; word-wrap: break-word; max-width: 100%;"></span>
+                        <div id="rating-section-main" class="rating-section-modern">
+                            <div class="rating-header">
+                                <h3>Noter cette œuvre</h3>
+                                <span id="current-rating-text-main" class="rating-display"></span>
                             </div>
-                            <div class="rating-actions">
-                                <button id="submit-rating-main" class="btn-rating submit" style="display: none;">
-                                    Confirmer la note
+                            
+                            <div class="rating-container">
+                                <div id="star-rating-main" class="star-rating-modern">
+                                    <div class="star-modern star-main" data-rating="1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                        </svg>
+                                    </div>
+                                    <div class="star-modern star-main" data-rating="2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                        </svg>
+                                    </div>
+                                    <div class="star-modern star-main" data-rating="3">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                        </svg>
+                                    </div>
+                                    <div class="star-modern star-main" data-rating="4">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                        </svg>
+                                    </div>
+                                    <div class="star-modern star-main" data-rating="5">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-actions-modern">
+                                <button id="submit-rating-main" class="btn-rating-modern submit" style="display: none;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="20,6 9,17 4,12"></polyline>
+                                    </svg>
+                                    Confirmer
                                 </button>
-                                <button id="remove-rating-main" class="btn-rating remove" style="display: none;">
-                                    Supprimer ma note
+                                <button id="remove-rating-main" class="btn-rating-modern remove" style="display: none;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3,6 5,6 21,6"></polyline>
+                                        <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                                    </svg>
+                                    Supprimer
                                 </button>
                             </div>
                         </div>
@@ -761,11 +792,11 @@
         }
 
         function initRatingStars() {
-            console.log('⭐ Initialisation des étoiles de notation');
+            console.log('⭐ Initialisation des étoiles de notation modernes');
             
-            // Initialiser les étoiles principales
-            const starMainElements = document.querySelectorAll('.star-main');
-            const starElements = document.querySelectorAll('.star');
+            // Initialiser les étoiles modernes
+            const starMainElements = document.querySelectorAll('.star-modern.star-main');
+            const starElements = document.querySelectorAll('.star-modern');
             
             // Fonction pour gérer les étoiles
             function initStarRating(stars, ratingText, submitBtn, removeBtn, isMain = false) {
@@ -795,10 +826,10 @@
                             ratingText.textContent = `${rating}/5`;
                         }
                         if (submitBtn) {
-                            submitBtn.style.display = 'inline-block';
+                            submitBtn.style.display = 'flex';
                         }
                         if (removeBtn) {
-                            removeBtn.style.display = 'inline-block';
+                            removeBtn.style.display = 'flex';
                         }
                     });
                 });
@@ -840,23 +871,28 @@
         
         function highlightStars(stars, rating) {
             stars.forEach((star, index) => {
+                const svg = star.querySelector('svg');
                 if (index < rating) {
-                    // Étoiles sélectionnées : jaune doré avec effet brillant
-                    star.style.color = '#fbbf24';
-                    star.style.textShadow = '0 0 8px rgba(251, 191, 36, 0.6)';
-                    star.style.transform = 'scale(1.1)';
-                    star.style.transition = 'all 0.2s ease';
-                    star.classList.add('selected');
+                    // Étoiles sélectionnées
+                    star.classList.add('active');
+                    if (svg) {
+                        svg.style.color = '#ffc107';
+                        svg.style.fill = '#ffc107';
+                        svg.style.strokeWidth = '0';
+                    }
                 } else {
-                    // Étoiles non sélectionnées : gris clair
-                    star.style.color = '#d1d5db';
-                    star.style.textShadow = 'none';
-                    star.style.transform = 'scale(1)';
-                    star.style.transition = 'all 0.2s ease';
-                    star.classList.remove('selected');
+                    // Étoiles non sélectionnées
+                    star.classList.remove('active');
+                    if (svg) {
+                        svg.style.color = '#64748b';
+                        svg.style.fill = 'none';
+                        svg.style.strokeWidth = '1.5';
+                    }
                 }
             });
         }
+
+
         
         async function loadExistingRating() {
             try {
@@ -883,7 +919,7 @@
                 console.log('📊 Données reçues:', data);
                 
                 if (data.rating) {
-                    const stars = document.querySelectorAll('.star, .star-main');
+                    const stars = document.querySelectorAll('.star-modern');
                     const ratingTexts = document.querySelectorAll('#current-rating-text, #current-rating-text-main');
                     const submitBtns = document.querySelectorAll('#submit-rating, #submit-rating-main');
                     const removeBtns = document.querySelectorAll('#remove-rating, #remove-rating-main');
@@ -893,10 +929,10 @@
                         if (text) text.textContent = `${data.rating}/5`;
                     });
                     submitBtns.forEach(btn => {
-                        if (btn) btn.style.display = 'inline-block';
+                        if (btn) btn.style.display = 'flex';
                     });
                     removeBtns.forEach(btn => {
-                        if (btn) btn.style.display = 'inline-block';
+                        if (btn) btn.style.display = 'flex';
                     });
                     
                     console.log('✅ Note existante chargée:', data.rating);
@@ -939,6 +975,18 @@
                 
                 if (response.ok) {
                     showNotification('Note enregistrée avec succès !', 'success');
+                    
+                    // Cacher les boutons pour indiquer que l'action a été prise en compte
+                    const submitBtns = document.querySelectorAll('#submit-rating, #submit-rating-main');
+                    const removeBtns = document.querySelectorAll('#remove-rating, #remove-rating-main');
+                    
+                    submitBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'none';
+                    });
+                    removeBtns.forEach(btn => {
+                        if (btn) btn.style.display = 'none';
+                    });
+                    
                     // Mettre à jour l'affichage de la moyenne
                     if (data.average !== undefined) {
                         updateAverageDisplay(data.average);
