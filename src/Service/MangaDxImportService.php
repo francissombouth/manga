@@ -423,11 +423,10 @@ class MangaDxImportService
             }
 
             // Créer les chapitres en base
-            $ordre = 1;
             foreach ($chaptersToCreate as $chapterInfo) {
                 $chapitre = new Chapitre();
                 $chapitre->setTitre($chapterInfo['title']);
-                $chapitre->setOrdre($ordre++);
+                $chapitre->setOrdre((int) $chapterInfo['chapter']); // Utiliser le vrai numéro de chapitre
                 $chapitre->setOeuvre($oeuvre);
                 $chapitre->setResume("Chapitre importé depuis MangaDx");
                 $chapitre->setMangadxChapterId($chapterInfo['id']);
@@ -689,5 +688,99 @@ class MangaDxImportService
         
         $this->logger->error("Échec de récupération des pages après {$maxRetries} tentatives pour le chapitre {$chapterId}");
         return [];
+    }
+
+    /**
+     * Corrige les numéros de chapitres existants pour utiliser les vrais numéros de MangaDx
+     * Cette méthode doit être appelée une fois pour corriger les anciens imports
+     */
+    public function correctExistingChapterNumbers(): void
+    {
+        $this->logger->info("Début de la correction des numéros de chapitres existants");
+        
+        // Récupérer toutes les œuvres qui ont un mangadxId
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->select('o')
+           ->from('App\Entity\Oeuvre', 'o')
+           ->where('o.mangadxId IS NOT NULL')
+           ->orderBy('o.id', 'ASC');
+        $oeuvres = $qb->getQuery()->getResult();
+        
+        $this->logger->info("Nombre d'œuvres à traiter: " . count($oeuvres));
+        
+        foreach ($oeuvres as $oeuvre) {
+            try {
+                $this->correctChapterNumbersForOeuvre($oeuvre);
+            } catch (\Exception $e) {
+                $this->logger->error("Erreur lors de la correction des chapitres pour l'œuvre {$oeuvre->getId()}: " . $e->getMessage());
+            }
+        }
+        
+        $this->entityManager->flush();
+        $this->logger->info("Correction des numéros de chapitres terminée");
+    }
+    
+    /**
+     * Corrige les numéros de chapitres pour une œuvre spécifique
+     */
+    private function correctChapterNumbersForOeuvre(Oeuvre $oeuvre): void
+    {
+        $mangadxId = $oeuvre->getMangadxId();
+        if (!$mangadxId) {
+            return;
+        }
+        
+        $this->logger->info("Correction des chapitres pour l'œuvre: {$oeuvre->getTitre()} (ID: {$oeuvre->getId()})");
+        
+        try {
+            // Récupérer les chapitres depuis MangaDx
+            $response = $this->httpClient->request('GET', self::MANGADX_API_BASE . '/manga/' . $mangadxId . '/feed', [
+                'query' => [
+                    'translatedLanguage' => ['fr', 'en'],
+                    'order' => ['chapter' => 'asc'],
+                    'limit' => 100
+                ]
+            ]);
+
+            if ($response->getStatusCode() !== 200) {
+                $this->logger->warning("Impossible de récupérer les chapitres pour l'œuvre {$oeuvre->getId()}");
+                return;
+            }
+
+            $data = $response->toArray();
+            $chaptersData = $data['data'] ?? [];
+            
+            // Créer un mapping des chapitres MangaDx par leur ID
+            $mangadxChapters = [];
+            foreach ($chaptersData as $chapterData) {
+                $attributes = $chapterData['attributes'];
+                $chapterNumber = (float) ($attributes['chapter'] ?? 0);
+                if ($chapterNumber > 0) {
+                    $mangadxChapters[$chapterData['id']] = $chapterNumber;
+                }
+            }
+            
+            // Corriger les chapitres existants
+            $corrected = 0;
+            foreach ($oeuvre->getChapitres() as $chapitre) {
+                $mangadxChapterId = $chapitre->getMangadxChapterId();
+                if ($mangadxChapterId && isset($mangadxChapters[$mangadxChapterId])) {
+                    $correctNumber = (int) $mangadxChapters[$mangadxChapterId];
+                    if ($chapitre->getOrdre() !== $correctNumber) {
+                        $oldNumber = $chapitre->getOrdre();
+                        $chapitre->setOrdre($correctNumber);
+                        $corrected++;
+                        $this->logger->info("Chapitre {$chapitre->getId()}: {$oldNumber} → {$correctNumber}");
+                    }
+                }
+            }
+            
+            if ($corrected > 0) {
+                $this->logger->info("{$corrected} chapitres corrigés pour l'œuvre {$oeuvre->getTitre()}");
+            }
+            
+        } catch (\Exception $e) {
+            $this->logger->error("Erreur lors de la correction des chapitres pour l'œuvre {$oeuvre->getId()}: " . $e->getMessage());
+        }
     }
 } 

@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Oeuvre;
 use App\Repository\OeuvreRepository;
+use App\Repository\OeuvreNoteRepository;
 use App\Repository\TagRepository;
+use App\Repository\CollectionUserRepository;
 use App\Service\MangaDxService;
 use App\Service\MangaDxImportService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,12 +26,14 @@ class OeuvreController extends AbstractController
 {
     public function __construct(
         private OeuvreRepository $oeuvreRepository,
+        private OeuvreNoteRepository $noteRepository,
         private TagRepository $tagRepository,
         private EntityManagerInterface $entityManager,
         private SerializerInterface $serializer,
         private ValidatorInterface $validator,
         private MangaDxService $mangaDxService,
-        private MangaDxImportService $importService
+        private MangaDxImportService $importService,
+        private CollectionUserRepository $collectionUserRepository
     ) {
     }
 
@@ -155,13 +159,35 @@ class OeuvreController extends AbstractController
         $commentaires = $oeuvre->getCommentaires()->toArray();
         usort($commentaires, fn($a, $b) => $b->getCreatedAt() <=> $a->getCreatedAt());
         
-        // Note: La moyenne est maintenant calculée côté API avec les nouvelles entités OeuvreNote
+        // Récupérer les chapitres triés par ordre
+        $chapitresSorted = $oeuvre->getChapitresSorted();
+        
+        // Récupérer les données de notation
+        $user = $this->getUser();
+        $userNote = null;
+        $isFavorite = false;
+        
+        if ($user) {
+            $userNoteEntity = $this->noteRepository->findByUserAndOeuvre($user, $oeuvre);
+            $userNote = $userNoteEntity ? $userNoteEntity->getNote() : null;
+            
+            // Vérifier si l'œuvre est en favoris
+            $favoriteCollection = $this->collectionUserRepository->findOneBy([
+                'user' => $user,
+                'oeuvre' => $oeuvre
+            ]);
+            $isFavorite = $favoriteCollection !== null;
+        }
+        
         $onglet = $request->query->get('onglet', 'chapitres');
 
         return $this->render('oeuvre/show.html.twig', [
             'oeuvre' => $oeuvre,
+            'chapitres' => $chapitresSorted,
             'commentaires' => $commentaires,
             'onglet' => $onglet,
+            'userNote' => $userNote,
+            'isFavorite' => $isFavorite,
         ]);
     }
 

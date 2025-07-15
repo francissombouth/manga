@@ -3,369 +3,18 @@
 {% block title %}Import MangaDx API - Administration{% endblock %}
 
 {% block stylesheets %}
-<style>
-.admin-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 2rem 0;
-}
-
-.admin-header {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.admin-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.admin-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.admin-subtitle {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.back-btn {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    color: var(--text-primary);
-    padding: 0.8rem 1.5rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    z-index: 3;
-}
-
-.back-btn:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: white;
-    text-decoration: none;
-    transform: translateY(-2px);
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.import-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.import-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.card-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    color: var(--text-primary);
-    font-weight: 600;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
-}
-
-.form-input {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-input::placeholder {
-    color: var(--text-muted);
-}
-
-.form-help {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    line-height: 1.5;
-}
-
-.form-help code {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent-primary);
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-    font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.import-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-    border: none;
-    padding: 1.2rem 2rem;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-}
-
-.import-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-}
-
-.info-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.info-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.step-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.step-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--bg-card);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-.step-item:hover {
-    background: rgba(59, 130, 246, 0.05);
-}
-
-.step-number {
-    background: var(--accent-primary);
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-}
-
-.step-content h6 {
-    color: var(--text-primary);
-    font-weight: 600;
-    margin: 0 0 0.3rem 0;
-}
-
-.step-content small {
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-.stats-card {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    border-radius: 16px;
-    padding: 2rem;
-    text-align: center;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.stat-item h4 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem 0;
-}
-
-.stat-item small {
-    opacity: 0.9;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.warning-card {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
-    border: 1px solid rgba(251, 191, 36, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.warning-title {
-    color: #f59e0b;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.warning-list {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin: 0;
-    padding-left: 1.2rem;
-}
-
-.warning-list li {
-    margin-bottom: 0.3rem;
-}
-
-.alert {
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    border: 1px solid;
-}
-
-.alert-success {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: rgba(16, 185, 129, 0.3);
-    color: #10b981;
-}
-
-.alert-danger {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-}
-
-.alert-info {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
-    color: #3b82f6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-@media (max-width: 768px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .admin-header {
-        padding: 1.5rem;
-    }
-    
-    .back-btn {
-        position: static;
-        margin-bottom: 1rem;
-        display: inline-block;
-    }
-    
-    .admin-title {
-        font-size: 2rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="admin-container">
     <div class="container">
         <!-- Header -->
-        <div class="admin-header">
+        <div class="admin-header mangadx">
             <a href="{{ path('admin_oeuvres') }}" class="back-btn">
                 ← Retour aux œuvres
             </a>
-            <h1 class="admin-title">
+            <h1 class="admin-title no-gradient">
                 📥 Import depuis MangaDx API
             </h1>
             <p class="admin-subtitle">Importez des mangas directement depuis l'API MangaDx avec leur ID unique</p>
@@ -374,109 +23,110 @@
         <!-- Flash Messages -->
         {% for type, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ type == 'error' ? 'danger' : type }}">
+                <div class="status-message {{ type == 'error' ? 'error' : type }}">
+                    {% if type == 'success' %}✅{% elseif type == 'error' %}❌{% elseif type == 'warning' %}⚠️{% else %}ℹ️{% endif %}
                     {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
         <!-- Contenu principal -->
-        <div class="content-grid">
+        <div class="admin-actions">
             <!-- Formulaire d'import -->
-            <div class="import-card">
-                <h2 class="card-title">
+            <div class="import-form">
+                <h3>
                     🚀 Importer une œuvre MangaDx
-                </h2>
+                </h3>
                 
-                                    <form method="post">
+                <form method="post">
                     <div class="form-group">
-                                            <label for="mangadx_id" class="form-label">
+                        <label for="mangadx_id">
                             ID MangaDx de l'œuvre
-                                            </label>
-                                            <input 
-                                                type="text" 
-                            class="form-input" 
-                                                id="mangadx_id" 
-                                                name="mangadx_id" 
+                        </label>
+                        <input 
+                            type="text" 
+                            id="mangadx_id" 
+                            name="mangadx_id" 
                             placeholder="a96676e5-8ae2-425e-b549-7f15dd34a6d8"
-                                                required
-                                            >
-                        <div class="form-help">
-                                                💡 Trouvez l'ID dans l'URL MangaDx : <code>https://mangadx.org/title/<mark>a96676e5-8ae2-425e-b549-7f15dd34a6d8</mark></code>
-                                            </div>
-                                        </div>
-                                        
-                    <button type="submit" class="import-btn">
-                        📥 Importer l'œuvre et ses chapitres
-                                            </button>
-                                    </form>
-                                </div>
+                            required
+                        >
+                        <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                            💡 Trouvez l'ID dans l'URL MangaDx : <code>https://mangadx.org/title/<mark>a96676e5-8ae2-425e-b549-7f15dd34a6d8</mark></code>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit">
+                            📥 Importer l'œuvre et ses chapitres
+                        </button>
+                    </div>
+                </form>
+            </div>
 
             <!-- Sidebar d'informations -->
             <div>
                 <!-- Guide -->
-                <div class="info-card">
-                    <h3 class="info-title">
+                <div class="action-card">
+                    <h3>
                         ℹ️ Comment procéder ?
                     </h3>
-                    <ol class="step-list">
-                        <li class="step-item">
-                            <span class="step-number">1</span>
-                            <div class="step-content">
-                                <h6>Trouvez une œuvre</h6>
-                                <small>Allez sur MangaDx.org et cherchez l'œuvre désirée</small>
+                    <ol style="list-style: none; padding: 0; margin: 0;">
+                        <li style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-card); border-radius: 10px;">
+                            <span style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">1</span>
+                            <div>
+                                <h6 style="margin: 0; color: var(--text-primary); font-weight: 600;">Trouvez une œuvre</h6>
+                                <small style="color: var(--text-secondary); line-height: 1.4;">Allez sur MangaDx.org et cherchez l'œuvre désirée</small>
                             </div>
                         </li>
-                        <li class="step-item">
-                            <span class="step-number">2</span>
-                            <div class="step-content">
-                                <h6>Copiez l'ID</h6>
-                                <small>L'ID unique se trouve dans l'URL de la page de l'œuvre</small>
-                            </div>
-                                        </li>
-                        <li class="step-item">
-                            <span class="step-number">3</span>
-                            <div class="step-content">
-                                <h6>Importez</h6>
-                                <small>L'œuvre, ses métadonnées et chapitres seront automatiquement récupérés</small>
+                        <li style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-card); border-radius: 10px;">
+                            <span style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">2</span>
+                            <div>
+                                <h6 style="margin: 0; color: var(--text-primary); font-weight: 600;">Copiez l'ID</h6>
+                                <small style="color: var(--text-secondary); line-height: 1.4;">L'ID unique se trouve dans l'URL de la page de l'œuvre</small>
                             </div>
                         </li>
-                        <li class="step-item">
-                            <span class="step-number">✓</span>
-                            <div class="step-content">
-                                <h6>Personnalisez</h6>
-                                <small>Vous pouvez ensuite modifier l'œuvre localement selon vos besoins</small>
+                        <li style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-card); border-radius: 10px;">
+                            <span style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">3</span>
+                            <div>
+                                <h6 style="margin: 0; color: var(--text-primary); font-weight: 600;">Importez</h6>
+                                <small style="color: var(--text-secondary); line-height: 1.4;">L'œuvre, ses métadonnées et chapitres seront automatiquement récupérés</small>
+                            </div>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-card); border-radius: 10px;">
+                            <span style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">✓</span>
+                            <div>
+                                <h6 style="margin: 0; color: var(--text-primary); font-weight: 600;">Personnalisez</h6>
+                                <small style="color: var(--text-secondary); line-height: 1.4;">Vous pouvez ensuite modifier l'œuvre localement selon vos besoins</small>
                             </div>
                         </li>
                     </ol>
-                            </div>
-                            
+                </div>
+                
                 <!-- Statistiques -->
-                <div class="stats-card">
-                    <h3 style="margin: 0 0 1.5rem 0; font-size: 1.3rem;">📊 Statistiques actuelles</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <h4>{{ totalOeuvres|default(0) }}</h4>
-                                            <small>Œuvres</small>
-                                        </div>
-                        <div class="stat-item">
-                            <h4>{{ totalChapitres|default(0) }}</h4>
-                                            <small>Chapitres</small>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="action-card" style="text-align: center;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <h4 style="font-size: 2rem; color: var(--accent-primary); margin: 0; font-weight: 800;">{{ totalOeuvres|default(0) }}</h4>
+                            <small style="color: var(--text-secondary); opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Œuvres</small>
+                        </div>
+                        <div>
+                            <h4 style="font-size: 2rem; color: var(--accent-primary); margin: 0; font-weight: 800;">{{ totalChapitres|default(0) }}</h4>
+                            <small style="color: var(--text-secondary); opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Chapitres</small>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Avertissements -->
-                <div class="warning-card">
-                    <div class="warning-title">
+                <div class="action-card">
+                    <h3 style="color: var(--text-primary); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                         ⚠️ Points importants
-                    </div>
-                    <ul class="warning-list">
-                        <li>Les données sont sauvegardées dans votre base de données</li>
-                        <li>Vous pouvez modifier les œuvres après import</li>
-                                                    <li>Les genres et auteurs sont automatiquement créés</li>
-                        <li>L'import peut prendre quelques minutes pour les gros mangas</li>
-                        <li>Les modifications locales sont préservées lors des mises à jour</li>
+                    </h3>
+                    <ul style="padding-left: 1.2rem; color: var(--text-secondary);">
+                        <li style="margin-bottom: 0.3rem;">Les données sont sauvegardées dans votre base de données</li>
+                        <li style="margin-bottom: 0.3rem;">Vous pouvez modifier les œuvres après import</li>
+                        <li style="margin-bottom: 0.3rem;">Les genres et auteurs sont automatiquement créés</li>
+                        <li style="margin-bottom: 0.3rem;">L'import peut prendre quelques minutes pour les gros mangas</li>
+                        <li style="margin-bottom: 0.3rem;">Les modifications locales sont préservées lors des mises à jour</li>
                     </ul>
                 </div>
             </div>

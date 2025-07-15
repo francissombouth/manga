@@ -208,7 +208,11 @@ class MangaDxController extends AbstractController
         }
 
         $manga = null;
+        $oeuvreLocale = null;
         if ($mangaId) {
+            // Récupérer l'œuvre locale correspondante
+            $oeuvreLocale = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangaId]);
+            
             $mangaData = $this->mangaDxService->getMangaById($mangaId);
             if ($mangaData) {
                 $manga = $this->mangaDxService->formatMangaData($mangaData);
@@ -248,6 +252,7 @@ class MangaDxController extends AbstractController
             'chapter' => $chapter,
             'pages' => $pages,
             'manga' => $manga,
+            'oeuvreLocale' => $oeuvreLocale,
             'previousChapter' => $previousChapter,
             'nextChapter' => $nextChapter,
         ]);

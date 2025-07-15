@@ -55,14 +55,9 @@
                     <span style="color: var(--text-muted); padding: 0.8rem 1.5rem;">Premier chapitre</span>
                 {% endif %}
 
-                {% if manga %}
-                <a href="{{ path('mangadx_manga_show', {id: manga.id}) }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple);">
+                {% if oeuvreLocale %}
+                <a href="{{ path('app_oeuvre_show', {id: oeuvreLocale.id}) }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple);">
                     📚 Retour au manga
-                </a>
-                {% else %}
-                <a href="{{ path('mangadx_home') }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple);">
-                    🌐 Retour à MangaDX
-                </a>
                 {% endif %}
 
                 {% if nextChapter %}
@@ -109,9 +104,13 @@
                 {% endif %}
 
                 <div style="text-align: center;">
-                    {% if manga %}
-                    <a href="{{ path('mangadx_manga_show', {id: manga.id}) }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple); display: inline-flex; align-items: center; gap: 0.5rem;">
+                    {% if oeuvreLocale %}
+                    <a href="{{ path('app_oeuvre_show', {id: oeuvreLocale.id}) }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple); display: inline-flex; align-items: center; gap: 0.5rem;">
                         📚 Voir tous les chapitres
+                    </a>
+                    {% elseif manga %}
+                    <a href="{{ path('mangadx_manga_show', {id: manga.id}) }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple); display: inline-flex; align-items: center; gap: 0.5rem;">
+                        🌐 Voir sur MangaDX
                     </a>
                     {% else %}
                     <a href="{{ path('mangadx_home') }}" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); padding: 0.8rem 2rem; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: 2px solid var(--accent-purple); display: inline-flex; align-items: center; gap: 0.5rem;">

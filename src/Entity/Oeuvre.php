@@ -206,6 +206,34 @@ class Oeuvre
         return $this->chapitres;
     }
 
+    /**
+     * Retourne les chapitres triés par ordre croissant
+     */
+    public function getChapitresSorted(): array
+    {
+        $chapitres = $this->chapitres->toArray();
+        usort($chapitres, fn($a, $b) => $a->getOrdre() <=> $b->getOrdre());
+        return $chapitres;
+    }
+
+    /**
+     * Retourne le premier chapitre (ordre le plus bas)
+     */
+    public function getFirstChapter(): ?Chapitre
+    {
+        $chapitres = $this->getChapitresSorted();
+        return !empty($chapitres) ? $chapitres[0] : null;
+    }
+
+    /**
+     * Retourne le dernier chapitre (ordre le plus élevé)
+     */
+    public function getLatestChapter(): ?Chapitre
+    {
+        $chapitres = $this->getChapitresSorted();
+        return !empty($chapitres) ? end($chapitres) : null;
+    }
+
     public function addChapitre(Chapitre $chapitre): static
     {
         if (!$this->chapitres->contains($chapitre)) {

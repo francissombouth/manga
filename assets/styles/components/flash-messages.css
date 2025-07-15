@@ -1,0 +1,91 @@
+/* Messages flash/notifications */
+.flash-message {
+    position: fixed;
+    top: 80px;
+    right: 10px;
+    left: 10px;
+    z-index: 1000;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    font-weight: 600;
+    max-width: calc(100vw - 20px);
+    animation: slideInRight 0.3s ease;
+    box-sizing: border-box;
+}
+
+.flash-message.flash-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.flash-message.flash-error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.flash-message.flash-info {
+    background: var(--accent-purple);
+}
+
+.flash-message.flash-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.flash-message-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.flash-message-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0;
+    transition: transform 0.2s ease;
+}
+
+.flash-message-close:hover {
+    transform: scale(1.1);
+}
+
+/* Animation d'entrée */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animation de sortie */
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.flash-message.removing {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .flash-message {
+        right: 5px;
+        left: 5px;
+        max-width: calc(100vw - 10px);
+        padding: 0.8rem 1rem;
+    }
+} 
