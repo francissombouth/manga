@@ -362,7 +362,7 @@
 
                         <div class="chapitre-actions">
                             {% if chapitre.mangadxChapterId %}
-                                <a href="{{ path('mangadx_chapter_show', {id: chapitre.mangadxChapterId}) }}" class="btn btn-secondary btn-sm" target="_blank">
+                                <a href="{{ path('app_chapitre_show', {id: chapitre.id}) }}" class="btn btn-secondary btn-sm" target="_blank">
                                     👁️ Voir (MangaDx)
                                 </a>
                             {% else %}

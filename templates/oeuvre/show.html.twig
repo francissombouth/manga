@@ -32,7 +32,7 @@
 {% endblock %}
 
 {% block body %}
-<div data-user="{{ app.user ? 'true' : 'false' }}">
+<div data-user="{{ app.user ? 'true' : 'false' }}" data-oeuvre-id="{{ oeuvre.id }}">
 <!-- JavaScript déplacé vers assets/scripts/pages/oeuvre-detail.js -->
 
 <div class="main-container oeuvre-page">
@@ -121,19 +121,6 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Genres -->
-                        {% if oeuvre.tags|length > 0 %}
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="color: var(--text-primary); margin-bottom: 1rem; font-size: 1.1rem;">🎭 Genres</h4>
-                            <div class="genre-tags">
-                                {% for tag in oeuvre.tags %}
-                                <a href="{{ path('app_oeuvre_list', {tag: tag.id}) }}" class="genre-tag">
-                                    🎭 {{ tag.nom }}
-                                </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
                         
                         {% if oeuvre.resume %}
                         <div class="oeuvre-resume">
@@ -244,7 +231,7 @@
                         
                         <div class="chapitre-actions">
                             {% if chapitre.mangadxChapterId %}
-                                <a href="{{ path('mangadx_chapter_show', {id: chapitre.mangadxChapterId}) }}" class="btn-read">
+                                <a href="{{ path('app_chapitre_show', {id: chapitre.id}) }}" class="btn-read">
                                     <span>📖</span> Lire le chapitre
                                 </a>
                             {% else %}
@@ -511,7 +498,7 @@
                 {% if chapitres|length > 0 %}
                 {% set firstChapter = chapitres|first %}
                 {% if firstChapter.mangadxChapterId %}
-                    <a href="{{ path('mangadx_chapter_show', {id: firstChapter.mangadxChapterId}) }}" class="sidebar-btn sidebar-btn-primary">
+                    <a href="{{ path('app_chapitre_show', {id: firstChapter.id}) }}" class="sidebar-btn sidebar-btn-primary">
                         📖 Lire
                     </a>
                 {% else %}
@@ -565,12 +552,5 @@
 
 <!-- Scripts de la page -->
 <script src="{{ asset('scripts/pages/oeuvre-detail.js') }}"></script>
-<script>
-    // Initialisation de la page œuvre
-    document.addEventListener('DOMContentLoaded', function() {
-        const oeuvreId = {{ oeuvre.id }};
-        window.oeuvrePageInstance = initOeuvrePage(oeuvreId);
-    });
-</script>
 </div>
 {% endblock %} 

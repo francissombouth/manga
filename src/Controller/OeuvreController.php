@@ -78,7 +78,7 @@ class OeuvreController extends AbstractController
 
         // Si on filtre par tag, récupérer uniquement les œuvres avec ce tag
         if ($tagId) {
-            $oeuvres = $this->oeuvreRepository->findByTag($tagId, 100, 0);
+            $oeuvres = $this->oeuvreRepository->findByTag($tagId);
             $totalOeuvres = $this->oeuvreRepository->countByTag($tagId);
             $totalChapitres = array_sum(array_map(fn($oeuvre) => $oeuvre->getChapitres()->count(), $oeuvres));
         } elseif (!empty($search) || $auteurId) {
@@ -91,34 +91,10 @@ class OeuvreController extends AbstractController
             $totalOeuvres = count($oeuvres);
             $totalChapitres = array_sum(array_map(fn($oeuvre) => $oeuvre->getChapitres()->count(), $oeuvres));
         } else {
-            // Utiliser la méthode optimisée qui limite à 100 œuvres et calcule les stats en SQL
-            $oeuvresWithStats = $this->oeuvreRepository->findWithStats(100);
-        
-            // Transformer les résultats pour le template
-            $processedOeuvres = [];
-            $totalChapitres = 0;
-        
-            foreach ($oeuvresWithStats as $result) {
-                $oeuvre = $result[0]; // L'entité Oeuvre
-                $chapitresCount = (int)$result['chapitres_count'];
-                $latestChapterDate = $result['latest_chapter_date'];
-                $newChaptersCount = (int)$result['new_chapters_count'];
-                
-                $processedOeuvres[] = [
-                'oeuvre' => $oeuvre,
-                    'chapitres_count' => $chapitresCount,
-                    'has_new_chapter' => $newChaptersCount > 0,
-                'latest_chapter_date' => $latestChapterDate
-            ];
-                
-                $totalChapitres += $chapitresCount;
-        }
-        
-            // Extraire les œuvres pour le template (rester compatible avec l'ancien format)
-            $oeuvres = array_map(function($item) {
-                return $item['oeuvre'];
-            }, $processedOeuvres);
-            $totalOeuvres = count($processedOeuvres);
+            // Récupérer toutes les œuvres sans limitation
+            $oeuvres = $this->oeuvreRepository->findAllWithRelations();
+            $totalOeuvres = count($oeuvres);
+            $totalChapitres = array_sum(array_map(fn($oeuvre) => $oeuvre->getChapitres()->count(), $oeuvres));
         }
 
         // Calculer le nombre total d'auteurs uniques
@@ -132,6 +108,19 @@ class OeuvreController extends AbstractController
         // Récupérer les tags populaires (les plus utilisés)
         $popularTags = $this->tagRepository->findPopularTags(8);
 
+        // Vérifier les favoris pour l'utilisateur connecté
+        $oeuvreIsFavorite = [];
+        $user = $this->getUser();
+        if ($user) {
+            foreach ($oeuvres as $oeuvre) {
+                $favoriteCollection = $this->collectionUserRepository->findOneBy([
+                    'user' => $user,
+                    'oeuvre' => $oeuvre
+                ]);
+                $oeuvreIsFavorite[$oeuvre->getId()] = $favoriteCollection !== null;
+            }
+        }
+
         return $this->render('oeuvre/collection.html.twig', [
             'oeuvres' => $oeuvres,
             'totalOeuvres' => $totalOeuvres,
@@ -140,6 +129,7 @@ class OeuvreController extends AbstractController
             'allTags' => $allTags,
             'popularTags' => $popularTags,
             'selectedTag' => $tagId ? $this->tagRepository->find($tagId) : null,
+            'oeuvreIsFavorite' => $oeuvreIsFavorite,
         ]);
     }
 

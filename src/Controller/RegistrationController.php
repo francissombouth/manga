@@ -25,7 +25,7 @@ class RegistrationController extends AbstractController
     ): Response {
         // Si l'utilisateur est déjà connecté, rediriger vers l'accueil
         if ($this->getUser()) {
-            return $this->redirectToRoute('mangadx_home');
+            return $this->redirectToRoute('app_home');
         }
 
         $user = new User();

@@ -1,0 +1,44 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline - MangaThèque"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to Railway
+      uses: bervProject/railway-deploy@v1.0.0
+      with:
+        railway_token: ${{ secrets.RAILWAY_TOKEN }}
+        service: ${{ secrets.RAILWAY_SERVICE }}
+
+    # Alternative: Déploiement sur VPS avec SSH
+    # - name: Deploy to VPS
+    #   uses: appleboy/ssh-action@v1.0.0
+    #   with:
+    #     host: ${{ secrets.HOST }}
+    #     username: ${{ secrets.USERNAME }}
+    #     key: ${{ secrets.SSH_KEY }}
+    #     script: |
+    #       cd /var/www/manga
+    #       docker-compose pull
+    #       docker-compose up -d
+    #       docker system prune -f
+
+    - name: Notify deployment
+      run: |
+        echo "🚀 Application déployée avec succès !"
+        echo "🌐 URL: https://votre-app.railway.app"
+        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" 

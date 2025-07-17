@@ -48,10 +48,8 @@ temp/
 docker-compose.yml
 docker-compose.override.yml
 Dockerfile
-docker/
 
-# Environment files
-.env
+# Environment files (keep .env for Docker)
 .env.local
 .env.*.local
 

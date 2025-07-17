@@ -61,8 +61,8 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        // Rediriger vers la page d'accueil après connexion réussie
-        return new RedirectResponse($this->urlGenerator->generate('mangadx_home'));
+        // Rediriger vers la page d'accueil principale après connexion réussie
+        return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
 
     protected function getLoginUrl(Request $request): string

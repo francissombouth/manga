@@ -18,7 +18,7 @@ security:
             custom_authenticator: App\Security\AppCustomAuthenticator
             logout:
                 path: app_logout
-                target: mangadx_home
+                target: app_home
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800

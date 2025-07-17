@@ -1,23 +1,25 @@
 /**
  * JavaScript pour la page de détail d'une œuvre
- * Version simplifiée et robuste
+ * Version encapsulée et compatible Turbo/Hotwire
  */
-
-// Variables globales
+(() => {
+    // Variables locales (pas globales)
 let oeuvreId = null;
 let isInitialized = false;
+    let commentSubmissionInProgress = false;
 
 // ================== INITIALISATION UNIQUE ==================
 function initOeuvrePage(id) {
+        console.log('[DEBUG] Appel de initOeuvrePage avec id =', id);
     // Éviter absolument les initialisations multiples
     if (isInitialized) {
-        console.log('⚠️ Page déjà initialisée, arrêt');
+            console.log('[DEBUG] Page déjà initialisée, arrêt');
         return;
     }
     
     oeuvreId = id;
     isInitialized = true;
-    console.log('✅ Initialisation UNIQUE de la page œuvre:', oeuvreId);
+        console.log('[DEBUG] Initialisation UNIQUE de la page œuvre:', oeuvreId);
     
     // Initialiser immédiatement sans attendre DOMContentLoaded
     initAllFeatures();
@@ -87,8 +89,14 @@ function handleTabClick(e) {
         
         // Réinitialiser les boutons si on va sur commentaires
         if (targetTab === 'commentaires') {
+                console.log('💬 Onglet commentaires activé - Réinitialisation des boutons d\'interaction');
             setTimeout(() => {
                 initInteractionButtons();
+                    // Réinitialiser aussi le formulaire de commentaire
+                    initCommentFormOnce();
+                    // Réinitialiser spécifiquement les boutons toggle
+                    console.log('🔄 Réinitialisation spécifique des boutons toggle');
+                    initToggleButtonsSimple();
             }, 100);
         }
     }
@@ -198,6 +206,8 @@ async function removeRating() {
         const response = await fetch(`/api/oeuvres/${oeuvreId}/rating`, {
             method: 'DELETE'
         });
+            
+            const data = await response.json();
         
         if (response.ok) {
             showNotification('Note supprimée avec succès !', 'success');
@@ -205,7 +215,6 @@ async function removeRating() {
             hideRatingButtons();
             loadAverageRating();
         } else {
-            const data = await response.json();
             showNotification(data.message || 'Erreur lors de la suppression', 'error');
         }
     } catch (error) {
@@ -216,7 +225,6 @@ async function removeRating() {
 function hideRatingButtons() {
     const submitBtn = document.getElementById('submit-rating-main');
     const removeBtn = document.getElementById('remove-rating-main');
-    
     if (submitBtn) submitBtn.style.display = 'none';
     if (removeBtn) removeBtn.style.display = 'none';
 }
@@ -248,8 +256,6 @@ async function loadAverageRating() {
 }
 
 // ================== SYSTÈME DE COMMENTAIRES (SIMPLIFIÉ) ==================
-let commentSubmissionInProgress = false;
-
 function initCommentFormOnce() {
     const form = document.getElementById('commentaire-form');
     if (!form) return;
@@ -282,31 +288,28 @@ function initCommentFormOnce() {
 }
 
 async function submitCommentSafely() {
+        console.log('[DEBUG] submitCommentSafely appelé');
     if (commentSubmissionInProgress) {
         console.log('💬 BLOCAGE: submitCommentSafely appelée en double');
         return;
     }
     
-    const contenu = document.getElementById('commentaire_contenu')?.value;
-    if (!contenu || contenu.trim() === '') {
+        commentSubmissionInProgress = true;
+        console.log('💬 DEBUT protection soumission commentaire');
+        
+        const textarea = document.getElementById('commentaire_contenu');
+        const contenu = textarea?.value?.trim();
+        if (!contenu) {
         showNotification('Veuillez saisir un commentaire', 'error');
         return;
     }
     
-    console.log('💬 DÉBUT soumission commentaire');
-    commentSubmissionInProgress = true;
-    
-    // Désactiver visuellement le formulaire
-    const submitButton = document.querySelector('#commentaire-form button[type="submit"]');
-    const textarea = document.getElementById('commentaire_contenu');
-    
+        const submitButton = document.getElementById('submit-comment-btn');
     if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = '⏳ Envoi en cours...';
     }
-    if (textarea) {
-        textarea.disabled = true;
-    }
+        if (textarea) textarea.disabled = true;
     
     try {
         const response = await fetch(`/api/commentaires/oeuvre/${oeuvreId}`, {
@@ -315,20 +318,24 @@ async function submitCommentSafely() {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ contenu: contenu.trim() })
+                body: JSON.stringify({ contenu: contenu })
         });
         
         const data = await response.json();
+            console.log('[DEBUG] Réponse API commentaire:', data);
         
         if (response.ok) {
             showNotification('Commentaire ajouté avec succès !', 'success');
             if (textarea) textarea.value = '';
-            setTimeout(() => window.location.reload(), 1000);
+                setTimeout(() => {
+                    console.log('[DEBUG] Reload page après ajout commentaire');
+                    window.location.reload();
+                }, 1000);
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout du commentaire', 'error');
         }
     } catch (error) {
-        console.error('Erreur:', error);
+            console.error('[DEBUG] Erreur submitCommentSafely:', error);
         showNotification('Erreur lors de l\'ajout du commentaire', 'error');
     } finally {
         // Réactiver le formulaire
@@ -348,24 +355,16 @@ async function submitCommentSafely() {
     }
 }
 
-// ================== BOUTONS D'INTERACTION (APPROCHE UNIFIÉE) ==================
+    // ================== BOUTONS D'INTERACTION ==================
 function initInteractionButtons() {
-    console.log('🔘 Initialisation des boutons d\'interaction');
-    
+        console.log('🎯 Initialisation des boutons d\'interaction');
     initLikeButtonsSimple();
     initReplyButtonsSimple();
     initToggleButtonsSimple();
 }
 
-// Exposer la fonction globalement pour qu'elle puisse être appelée depuis app.js
-window.initInteractionButtons = initInteractionButtons;
-
 function initLikeButtonsSimple() {
-    const likeButtons = document.querySelectorAll('.like-btn:not([data-initialized])');
-    console.log(`❤️ Initialisation ${likeButtons.length} nouveaux boutons like`);
-    
-    likeButtons.forEach(button => {
-        button.setAttribute('data-initialized', 'true');
+        document.querySelectorAll('.like-btn').forEach(button => {
         button.addEventListener('click', handleLikeClick);
     });
 }
@@ -374,162 +373,156 @@ async function handleLikeClick(e) {
     e.preventDefault();
     const commentaireId = this.getAttribute('data-commentaire-id');
     
-    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
-        showNotification('Vous devez être connecté pour liker un commentaire', 'warning');
-        return;
-    }
-    
     try {
-        const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
-            method: 'POST'
+            const response = await fetch(`/api/commentaires/${commentaireId}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
         });
-        
-        if (response.status === 404) {
-            showNotification('Fonctionnalité de like non disponible', 'warning');
-            return;
-        }
         
         const data = await response.json();
         
         if (response.ok) {
-            const icon = this.querySelector('.like-icon');
-            const count = this.querySelector('.like-count');
+                const likeIcon = this.querySelector('.like-icon');
+                const likeCount = this.querySelector('.like-count');
             
-            if (icon) icon.textContent = data.isLiked ? '❤️' : '🤍';
-            if (count) count.textContent = data.likesCount;
+                if (data.liked) {
+                    likeIcon.textContent = '❤️';
         } else {
-            showNotification(data.message || 'Erreur lors du like', 'error');
+                    likeIcon.textContent = '🤍';
+                }
+                
+                if (likeCount) {
+                    likeCount.textContent = data.likesCount;
+                }
         }
     } catch (error) {
-        showNotification('Fonctionnalité de like temporairement indisponible', 'warning');
+            console.error('Erreur like:', error);
     }
 }
 
 function initReplyButtonsSimple() {
-    const replyButtons = document.querySelectorAll('.reply-btn:not([data-initialized])');
-    const replyToReplyButtons = document.querySelectorAll('.reply-to-reply-btn:not([data-initialized])');
-    
-    console.log(`💬 Initialisation ${replyButtons.length} boutons réponse + ${replyToReplyButtons.length} boutons réponse-à-réponse`);
-    
-    replyButtons.forEach(button => {
-        button.setAttribute('data-initialized', 'true');
-        button.addEventListener('click', function(e) {
+        document.querySelectorAll('.reply-btn, .reply-to-reply-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
             e.preventDefault();
-            const commentaireId = this.getAttribute('data-commentaire-id');
+                const commentaireId = button.getAttribute('data-commentaire-id');
+                if (button.classList.contains('reply-to-reply-btn')) {
+                    showReplyToReplyForm(commentaireId);
+                } else {
             showReplyForm(commentaireId);
-        });
-    });
-    
-    replyToReplyButtons.forEach(button => {
-        button.setAttribute('data-initialized', 'true');
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const commentaireId = this.getAttribute('data-commentaire-id');
-            showReplyToReplyForm(commentaireId);
+                }
         });
     });
 }
 
 function initToggleButtonsSimple() {
-    const toggleButtons = document.querySelectorAll('.toggle-replies-btn:not([data-initialized]), .toggle-replies-to-replies-btn:not([data-initialized])');
-    console.log(`🔄 Initialisation ${toggleButtons.length} boutons toggle`);
+        const toggleButtons = document.querySelectorAll('.toggle-replies-btn, .toggle-replies-to-replies-btn');
+        console.log('🔄 Initialisation des boutons toggle - Trouvés:', toggleButtons.length);
     
     toggleButtons.forEach(button => {
-        button.setAttribute('data-initialized', 'true');
-        button.addEventListener('click', function(e) {
+            console.log('🔄 Bouton toggle trouvé:', button.textContent?.trim());
+            button.addEventListener('click', (e) => {
             e.preventDefault();
-            const commentaireId = this.getAttribute('data-commentaire-id');
+                const commentaireId = button.getAttribute('data-commentaire-id');
+                console.log('🔄 Clic sur bouton toggle pour commentaire:', commentaireId);
             
-            if (this.classList.contains('toggle-replies-btn')) {
+                if (button.classList.contains('toggle-replies-to-replies-btn')) {
+                    toggleRepliesToReplies(commentaireId);
+                } else {
                 toggleReplies(commentaireId);
-            } else {
-                toggleRepliesToReplies(commentaireId);
             }
         });
     });
 }
 
-// ================== FONCTIONS DE RÉPONSES ==================
 function showReplyForm(commentaireId) {
     const form = document.getElementById(`reply-form-${commentaireId}`);
     if (form) {
-        const isVisible = form.style.display !== 'none';
-        form.style.display = isVisible ? 'none' : 'block';
-        
-        if (!isVisible) {
-            const textarea = document.getElementById(`reply-content-${commentaireId}`);
-            if (textarea) setTimeout(() => textarea.focus(), 100);
-        }
+            form.style.display = 'block';
+            form.querySelector('textarea').focus();
     }
 }
 
 function showReplyToReplyForm(commentaireId) {
     const form = document.getElementById(`reply-to-reply-form-${commentaireId}`);
     if (form) {
-        const isVisible = form.style.display !== 'none';
-        form.style.display = isVisible ? 'none' : 'block';
-        
-        if (!isVisible) {
-            const textarea = document.getElementById(`reply-to-reply-content-${commentaireId}`);
-            if (textarea) setTimeout(() => textarea.focus(), 100);
-        }
+            form.style.display = 'block';
+            form.querySelector('textarea').focus();
     }
 }
 
 function toggleReplies(commentaireId) {
-    const repliesDiv = document.getElementById(`replies-${commentaireId}`);
-    const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
+        console.log('🔄 toggleReplies appelé pour commentaireId:', commentaireId);
+        const replies = document.getElementById(`replies-${commentaireId}`);
+        const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
     
-    if (repliesDiv && toggleBtn) {
-        const isVisible = repliesDiv.style.display !== 'none';
-        repliesDiv.style.display = isVisible ? 'none' : 'block';
+        console.log('🔄 Éléments trouvés:', {
+            replies: replies ? 'oui' : 'non',
+            button: button ? 'oui' : 'non'
+        });
         
-        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
-        const toggleText = toggleBtn.querySelector('.toggle-text');
+        if (replies && button) {
+            const isVisible = replies.style.display !== 'none';
+            console.log('🔄 État actuel - Visible:', isVisible);
+            
+            replies.style.display = isVisible ? 'none' : 'block';
         
-        if (toggleIcon) toggleIcon.textContent = isVisible ? '▶' : '▼';
-        if (toggleText) {
-            const replyCount = repliesDiv.querySelectorAll('.reponse-item').length;
-            toggleText.textContent = isVisible ? 
-                `Voir ${replyCount} réponse${replyCount > 1 ? 's' : ''}` :
-                `Masquer ${replyCount} réponse${replyCount > 1 ? 's' : ''}`;
-        }
+            const icon = button.querySelector('.toggle-icon');
+            const text = button.querySelector('.toggle-text');
         
-        // Réinitialiser les boutons dans les réponses
-        if (!isVisible) {
-            setTimeout(() => initInteractionButtons(), 100);
-        }
+            if (icon) {
+                icon.textContent = isVisible ? '▼' : '▲';
+                console.log('🔄 Icône mise à jour:', icon.textContent);
+            }
+            if (text) {
+                const count = replies.children.length;
+                text.textContent = isVisible ? 
+                    `Voir ${count} réponse${count > 1 ? 's' : ''}` : 
+                    'Masquer les réponses';
+                console.log('🔄 Texte mis à jour:', text.textContent);
+            }
+        } else {
+            console.log('🔄 ERREUR: Éléments manquants pour toggleReplies');
     }
 }
 
 function toggleRepliesToReplies(commentaireId) {
-    const repliesDiv = document.getElementById(`replies-to-replies-${commentaireId}`);
-    const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
+        console.log('🔄 toggleRepliesToReplies appelé pour commentaireId:', commentaireId);
+        const replies = document.getElementById(`replies-to-replies-${commentaireId}`);
+        const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
     
-    if (repliesDiv && toggleBtn) {
-        const isVisible = repliesDiv.style.display !== 'none';
-        repliesDiv.style.display = isVisible ? 'none' : 'block';
+        console.log('🔄 Éléments trouvés (réponses à réponses):', {
+            replies: replies ? 'oui' : 'non',
+            button: button ? 'oui' : 'non'
+        });
         
-        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
-        const toggleText = toggleBtn.querySelector('.toggle-text');
+        if (replies && button) {
+            const isVisible = replies.style.display !== 'none';
+            console.log('🔄 État actuel - Visible:', isVisible);
+            
+            replies.style.display = isVisible ? 'none' : 'block';
         
-        if (toggleIcon) toggleIcon.textContent = isVisible ? '▶' : '▼';
-        if (toggleText) {
-            const replyCount = repliesDiv.children.length;
-            toggleText.textContent = isVisible ? 
-                `Voir ${replyCount} réponse${replyCount > 1 ? 's' : ''} à cette réponse` :
-                `Masquer ${replyCount} réponse${replyCount > 1 ? 's' : ''} à cette réponse`;
+            const icon = button.querySelector('.toggle-icon');
+            const text = button.querySelector('.toggle-text');
+        
+            if (icon) {
+                icon.textContent = isVisible ? '▼' : '▲';
+                console.log('🔄 Icône mise à jour:', icon.textContent);
+            }
+            if (text) {
+                const count = replies.children.length;
+                text.textContent = isVisible ? 
+                    `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
+                    'Masquer les réponses';
+                console.log('🔄 Texte mis à jour:', text.textContent);
         }
-        
-        // Réinitialiser les boutons dans les réponses
-        if (!isVisible) {
-            setTimeout(() => initInteractionButtons(), 100);
-        }
+        } else {
+            console.log('🔄 ERREUR: Éléments manquants pour toggleRepliesToReplies');
     }
 }
 
 // ================== FONCTIONS APPELÉES PAR LE TEMPLATE ==================
 async function submitReply(commentaireId) {
+        console.log('[DEBUG] submitReply appelé pour commentaireId =', commentaireId);
     const textarea = document.getElementById(`reply-content-${commentaireId}`);
     const contenu = textarea?.value?.trim();
     
@@ -549,29 +542,35 @@ async function submitReply(commentaireId) {
         });
         
         const data = await response.json();
+            console.log('[DEBUG] Réponse API reply:', data);
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
             textarea.value = '';
             document.getElementById(`reply-form-${commentaireId}`).style.display = 'none';
-            setTimeout(() => window.location.reload(), 1000);
+                setTimeout(() => {
+                    console.log('[DEBUG] Reload page après ajout réponse');
+                    window.location.reload();
+                }, 1000);
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
+            console.error('[DEBUG] Erreur submitReply:', error);
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
 
 function cancelReply(commentaireId) {
     const form = document.getElementById(`reply-form-${commentaireId}`);
-    const textarea = document.getElementById(`reply-content-${commentaireId}`);
-    
-    if (form) form.style.display = 'none';
-    if (textarea) textarea.value = '';
+        if (form) {
+            form.style.display = 'none';
+            form.querySelector('textarea').value = '';
+        }
 }
 
 async function submitReplyToReply(reponseId) {
+        console.log('[DEBUG] submitReplyToReply appelé pour reponseId =', reponseId);
     const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
     const contenu = textarea?.value?.trim();
     
@@ -591,62 +590,66 @@ async function submitReplyToReply(reponseId) {
         });
         
         const data = await response.json();
+            console.log('[DEBUG] Réponse API reply-to-reply:', data);
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
             textarea.value = '';
             document.getElementById(`reply-to-reply-form-${reponseId}`).style.display = 'none';
-            setTimeout(() => window.location.reload(), 1000);
+                setTimeout(() => {
+                    console.log('[DEBUG] Reload page après ajout réponse à réponse');
+                    window.location.reload();
+                }, 1000);
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
+            console.error('[DEBUG] Erreur submitReplyToReply:', error);
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
 
 function cancelReplyToReply(reponseId) {
     const form = document.getElementById(`reply-to-reply-form-${reponseId}`);
-    const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
-    
-    if (form) form.style.display = 'none';
-    if (textarea) textarea.value = '';
+        if (form) {
+            form.style.display = 'none';
+            form.querySelector('textarea').value = '';
+        }
 }
 
 // ================== SYSTÈME DE FAVORIS ==================
 async function checkFavoriteStatus() {
-    if (!document.body.dataset.user || document.body.dataset.user === 'false') {
-        return;
-    }
-    
     try {
         const response = await fetch(`/collections/verifier/${oeuvreId}`);
-        if (response.ok) {
             const data = await response.json();
+            
+            if (response.ok) {
             updateFavoriteButton(oeuvreId, data.isFavorite);
         }
     } catch (error) {
-        console.log('⚠️ Erreur statut favori (ignorée):', error);
+            console.log('⚠️ Erreur vérification favoris (ignorée):', error);
     }
 }
 
-function toggleFavorite(oeuvreIdParam, button) {
-    fetch(`/collections/toggle/${oeuvreIdParam}`, {
+    async function toggleFavorite(oeuvreIdParam, button) {
+        try {
+            const response = await fetch(`/collections/toggle/${oeuvreIdParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
             updateFavoriteButton(oeuvreIdParam, data.isFavorite);
-            showNotification(data.message, 'success');
-        } else {
-            showNotification(data.message, 'error');
+                showNotification(
+                    data.isFavorite ? 'Ajouté aux favoris !' : 'Retiré des favoris !', 
+                    'success'
+                );
         }
-    })
-    .catch(error => {
+        } catch (error) {
         showNotification('Erreur lors de la modification des favoris', 'error');
-    });
+        }
 }
 
 function updateFavoriteButton(oeuvreIdParam, isFavorite) {
@@ -654,38 +657,60 @@ function updateFavoriteButton(oeuvreIdParam, isFavorite) {
     const icon = document.getElementById(`favorite-icon-${oeuvreIdParam}`);
     const text = document.getElementById(`favorite-text-${oeuvreIdParam}`);
     
-    if (button && icon) {
+        if (button) {
         if (isFavorite) {
             button.classList.add('favorited');
-            button.setAttribute('title', 'Retirer des favoris');
-            icon.textContent = '❤️';
-            if (text) text.textContent = 'Retirer des favoris';
         } else {
             button.classList.remove('favorited');
-            button.setAttribute('title', 'Ajouter aux favoris');
-            icon.textContent = '🤍';
-            if (text) text.textContent = 'Ajouter aux favoris';
+            }
         }
+        
+        if (icon) {
+            icon.textContent = isFavorite ? '❤️' : '🤍';
+        }
+        
+        if (text) {
+            text.textContent = isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris';
     }
 }
 
 // ================== UTILITAIRES ==================
 function showNotification(message, type = 'info') {
-    if (window.flashMessages) {
-        window.flashMessages[type](message);
-    } else {
-        console.log(`${type.toUpperCase()}: ${message}`);
-        if (type === 'error') {
-            alert(`Erreur: ${message}`);
-        } else if (type === 'success') {
-            alert(`Succès: ${message}`);
+        // Créer une notification simple
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        switch (type) {
+            case 'success':
+                notification.style.backgroundColor = '#10b981';
+                break;
+            case 'error':
+                notification.style.backgroundColor = '#ef4444';
+                break;
+            default:
+                notification.style.backgroundColor = '#3b82f6';
         }
+        
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
     }
-}
 
-// Fonctions pour la compatibilité (pas utilisées mais exposées)
+    // ================== FONCTIONS DE COMPATIBILITÉ ==================
 function submitComment() { submitCommentSafely(); }
-function initTabs() { /* déjà fait dans initAllFeatures */ }
 function initLikeButtons() { initLikeButtonsSimple(); }
 function initReplies() { initReplyButtonsSimple(); }
 
@@ -709,4 +734,68 @@ window.initTabs = initTabs;
 window.initLikeButtons = initLikeButtons;
 window.initReplies = initReplies;
 
-console.log('🎯 JavaScript page œuvre VERSION SIMPLIFIÉE chargé'); 
+    console.log('🎯 JavaScript page œuvre VERSION ENCAPSULÉE chargé');
+
+    // ================== INITIALISATION IMMÉDIATE ==================
+    // Essayer d'initialiser immédiatement au chargement du script
+    console.log('[DEBUG] Tentative d\'initialisation immédiate');
+    const mainDivImmediate = document.querySelector('div[data-oeuvre-id]');
+    if (mainDivImmediate) {
+        const oeuvreIdImmediate = mainDivImmediate.dataset.oeuvreId;
+        console.log('[DEBUG] ID trouvé immédiatement:', oeuvreIdImmediate);
+        if (!isInitialized) {
+            window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdImmediate));
+        }
+    } else {
+        console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (initialisation immédiate)');
+    }
+
+    // ================== INITIALISATION COMPATIBLE TURBO ==================
+    // Écouter l'événement turbo:load pour l'initialisation
+    document.addEventListener('turbo:load', function() {
+        console.log('[DEBUG] Événement turbo:load détecté');
+        // Récupérer l'ID de l'œuvre depuis l'attribut data du div principal
+        const mainDiv = document.querySelector('div[data-oeuvre-id]');
+        if (mainDiv) {
+            const oeuvreIdFromData = mainDiv.dataset.oeuvreId;
+            console.log('[DEBUG] ID trouvé dans data-oeuvre-id:', oeuvreIdFromData);
+            // Réinitialiser le flag pour permettre une nouvelle initialisation
+            isInitialized = false;
+            window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFromData));
+        } else {
+            console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé');
+        }
+    });
+
+    // Écouter aussi DOMContentLoaded pour les chargements initiaux
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[DEBUG] Événement DOMContentLoaded détecté');
+        const mainDiv = document.querySelector('div[data-oeuvre-id]');
+        if (mainDiv) {
+            const oeuvreIdFromData = mainDiv.dataset.oeuvreId;
+            console.log('[DEBUG] ID trouvé dans data-oeuvre-id (DOMContentLoaded):', oeuvreIdFromData);
+            if (!isInitialized) {
+                window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFromData));
+            }
+        } else {
+            console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (DOMContentLoaded)');
+        }
+    });
+
+    // ================== FALLBACK AVEC TIMEOUT ==================
+    // Si rien ne fonctionne, essayer après un délai
+    setTimeout(() => {
+        if (!isInitialized) {
+            console.log('[DEBUG] Fallback: tentative d\'initialisation après timeout');
+            const mainDivFallback = document.querySelector('div[data-oeuvre-id]');
+            if (mainDivFallback) {
+                const oeuvreIdFallback = mainDivFallback.dataset.oeuvreId;
+                console.log('[DEBUG] ID trouvé dans fallback:', oeuvreIdFallback);
+                window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFallback));
+            } else {
+                console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (fallback)');
+            }
+        }
+    }, 1000);
+
+})(); 

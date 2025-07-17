@@ -1,108 +1,125 @@
-# Stage 1: Build stage
+# Multi-stage build pour Symfony
+FROM composer:latest AS composer
+
+# Stage de build
 FROM php:8.2-fpm-alpine AS build
 
-# Install system dependencies
+# Installer les dépendances système
 RUN apk add --no-cache \
     git \
     curl \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    libzip-dev \
-    zip \
-    unzip \
     postgresql-dev \
     icu-dev \
-    autoconf \
-    g++ \
-    make \
-    linux-headers
+    libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    libxpm-dev \
+    freetype-dev \
+    zlib-dev \
+    libzip-dev \
+    oniguruma-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install \
+        pdo_pgsql \
+        pdo_mysql \
+        mbstring \
+        intl \
+        zip \
+        gd
 
-# Install PHP extensions
-RUN docker-php-ext-install \
-    pdo_pgsql \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    zip \
-    intl \
-    opcache
-
-# Install Composer
+# Copier Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copy composer files
+# Copier les fichiers de dépendances
 COPY composer.json composer.lock ./
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+# Installer les dépendances PHP (sans scripts)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi --no-scripts
 
-# Copy application code
+# Copier le code source
 COPY . .
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Exécuter les scripts post-installation après avoir copié tous les fichiers
+RUN composer run-script post-install-cmd
 
-# Stage 2: Production stage
+# Stage de production
 FROM php:8.2-fpm-alpine AS production
 
-# Install system dependencies
+# Installer les dépendances système pour la production
 RUN apk add --no-cache \
     postgresql-dev \
     icu-dev \
     libpng-dev \
-    libxml2-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    libxpm-dev \
+    freetype-dev \
+    zlib-dev \
     libzip-dev \
     oniguruma-dev \
     nginx \
-    supervisor
+    supervisor \
+    postgresql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install \
+        pdo_pgsql \
+        pdo_mysql \
+        mbstring \
+        intl \
+        zip \
+        gd
 
-# Install PHP extensions
-RUN docker-php-ext-install \
-    pdo_pgsql \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    zip \
-    intl \
-    opcache
-
-# Configure PHP
+# Copier les configurations
 COPY docker/php/php.ini /usr/local/etc/php/php.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-
-# Configure Nginx
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Configure Supervisor
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set working directory
+# Créer le script d'initialisation
+RUN echo '#!/bin/sh' > /usr/local/bin/init.sh && \
+    echo 'set -e' >> /usr/local/bin/init.sh && \
+    echo 'echo "Waiting for database..."' >> /usr/local/bin/init.sh && \
+    echo 'while ! pg_isready -h database -p 5432 -U postgres; do' >> /usr/local/bin/init.sh && \
+    echo '  sleep 1' >> /usr/local/bin/init.sh && \
+    echo 'done' >> /usr/local/bin/init.sh && \
+    echo 'echo "Database is ready!"' >> /usr/local/bin/init.sh && \
+    echo 'cd /var/www/html' >> /usr/local/bin/init.sh && \
+    echo 'php bin/console doctrine:migrations:migrate --no-interaction || echo "Migrations failed, continuing..."' >> /usr/local/bin/init.sh && \
+    echo 'echo "Compiling assets..."' >> /usr/local/bin/init.sh && \
+    echo 'php bin/console asset-map:compile || echo "Asset compilation failed, continuing..."' >> /usr/local/bin/init.sh && \
+    echo 'echo "Setting permissions..."' >> /usr/local/bin/init.sh && \
+    echo 'chown -R www-data:www-data var public' >> /usr/local/bin/init.sh && \
+    echo 'chmod -R 755 var public' >> /usr/local/bin/init.sh && \
+    echo 'echo "Initialization complete!"' >> /usr/local/bin/init.sh && \
+    echo 'exec "$@"' >> /usr/local/bin/init.sh && \
+    chmod +x /usr/local/bin/init.sh
+
+# Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copy application from build stage
+# Copier l'application depuis le stage de build
 COPY --from=build --chown=www-data:www-data /var/www/html /var/www/html
 
-# Create necessary directories
+# Créer les répertoires nécessaires
 RUN mkdir -p /var/www/html/var/cache \
     && mkdir -p /var/www/html/var/log \
     && mkdir -p /var/www/html/public/uploads \
+    && mkdir -p /var/log/supervisor \
     && chown -R www-data:www-data /var/www/html/var \
-    && chown -R www-data:www-data /var/www/html/public/uploads
+    && chown -R www-data:www-data /var/www/html/public/uploads \
+    && chmod -R 755 /var/www/html/var \
+    && chmod -R 755 /var/www/html/public/uploads \
+    && chmod -R 755 /var/log/supervisor
 
-# Expose port
-EXPOSE 80
+# Exposer le port 8080
+EXPOSE 8080
 
-# Start supervisor
+# Utiliser le script d'initialisation comme point d'entrée
+ENTRYPOINT ["/usr/local/bin/init.sh"]
+
+# Démarrer Supervisor qui gère PHP-FPM et Nginx
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 

@@ -43,7 +43,7 @@ class OeuvreRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllWithRelations(int $limit = null, int $offset = 0, string $orderBy = 'updatedAt', string $order = 'DESC'): array
+    public function findAllWithRelations(int $limit = null, int $offset = 0, string $orderBy = 'titre', string $order = 'ASC'): array
     {
         $qb = $this->createQueryBuilder('o')
             ->leftJoin('o.auteur', 'a')
@@ -317,8 +317,7 @@ class OeuvreRepository extends ServiceEntityRepository
             ->leftJoin('o.auteur', 'a')
             ->leftJoin('o.chapitres', 'c')
             ->addSelect('a', 'c')
-            ->orderBy('o.updatedAt', 'DESC')
-            ->setMaxResults(100) // Limiter à 100 œuvres pour optimiser les performances
+            ->orderBy('o.titre', 'ASC')
             ->getQuery()
             ->getResult();
     }
