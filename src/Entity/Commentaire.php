@@ -21,6 +21,9 @@ class Commentaire
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
     #[ORM\OneToMany(mappedBy: 'commentaire', targetEntity: CommentaireLike::class, orphanRemoval: true)]
     private Collection $likes;
 
@@ -42,6 +45,7 @@ class Commentaire
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
         $this->likes = new ArrayCollection();
         $this->reponses = new ArrayCollection();
     }
@@ -108,6 +112,16 @@ class Commentaire
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function updateTimestamp(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getAuteur(): ?User

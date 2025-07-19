@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
     name: 'app:sync-tags',
@@ -26,7 +27,8 @@ class SyncTagsCommand extends Command
         private TagRepository $tagRepository,
         private OeuvreRepository $oeuvreRepository,
         private EntityManagerInterface $entityManager,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private HttpClientInterface $httpClient
     ) {
         parent::__construct();
     }
@@ -37,6 +39,7 @@ class SyncTagsCommand extends Command
             ->addOption('create-popular', null, InputOption::VALUE_NONE, 'Créer les genres populaires manuellement')
             ->addOption('associate-existing', null, InputOption::VALUE_NONE, 'Associer des genres aux œuvres existantes basé sur les métadonnées')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Forcer l\'opération même si les tags existent déjà')
+            ->addOption('sync-all-oeuvres', null, InputOption::VALUE_NONE, 'Synchroniser les genres pour toutes les œuvres avec ID MangaDx')
         ;
     }
 
@@ -47,6 +50,7 @@ class SyncTagsCommand extends Command
         $createPopular = $input->getOption('create-popular');
         $associateExisting = $input->getOption('associate-existing');
         $force = $input->getOption('force');
+        $syncAllOeuvres = $input->getOption('sync-all-oeuvres');
 
         $io->title('🏷️ Synchronisation des Genres MangaDx');
 
@@ -72,6 +76,13 @@ class SyncTagsCommand extends Command
             $io->section('🔗 Association automatique de genres');
             $associated = $this->associateGenresBasedOnMetadata($io);
             $io->success("✅ Genres associés à {$associated} œuvres");
+        }
+
+        // Quatrième étape : Synchroniser les genres pour toutes les œuvres avec ID MangaDx
+        if ($syncAllOeuvres) {
+            $io->section('🔄 Synchronisation des genres pour toutes les œuvres');
+            $synced = $this->syncGenresForAllOeuvres($io);
+            $io->success("✅ Genres synchronisés pour {$synced} œuvres");
         }
 
         // Statistiques finales
@@ -233,5 +244,105 @@ class SyncTagsCommand extends Command
         }
 
         return $genresAssociated;
+    }
+
+    /**
+     * Synchronise les genres pour toutes les œuvres avec ID MangaDx
+     */
+    private function syncGenresForAllOeuvres(SymfonyStyle $io): int
+    {
+        $oeuvres = $this->oeuvreRepository->createQueryBuilder('o')
+            ->where('o.mangadxId IS NOT NULL')
+            ->andWhere('o.mangadxId != :empty')
+            ->setParameter('empty', '')
+            ->getQuery()
+            ->getResult();
+
+        if (empty($oeuvres)) {
+            $io->info('Aucune œuvre avec ID MangaDx trouvée');
+            return 0;
+        }
+
+        $io->text("📚 Trouvé " . count($oeuvres) . " œuvres avec ID MangaDx");
+
+        $progressBar = $io->createProgressBar(count($oeuvres));
+        $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | 📚 %message%');
+
+        $synced = 0;
+        $errors = 0;
+
+        foreach ($oeuvres as $oeuvre) {
+            $progressBar->setMessage($oeuvre->getTitre());
+            
+            try {
+                // Récupérer les données depuis MangaDx
+                $response = $this->httpClient->request('GET', 'https://api.mangadex.org/manga/' . $oeuvre->getMangadxId(), [
+                    'headers' => ['User-Agent' => 'MangaTheque/1.0 (Educational Project)']
+                ]);
+
+                if ($response->getStatusCode() === 200) {
+                    $data = $response->toArray();
+                    $attributes = $data['data']['attributes'] ?? [];
+                    
+                    // Récupérer les tags depuis les attributs
+                    $tags = $attributes['tags'] ?? [];
+                    
+                    // Traiter les tags
+                    $tagRelations = array_filter($tags, function($tag) {
+                        return isset($tag['attributes']) && $tag['attributes']['group'] === 'genre';
+                    });
+
+                    $tagsAdded = 0;
+                    foreach ($tagRelations as $tagRelation) {
+                        $mangadxId = $tagRelation['id'];
+                        $attributes = $tagRelation['attributes'];
+                        $tagName = $attributes['name']['fr'] ?? $attributes['name']['en'] ?? null;
+                        
+                        if ($tagName) {
+                            // Chercher ou créer le tag
+                            $tag = $this->tagRepository->findOneBy(['mangadxId' => $mangadxId]);
+                            if (!$tag) {
+                                $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
+                                if (!$tag) {
+                                    $tag = new Tag();
+                                    $tag->setNom($tagName);
+                                    $tag->setMangadxId($mangadxId);
+                                    $this->entityManager->persist($tag);
+                                } else if (!$tag->getMangadxId()) {
+                                    $tag->setMangadxId($mangadxId);
+                                }
+                            }
+                            
+                            // Associer le tag à l'œuvre
+                            if (!$oeuvre->getTags()->contains($tag)) {
+                                $oeuvre->addTag($tag);
+                                $tagsAdded++;
+                            }
+                        }
+                    }
+                    
+                    if ($tagsAdded > 0) {
+                        $synced++;
+                        $this->logger->info("✅ {$oeuvre->getTitre()} - {$tagsAdded} genres ajoutés");
+                    }
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $this->logger->error("❌ {$oeuvre->getTitre()} - Erreur: " . $e->getMessage());
+            }
+            
+            $progressBar->advance();
+        }
+
+        $progressBar->finish();
+        $io->newLine(2);
+
+        $this->entityManager->flush();
+
+        if ($errors > 0) {
+            $io->warning("⚠️ {$errors} erreurs rencontrées");
+        }
+
+        return $synced;
     }
 } 

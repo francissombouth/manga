@@ -10,7 +10,6 @@ docker/README.md
 CHANGELOG*
 
 # Tests
-tests/
 phpunit.xml
 phpunit.dist.xml
 

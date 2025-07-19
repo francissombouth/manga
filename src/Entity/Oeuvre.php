@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OeuvreRepository::class)]
 class Oeuvre
@@ -20,19 +21,26 @@ class Oeuvre
 
     #[ORM\Column(length: 255)]
     #[Groups(['oeuvre:read'])]
+    #[Assert\NotBlank(message: 'Le titre est obligatoire')]
+    #[Assert\Length(min: 1, max: 255, minMessage: 'Le titre doit contenir au moins {{ limit }} caractère', maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères')]
     private ?string $titre = null;
 
     #[ORM\ManyToOne(inversedBy: 'oeuvres')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['oeuvre:read'])]
+    #[Assert\NotNull(message: 'L\'auteur est obligatoire')]
     private ?Auteur $auteur = null;
 
     #[ORM\Column(length: 50)]
     #[Groups(['oeuvre:read'])]
+    #[Assert\NotBlank(message: 'Le type est obligatoire')]
+    #[Assert\Choice(choices: ['Manga', 'Manhwa', 'Manhua', 'Light Novel', 'Web Novel'], message: 'Le type doit être l\'un des suivants : {{ choices }}')]
     private ?string $type = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['oeuvre:read'])]
+    #[Assert\Url(protocols: ['http', 'https'], message: "L'URL de la couverture doit être une URL valide commençant par http:// ou https://")]
+    #[Assert\NotBlank(allowNull: true, message: "L'URL ne peut pas être une chaîne invalide")]
     private ?string $couverture = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

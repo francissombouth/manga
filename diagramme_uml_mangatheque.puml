@@ -1,0 +1,228 @@
+@startuml MangaThèque - Diagramme de Classes
+
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName Arial
+skinparam backgroundColor #FFFFFF
+skinparam classBackgroundColor #F8F9FA
+skinparam classBorderColor #6C757D
+
+title MangaThèque - Diagramme de Classes UML
+
+' ===== ENTITÉS PRINCIPALES =====
+
+class User {
+  -id: int
+  -email: string
+  -roles: array
+  -password: string
+  -nom: string
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getEmail(): string
+  +getRoles(): array
+  +getPassword(): string
+  +getNom(): string
+  +isAdmin(): bool
+  +addRole(string): User
+  +removeRole(string): User
+}
+
+class Oeuvre {
+  -id: int
+  -titre: string
+  -type: string
+  -couverture: string
+  -resume: text
+  -datePublication: DateTime
+  -isbn: string
+  -mangadxId: string
+  -statut: string
+  -originalLanguage: text
+  -demographic: text
+  -contentRating: text
+  -alternativeTitles: json
+  -lastVolume: text
+  -lastChapter: text
+  -year: int
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getTitre(): string
+  +getType(): string
+  +getResume(): string
+  +getCouverture(): string
+  +getImageUrl(): string
+  +getChapitresSorted(): array
+  +getFirstChapter(): Chapitre
+  +getLatestChapter(): Chapitre
+}
+
+class Auteur {
+  -id: int
+  -nom: string
+  -prenom: string
+  -nomPlume: string
+  -biographie: text
+  -dateNaissance: DateTime
+  -nationalite: string
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getNom(): string
+  +getPrenom(): string
+  +getNomPlume(): string
+  +getBiographie(): string
+}
+
+class Chapitre {
+  -id: int
+  -titre: string
+  -ordre: int
+  -resume: text
+  -pages: json
+  -mangadxChapterId: string
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getTitre(): string
+  +getOrdre(): int
+  +getPages(): array
+  +getNextChapitre(): Chapitre
+  +getPreviousChapitre(): Chapitre
+}
+
+class Tag {
+  -id: int
+  -nom: string
+  -mangadxId: string
+  -createdAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getNom(): string
+  +getMangadxId(): string
+}
+
+' ===== ENTITÉS DE RELATION =====
+
+class CollectionUser {
+  -id: int
+  -dateAjout: DateTimeImmutable
+  -notePersonnelle: text
+  -createdAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getDateAjout(): DateTimeImmutable
+  +getNotePersonnelle(): string
+}
+
+class Statut {
+  -id: int
+  -nom: string
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getNom(): string
+  +getUser(): User
+  +getOeuvre(): Oeuvre
+}
+
+class Commentaire {
+  -id: int
+  -contenu: text
+  -createdAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getContenu(): string
+  +getLikesCount(): int
+  +isLikedByUser(User): bool
+  +isReponse(): bool
+  +getReponsesCount(): int
+}
+
+class CommentaireLike {
+  -id: int
+  -createdAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getUser(): User
+  +getCommentaire(): Commentaire
+}
+
+class OeuvreNote {
+  -id: int
+  -note: int
+  -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
+  --
+  +getId(): int
+  +getNote(): int
+  +getUser(): User
+  +getOeuvre(): Oeuvre
+}
+
+' ===== RELATIONS =====
+
+' Relations User
+User ||--o{ CollectionUser : "possède"
+User ||--o{ Statut : "a"
+User ||--o{ Commentaire : "écrit"
+User ||--o{ CommentaireLike : "like"
+User ||--o{ OeuvreNote : "note"
+
+' Relations Oeuvre
+Oeuvre }o--|| Auteur : "écrit par"
+Oeuvre ||--o{ Chapitre : "contient"
+Oeuvre }o--o{ Tag : "tagué par"
+Oeuvre ||--o{ CollectionUser : "dans collection"
+Oeuvre ||--o{ Statut : "a statut"
+Oeuvre ||--o{ Commentaire : "commenté"
+Oeuvre ||--o{ OeuvreNote : "noté"
+
+' Relations Commentaire
+Commentaire }o--|| User : "écrit par"
+Commentaire }o--|| Oeuvre : "sur"
+Commentaire }o--o| Commentaire : "répond à"
+Commentaire ||--o{ CommentaireLike : "liké par"
+
+' Relations Chapitre
+Chapitre }o--|| Oeuvre : "appartient à"
+
+' Relations Auteur
+Auteur ||--o{ Oeuvre : "écrit"
+
+' Relations Tag
+Tag }o--o{ Oeuvre : "tag"
+
+' Relations CollectionUser
+CollectionUser }o--|| User : "appartient à"
+CollectionUser }o--|| Oeuvre : "contient"
+
+' Relations Statut
+Statut }o--|| User : "appartient à"
+Statut }o--|| Oeuvre : "sur"
+
+' Relations CommentaireLike
+CommentaireLike }o--|| User : "par"
+CommentaireLike }o--|| Commentaire : "sur"
+
+' Relations OeuvreNote
+OeuvreNote }o--|| User : "par"
+OeuvreNote }o--|| Oeuvre : "sur"
+
+' ===== NOTES =====
+note top of User : "Gestion des utilisateurs\net authentification"
+note top of Oeuvre : "Entité centrale du système\n(mangas, animes, etc.)"
+note top of Chapitre : "Chapitres/épisodes\ndes œuvres"
+note top of Commentaire : "Système de commentaires\navec réponses"
+note top of CollectionUser : "Collection personnelle\nde l'utilisateur"
+note top of Statut : "Statut de lecture\n(lu, en cours, etc.)"
+
+@enduml 

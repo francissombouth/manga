@@ -1,0 +1,194 @@
+@startuml MangaThèque - Modèle Entité-Relation (MER)
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam entityBackgroundColor #E3F2FD
+skinparam entityBorderColor #1976D2
+skinparam entityFontSize 11
+skinparam entityFontName Arial
+skinparam relationshipFontSize 10
+skinparam relationshipFontName Arial
+
+title MangaThèque - Modèle Entité-Relation (MER)
+
+' ===== ENTITÉS =====
+
+entity "user" {
+  * id : INT (PK)
+  --
+  * email : VARCHAR(180) (UNIQUE)
+  * roles : JSON
+  * password : VARCHAR(255)
+  * nom : VARCHAR(255)
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+entity "auteur" {
+  * id : INT (PK)
+  --
+  * nom : VARCHAR(255)
+  prenom : VARCHAR(255)
+  nomPlume : VARCHAR(255)
+  biographie : TEXT
+  dateNaissance : DATE
+  nationalite : VARCHAR(100)
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+entity "oeuvre" {
+  * id : INT (PK)
+  --
+  * titre : VARCHAR(255)
+  * auteur_id : INT (FK)
+  * type : VARCHAR(50)
+  couverture : VARCHAR(255)
+  resume : TEXT
+  datePublication : DATE
+  isbn : VARCHAR(20)
+  mangadxId : VARCHAR(255)
+  statut : VARCHAR(50)
+  originalLanguage : TEXT
+  demographic : TEXT
+  contentRating : TEXT
+  alternativeTitles : JSON
+  lastVolume : TEXT
+  lastChapter : TEXT
+  year : INT
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+entity "chapitre" {
+  * id : INT (PK)
+  --
+  * titre : VARCHAR(255)
+  * ordre : INT
+  resume : TEXT
+  * pages : JSON
+  * oeuvre_id : INT (FK)
+  mangadxChapterId : VARCHAR(64)
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+entity "tag" {
+  * id : INT (PK)
+  --
+  * nom : VARCHAR(255) (UNIQUE)
+  mangadxId : VARCHAR(255) (UNIQUE)
+  * createdAt : TIMESTAMP
+}
+
+entity "oeuvre_tag" {
+  * oeuvre_id : INT (FK)
+  * tag_id : INT (FK)
+}
+
+entity "collection_user" {
+  * id : INT (PK)
+  --
+  * user_id : INT (FK)
+  * oeuvre_id : INT (FK)
+  * dateAjout : TIMESTAMP
+  notePersonnelle : TEXT
+  * createdAt : TIMESTAMP
+}
+
+entity "statut" {
+  * id : INT (PK)
+  --
+  * nom : VARCHAR(50)
+  * user_id : INT (FK)
+  * oeuvre_id : INT (FK)
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+entity "commentaire" {
+  * id : INT (PK)
+  --
+  * contenu : TEXT
+  * auteur_id : INT (FK)
+  * oeuvre_id : INT (FK)
+  parent_id : INT (FK)
+  * createdAt : TIMESTAMP
+}
+
+entity "commentaire_like" {
+  * id : INT (PK)
+  --
+  * user_id : INT (FK)
+  * commentaire_id : INT (FK)
+  * createdAt : TIMESTAMP
+}
+
+entity "oeuvre_note" {
+  * id : INT (PK)
+  --
+  * user_id : INT (FK)
+  * oeuvre_id : INT (FK)
+  * note : INT
+  * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
+}
+
+' ===== RELATIONS =====
+
+' Relations One-to-Many
+user ||--o{ collection_user : "possède"
+user ||--o{ statut : "a"
+user ||--o{ commentaire : "écrit"
+user ||--o{ commentaire_like : "like"
+user ||--o{ oeuvre_note : "note"
+
+auteur ||--o{ oeuvre : "écrit"
+
+oeuvre ||--o{ chapitre : "contient"
+oeuvre ||--o{ collection_user : "dans collection"
+oeuvre ||--o{ statut : "a statut"
+oeuvre ||--o{ commentaire : "commenté"
+oeuvre ||--o{ oeuvre_note : "noté"
+
+commentaire ||--o{ commentaire : "répond à"
+commentaire ||--o{ commentaire_like : "liké par"
+
+' Relations Many-to-Many
+oeuvre }o--o{ tag : "tagué par"
+oeuvre_tag }o--|| oeuvre : "appartient à"
+oeuvre_tag }o--|| tag : "contient"
+
+' Relations Many-to-One
+collection_user }o--|| user : "appartient à"
+collection_user }o--|| oeuvre : "contient"
+
+statut }o--|| user : "appartient à"
+statut }o--|| oeuvre : "sur"
+
+commentaire }o--|| user : "écrit par"
+commentaire }o--|| oeuvre : "sur"
+
+commentaire_like }o--|| user : "par"
+commentaire_like }o--|| commentaire : "sur"
+
+oeuvre_note }o--|| user : "par"
+oeuvre_note }o--|| oeuvre : "sur"
+
+chapitre }o--|| oeuvre : "appartient à"
+
+oeuvre }o--|| auteur : "écrit par"
+
+' ===== CONTRAINTES =====
+note right of commentaire_like : "UNIQUE(user_id, commentaire_id)"
+note right of oeuvre_note : "UNIQUE(user_id, oeuvre_id)"
+note right of oeuvre_tag : "Clé composite (oeuvre_id, tag_id)"
+
+' ===== INDEX SUGGESTIONS =====
+note bottom of user : "Index sur email"
+note bottom of oeuvre : "Index sur type, statut, mangadxId"
+note bottom of chapitre : "Index sur oeuvre_id, ordre"
+note bottom of commentaire : "Index sur oeuvre_id, parent_id"
+note bottom of collection_user : "Index sur user_id, oeuvre_id"
+
+@enduml 

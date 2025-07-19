@@ -50,6 +50,7 @@ class OeuvreType extends AbstractType
             ->add('couverture', UrlType::class, [
                 'label' => 'URL de la couverture',
                 'required' => false,
+                'default_protocol' => 'http',
                 'attr' => [
                     'placeholder' => 'https://exemple.com/image.jpg',
                     'class' => 'form-input'

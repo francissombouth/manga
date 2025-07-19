@@ -33,7 +33,6 @@
 }
 
 .oeuvre-cover {
-    width: 200px;
     height: 280px;
     border-radius: 15px;
     overflow: hidden;
@@ -1008,6 +1007,27 @@
         font-size: clamp(0.7rem, 2vw, 0.8rem) !important;
         padding: 0.3rem 0.6rem !important;
         word-wrap: break-word !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Badges de genres pour manga-cards */
+    .manga-genres {
+        grid-template-columns: 1fr 1fr !important;
+        gap: min(0.4rem, 1vw) !important;
+        max-width: 100% !important;
+    }
+    
+    .manga-genre-badge {
+        font-size: clamp(0.6rem, 2vw, 0.7rem) !important;
+        padding: 0.2rem 0.5rem !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .manga-genres-count {
+        font-size: clamp(0.6rem, 2vw, 0.7rem) !important;
+        padding: 0.2rem 0.4rem !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
     }

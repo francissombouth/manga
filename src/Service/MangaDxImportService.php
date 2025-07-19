@@ -71,7 +71,7 @@ class MangaDxImportService
             
             $response = $this->httpClient->request('GET', self::MANGADX_API_BASE . '/manga/' . $mangadxId, [
                 'query' => [
-                    'includes' => ['author', 'artist', 'tag', 'cover_art']
+                    'includes' => ['author', 'artist', 'cover_art']
                 ],
                 'headers' => [
                     'User-Agent' => 'MangaTheque/1.0 (Educational Project)'
@@ -97,6 +97,21 @@ class MangaDxImportService
             
             $mangaData = $data['data'];
             $attributes = $mangaData['attributes'];
+            
+            // Récupérer les tags depuis les attributs
+            $this->logger->info("Récupération des tags depuis les attributs pour l'œuvre: {$mangadxId}");
+            $tags = $attributes['tags'] ?? [];
+            
+            // Convertir les tags en relations pour la compatibilité
+            foreach ($tags as $tag) {
+                $mangaData['relationships'][] = [
+                    'id' => $tag['id'],
+                    'type' => 'tag',
+                    'attributes' => $tag['attributes'] ?? []
+                ];
+            }
+            
+            $this->logger->info("Tags récupérés depuis les attributs: " . count($tags));
             
             // Log des informations importantes récupérées
             $this->logger->info("Données récupérées avec succès pour l'œuvre {$mangadxId}", [
@@ -494,37 +509,55 @@ class MangaDxImportService
      */
     private function syncTags(Oeuvre $oeuvre, array $relationships): void
     {
-        $apiTags = [];
+        $this->logger->info("🔄 Synchronisation des genres pour l'œuvre: " . $oeuvre->getTitre());
         
-        // Récupérer les tags de l'API
-        foreach ($relationships as $relation) {
-            if ($relation['type'] === 'tag' && isset($relation['attributes'])) {
-                $tagName = $relation['attributes']['name']['en'] ?? null;
-                if ($tagName) {
-                    $apiTags[] = $tagName;
+        $tagsAssociated = 0;
+        $tagRelations = array_filter($relationships, function($rel) {
+            return $rel['type'] === 'tag' && isset($rel['attributes']) && $rel['attributes']['group'] === 'genre';
+        });
+        
+        $this->logger->info("📊 Relations genres trouvées pour synchronisation: " . count($tagRelations));
+        
+        foreach ($tagRelations as $tagRelation) {
+            $mangadxId = $tagRelation['id'];
+            $attributes = $tagRelation['attributes'];
+            $tagName = $attributes['name']['fr'] ?? $attributes['name']['en'] ?? null;
+            
+            if ($tagName) {
+                // Chercher d'abord par mangadxId
+                $tag = $this->tagRepository->findOneBy(['mangadxId' => $mangadxId]);
+                
+                // Si pas trouvé, chercher par nom
+                if (!$tag) {
+                    $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
+                    
+                    if (!$tag) {
+                        // Créer le nouveau tag
+                        $tag = new Tag();
+                        $tag->setNom($tagName);
+                        $tag->setMangadxId($mangadxId);
+                        $this->entityManager->persist($tag);
+                        $this->logger->info("✅ Nouveau genre créé lors de la synchronisation: " . $tagName);
+                    } else if (!$tag->getMangadxId()) {
+                        // Mettre à jour l'ID MangaDex si le tag existe mais n'a pas d'ID
+                        $tag->setMangadxId($mangadxId);
+                        $this->logger->info("🔄 ID MangaDex ajouté au genre existant: " . $tagName);
+                    }
+                }
+                
+                // Associer le tag à l'œuvre s'il n'est pas déjà associé
+                if (!$oeuvre->getTags()->contains($tag)) {
+                    $oeuvre->addTag($tag);
+                    $tagsAssociated++;
+                    $this->logger->info("🔗 Genre associé à l'œuvre lors de la synchronisation: " . $tagName);
                 }
             }
         }
-
-        // Ajouter les nouveaux tags de l'API s'ils n'existent pas
-        foreach ($apiTags as $tagName) {
-            $hasTag = false;
-            foreach ($oeuvre->getTags() as $existingTag) {
-                if ($existingTag->getNom() === $tagName) {
-                    $hasTag = true;
-                    break;
-                }
-            }
-            
-            if (!$hasTag) {
-                $tag = $this->tagRepository->findOneBy(['nom' => $tagName]);
-                if (!$tag) {
-                    $tag = new Tag();
-                    $tag->setNom($tagName);
-                    $this->entityManager->persist($tag);
-                }
-                $oeuvre->addTag($tag);
-            }
+        
+        if ($tagsAssociated === 0) {
+            $this->logger->info("ℹ️ Aucun nouveau genre ajouté lors de la synchronisation");
+        } else {
+            $this->logger->info("✅ {$tagsAssociated} nouveaux genres associés lors de la synchronisation !");
         }
     }
 

@@ -475,6 +475,61 @@ img {
     text-decoration: none;
 }
 
+/* Badges de genres pour les manga-cards */
+.manga-genres {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin: 1rem 0;
+    align-items: start;
+}
+
+.manga-genre-badge {
+    background: rgba(225, 29, 72, 0.1);
+    color: #e11d48;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(225, 29, 72, 0.3);
+    transition: all 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 28px;
+    box-sizing: border-box;
+}
+
+.manga-genre-badge:hover {
+    background: #e11d48;
+    color: white;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.manga-genres-count {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    width: 100%;
+    height: 100%;
+    min-height: 28px;
+    box-sizing: border-box;
+}
+
 /* Sidebar */
 .sidebar {
     background-color: var(--bg-card);
