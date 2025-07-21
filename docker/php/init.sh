@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+echo "=== DEBUT INIT.SH ==="
+
 # Extraire les infos de connexion depuis DATABASE_URL (compatible Render et local)
 if [ -n "$DATABASE_URL" ]; then
   export PGHOST=$(echo $DATABASE_URL | sed -E 's|.*@([^:/]+):([0-9]+).*|\1|')
@@ -36,6 +38,8 @@ chown -R www-data:www-data var public
 chmod -R 755 var public
 
 echo "Initialisation terminée !"
+
+echo "=== FIN INIT.SH ==="
 
 # Lancer le service principal (Nginx + PHP-FPM via Supervisor)
 exec "$@" 
