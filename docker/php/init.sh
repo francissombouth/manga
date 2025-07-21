@@ -8,9 +8,10 @@ echo "--- FIN CONTENU INIT.SH ---"
 
 # Extraire les infos de connexion depuis DATABASE_URL (compatible Render et local)
 if [ -n "$DATABASE_URL" ]; then
-  export PGHOST=$(echo $DATABASE_URL | sed -E 's|.*@([^:/]+):([0-9]+).*|\1|')
-  export PGPORT=$(echo $DATABASE_URL | sed -E 's|.*@([^:/]+):([0-9]+).*|\2|')
-  export PGUSER=$(echo $DATABASE_URL | sed -E 's|postgres://([^:]+):.*|\1|')
+  # PGHOST = hostname Render
+  export PGHOST=$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/]+):[0-9]+/.*|\1|')
+  export PGPORT=$(echo "$DATABASE_URL" | sed -E 's|.*:([0-9]+)/.*|\1|')
+  export PGUSER=$(echo "$DATABASE_URL" | sed -E 's|postgresql://([^:]+):.*|\1|')
 else
   export PGHOST=database
   export PGPORT=5432
