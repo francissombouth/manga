@@ -90,24 +90,9 @@ COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Créer le script d'initialisation
-RUN echo '#!/bin/sh' > /usr/local/bin/init.sh && \
-    echo 'set -e' >> /usr/local/bin/init.sh && \
-    echo 'echo "Waiting for database..."' >> /usr/local/bin/init.sh && \
-    echo 'while ! pg_isready -h database -p 5432 -U postgres; do' >> /usr/local/bin/init.sh && \
-    echo '  sleep 1' >> /usr/local/bin/init.sh && \
-    echo 'done' >> /usr/local/bin/init.sh && \
-    echo 'echo "Database is ready!"' >> /usr/local/bin/init.sh && \
-    echo 'cd /var/www/html' >> /usr/local/bin/init.sh && \
-    echo 'php bin/console doctrine:migrations:migrate --no-interaction || echo "Migrations failed, continuing..."' >> /usr/local/bin/init.sh && \
-    echo 'echo "Compiling assets..."' >> /usr/local/bin/init.sh && \
-    echo 'php bin/console asset-map:compile || echo "Asset compilation failed, continuing..."' >> /usr/local/bin/init.sh && \
-    echo 'echo "Setting permissions..."' >> /usr/local/bin/init.sh && \
-    echo 'chown -R www-data:www-data var public' >> /usr/local/bin/init.sh && \
-    echo 'chmod -R 755 var public' >> /usr/local/bin/init.sh && \
-    echo 'echo "Initialization complete!"' >> /usr/local/bin/init.sh && \
-    echo 'exec "$@"' >> /usr/local/bin/init.sh && \
-    chmod +x /usr/local/bin/init.sh
+# Copier le script d'init et le rendre exécutable (après le COPY . .)
+COPY docker/php/init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html

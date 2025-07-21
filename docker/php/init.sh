@@ -2,6 +2,9 @@
 set -e
 
 echo "=== DEBUT INIT.SH ==="
+echo "--- CONTENU INIT.SH ---"
+cat /usr/local/bin/init.sh
+echo "--- FIN CONTENU INIT.SH ---"
 
 # Extraire les infos de connexion depuis DATABASE_URL (compatible Render et local)
 if [ -n "$DATABASE_URL" ]; then
