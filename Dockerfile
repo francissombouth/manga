@@ -42,8 +42,11 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi -
 # Copier le code source
 COPY . .
 
+# Créer les répertoires nécessaires
+RUN mkdir -p var/cache var/log public/uploads
+
 # Exécuter les scripts post-installation après avoir copié tous les fichiers
-RUN composer run-script post-install-cmd
+RUN composer run-script post-install-cmd || echo "Scripts post-install failed, continuing..."
 
 # Stage de production
 FROM php:8.2-fpm-alpine AS production

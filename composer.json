@@ -86,6 +86,11 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "render-build": [
+            "php bin/console cache:clear --env=prod",
+            "php bin/console assets:install public --env=prod",
+            "php bin/console importmap:install --env=prod"
         ]
     },
     "conflict": {
