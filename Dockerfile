@@ -42,6 +42,10 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi -
 # Copier le code source
 COPY . .
 
+# Copier le script d'init et le rendre exécutable
+COPY docker/php/init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
+
 # Créer les répertoires nécessaires
 RUN mkdir -p var/cache var/log public/uploads
 
