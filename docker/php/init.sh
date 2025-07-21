@@ -12,6 +12,11 @@ else
   export PGUSER=postgres
 fi
 
+echo "DATABASE_URL=$DATABASE_URL"
+echo "PGHOST=$PGHOST"
+echo "PGPORT=$PGPORT"
+echo "PGUSER=$PGUSER"
+
 echo "Attente de la base de données à $PGHOST:$PGPORT (utilisateur: $PGUSER)..."
 while ! pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"; do
   sleep 1
