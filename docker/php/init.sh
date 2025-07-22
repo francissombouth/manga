@@ -2,6 +2,7 @@
 set -e
 
 echo "=== DIAGNOSTIC CONNEXION ==="
+echo "Version PostgreSQL:" && php bin/console doctrine:query:sql "SELECT version()" || echo "Erreur version"
 
 cd /var/www/html
 

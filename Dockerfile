@@ -42,14 +42,10 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi -
 # Copier le code source
 COPY . .
 
-# Copier le script d'init et le rendre exécutable
-COPY docker/php/init.sh /usr/local/bin/init.sh
-RUN chmod +x /usr/local/bin/init.sh
-
 # Créer les répertoires nécessaires
 RUN mkdir -p var/cache var/log public/uploads
 
-# Exécuter les scripts post-installation après avoir copié tous les fichiers
+# Exécuter les scripts post-installation
 RUN composer run-script post-install-cmd || echo "Scripts post-install failed, continuing..."
 
 # Stage de production
@@ -70,6 +66,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     postgresql-client \
+    netcat-openbsd \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install \
@@ -80,7 +77,7 @@ RUN apk add --no-cache \
         zip \
         gd
 
-# Copier Composer pour les tests
+# Copier Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Copier les configurations
@@ -90,17 +87,21 @@ COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Copier le script d'init et le rendre exécutable (après le COPY . .)
-COPY docker/php/init.sh /usr/local/bin/init.sh
-RUN chmod +x /usr/local/bin/init.sh
-
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
 # Copier l'application depuis le stage de build
 COPY --from=build --chown=www-data:www-data /var/www/html /var/www/html
 
-# Créer les répertoires nécessaires
+# IMPORTANT: Copier le script d'init APRÈS avoir copié l'application
+COPY docker/php/init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
+
+# Alternative: Si le script init.sh est à la racine du projet
+# COPY init.sh /usr/local/bin/init.sh
+# RUN chmod +x /usr/local/bin/init.sh
+
+# Créer les répertoires nécessaires et permissions
 RUN mkdir -p /var/www/html/var/cache \
     && mkdir -p /var/www/html/var/log \
     && mkdir -p /var/www/html/public/uploads \
@@ -111,11 +112,17 @@ RUN mkdir -p /var/www/html/var/cache \
     && chmod -R 755 /var/www/html/public/uploads \
     && chmod -R 755 /var/log/supervisor
 
-# Exposer le port 8080
+# Configuration PHP pour Render
+RUN echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini \
+    && echo "max_execution_time = 60" >> /usr/local/etc/php/php.ini \
+    && echo "post_max_size = 32M" >> /usr/local/etc/php/php.ini \
+    && echo "upload_max_filesize = 32M" >> /usr/local/etc/php/php.ini
+
+# Exposer le port 8080 (requis par Render)
 EXPOSE 8080
 
 # Utiliser le script d'initialisation comme point d'entrée
 ENTRYPOINT ["/usr/local/bin/init.sh"]
 
 # Démarrer Supervisor qui gère PHP-FPM et Nginx
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
