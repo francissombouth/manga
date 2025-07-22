@@ -31,7 +31,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
         gd
 
 # Installer le binaire symfony pour les auto-scripts
-RUN curl -sS https://get.symfony.com/cli/installer | bash && \
+RUN curl -sS https://get.symfony.com/cli/installer | sh && \
     mv /root/.symfony*/bin/symfony /usr/local/bin/symfony
 
 # Copier Composer
