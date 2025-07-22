@@ -50,6 +50,16 @@ try {
 
 echo "=== FIN DIAGNOSTIC ==="
 
+# Appliquer les migrations Doctrine (création des tables)
+echo "Exécution des migrations Doctrine..."
+php bin/console doctrine:migrations:migrate --no-interaction || echo "Erreur lors des migrations, on continue..."
+
+# Compiler les assets Symfony (AssetMapper, Importmap, etc.)
+echo "Compilation des assets Symfony..."
+php bin/console asset-map:compile --env=prod || echo "Erreur asset-map:compile, on continue..."
+php bin/console importmap:install --env=prod || echo "Erreur importmap:install, on continue..."
+php bin/console assets:install public --env=prod || echo "Erreur assets:install, on continue..."
+
 # Continuer avec le déploiement même en cas d'erreur
 echo "Lancement du service principal..."
 exec "$@"
