@@ -1,61 +1,54 @@
 #!/bin/sh
 set -e
 
-echo "=== DEBUT INIT.SH ==="
+echo "=== DIAGNOSTIC CONNEXION ==="
 
 cd /var/www/html
 
 echo "DATABASE_URL=$DATABASE_URL"
 
-# Attendre que la base de données soit disponible en utilisant PHP directement
-echo "Attente de la base de données..."
-timeout=60
-counter=0
+# Extraire les composants pour diagnostic
+DB_HOST=$(echo "$DATABASE_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+DB_PORT=$(echo "$DATABASE_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+DB_USER=$(echo "$DATABASE_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+DB_NAME=$(echo "$DATABASE_URL" | sed -n 's|.*/\([^/]*\)$|\1|p')
 
-while [ $counter -lt $timeout ]; do
-    if php -r "
-        try {
-            \$pdo = new PDO('$DATABASE_URL');
-            echo 'Connexion réussie!';
-            exit(0);
-        } catch (Exception \$e) {
-            exit(1);
-        }
-    " 2>/dev/null; then
-        echo "Base de données disponible!"
-        break
-    fi
-    
-    echo "En attente... ($counter/$timeout)"
-    sleep 2
-    counter=$((counter + 2))
-done
+echo "Host extraite: $DB_HOST"
+echo "Port extrait: $DB_PORT"
+echo "User extrait: $DB_USER"
+echo "Database extraite: $DB_NAME"
 
-if [ $counter -ge $timeout ]; then
-    echo "Timeout: impossible de se connecter à la base de données"
-    exit 1
+# Test de résolution DNS
+echo "Test de résolution DNS..."
+nslookup "$DB_HOST" || echo "Erreur DNS"
+
+# Test de connectivité réseau
+echo "Test de connectivité réseau..."
+nc -z "$DB_HOST" "$DB_PORT" && echo "Port accessible" || echo "Port inaccessible"
+
+# Test avec psql si disponible
+if command -v psql >/dev/null 2>&1; then
+    echo "Test avec psql..."
+    psql "$DATABASE_URL" -c "SELECT 1;" || echo "Erreur psql"
+else
+    echo "psql non disponible"
 fi
 
-# Test Symfony/Doctrine
-echo "Test Doctrine..."
-php bin/console doctrine:schema:validate --skip-sync || echo "Schéma pas encore synchronisé"
+# Test final avec PHP
+echo "Test avec PHP/PDO..."
+php -r "
+try {
+    \$pdo = new PDO('$DATABASE_URL');
+    echo 'Connexion PHP réussie!' . PHP_EOL;
+    \$stmt = \$pdo->query('SELECT version()');
+    echo 'Version PostgreSQL: ' . \$stmt->fetchColumn() . PHP_EOL;
+} catch (Exception \$e) {
+    echo 'Erreur PHP: ' . \$e->getMessage() . PHP_EOL;
+}
+"
 
-# Migrations
-echo "Exécution des migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction || echo "Erreur migrations, on continue..."
+echo "=== FIN DIAGNOSTIC ==="
 
-# Cache
-echo "Nettoyage du cache..."
-php bin/console cache:clear --env=prod || echo "Erreur cache clear"
-php bin/console cache:warmup --env=prod || echo "Erreur cache warmup"
-
-# Permissions
-echo "Configuration des permissions..."
-chown -R www-data:www-data var/ 2>/dev/null || true
-chmod -R 755 var/ 2>/dev/null || true
-
-echo "Initialisation terminée avec succès !"
-echo "=== FIN INIT.SH ==="
-
-# Lancer le service principal
+# Continuer avec le déploiement même en cas d'erreur
+echo "Lancement du service principal..."
 exec "$@"
