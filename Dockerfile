@@ -47,11 +47,11 @@ WORKDIR /var/www/html
 # Copier les fichiers de dépendances
 COPY composer.json composer.lock ./
 
-# Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
-
 # Copier le code source
 COPY . .
+
+# Installer les dépendances PHP
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
 
 # Compiler les assets Symfony (AssetMapper)
 RUN php bin/console asset-map:compile --env=prod || true
