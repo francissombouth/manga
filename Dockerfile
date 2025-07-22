@@ -39,6 +39,9 @@ RUN apk add --no-cache bash && \
 # Copier Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Autoriser composer à tourner en root (Docker)
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 WORKDIR /var/www/html
 
 # Copier les fichiers de dépendances
