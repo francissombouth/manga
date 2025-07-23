@@ -289,6 +289,8 @@ class AdminController extends AbstractController
                 if (!$dryRun) {
                     // Vider la base si l'option force est cochée
                     if ($force) {
+                        // Supprimer d'abord les commentaires pour éviter les violations de clé étrangère
+                        $this->entityManager->createQuery('DELETE FROM App\\Entity\\Commentaire')->execute();
                         $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
                         $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
                         $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
