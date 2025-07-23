@@ -15,8 +15,6 @@ class AdminImportManager {
     }
 
     init() {
-        console.log('🚀 Initialisation du gestionnaire d\'import admin');
-        
         // Attendre que le DOM soit chargé
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.bindEvents());

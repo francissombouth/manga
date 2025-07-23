@@ -59,6 +59,9 @@
             "./config/packages/nelmio_cors.yaml"
         ]
     },
+    "opctim/symfony-bruno-generator": {
+        "version": "1.0.0"
+    },
     "phpunit/phpunit": {
         "version": "11.5",
         "recipe": {

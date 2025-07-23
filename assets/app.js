@@ -9,8 +9,6 @@ import './styles/app.css';
 import './styles/components/burger-menu.css';
 import './styles/components/flash-messages.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
-
 // Gestion des onglets
 document.addEventListener('DOMContentLoaded', function() {
     initTabs();
@@ -19,11 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Activer l'onglet spécifié dans l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const ongletParam = urlParams.get('onglet');
-    console.log('Paramètre onglet dans URL:', ongletParam);
     
     if (ongletParam === 'commentaires') {
         const targetButton = document.querySelector(`[data-tab="${ongletParam}"]`);
-        console.log('Bouton trouvé pour paramètre URL:', targetButton);
         if (targetButton) {
             setTimeout(() => {
                 targetButton.click();
@@ -47,13 +43,9 @@ function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    console.log('Initialisation des onglets - Boutons trouvés:', tabButtons.length);
-    console.log('Initialisation des onglets - Contenus trouvés:', tabContents.length);
-
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const targetTab = this.getAttribute('data-tab');
-            console.log('Clic sur onglet:', targetTab);
             
             // Retirer la classe active de tous les boutons et contenus
             tabButtons.forEach(btn => {
@@ -73,16 +65,13 @@ function initTabs() {
             this.style.color = 'white';
             
             const activeContent = document.getElementById(`tab-${targetTab}`);
-            console.log('Contenu trouvé pour onglet:', activeContent);
             
             if (activeContent) {
                 activeContent.classList.add('active');
                 activeContent.style.display = 'block';
-                console.log('Onglet affiché:', targetTab);
                 
                 // Si on clique sur l'onglet commentaires, garder le rendu Twig côté serveur
                 if (targetTab === 'commentaires') {
-                    console.log('Affichage des commentaires (rendu côté serveur)');
                     // loadCommentaires(); // Désactivé pour garder les réponses et boutons "Voir réponse"
                 }
             } else {
@@ -94,7 +83,6 @@ function initTabs() {
 
 function initCommentairesForm() {
     const form = document.getElementById('commentaire-form');
-    console.log('Formulaire commentaire trouvé:', form);
     
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -106,7 +94,6 @@ function initCommentairesForm() {
 
 // Fonction de secours pour forcer l'affichage de l'onglet commentaires
 function forceShowCommentaires() {
-    console.log('Forçage de l\'affichage des commentaires...');
     const commentairesTab = document.getElementById('tab-commentaires');
     const chapitresTab = document.getElementById('tab-chapitres');
     const commentairesBtn = document.querySelector('[data-tab="commentaires"]');
@@ -127,7 +114,6 @@ function forceShowCommentaires() {
         commentairesBtn.style.background = 'var(--accent-purple)';
         commentairesBtn.style.color = 'white';
         
-        console.log('Onglet commentaires forcé à s\'afficher');
         return true;
     }
     console.error('Impossible de forcer l\'affichage - éléments manquants');
@@ -136,7 +122,6 @@ function forceShowCommentaires() {
 
 async function loadCommentaires() {
     const oeuvreId = getOeuvreIdFromUrl();
-    console.log('ID de l\'oeuvre extraite:', oeuvreId);
     
     if (!oeuvreId) {
         console.error('Impossible de récupérer l\'ID de l\'oeuvre depuis l\'URL');
@@ -144,12 +129,9 @@ async function loadCommentaires() {
     }
 
     try {
-        console.log('Chargement des commentaires via API...');
         const response = await fetch(`/api/commentaires/oeuvre/${oeuvreId}`);
-        console.log('Réponse API reçue:', response.status);
         
         const data = await response.json();
-        console.log('Données reçues:', data);
         
         if (response.ok) {
             updateCommentairesDisplay(data);

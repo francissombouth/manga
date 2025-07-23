@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8a806e3ffbb49b6e843bf6dfa50ebdb0",
+    "content-hash": "9b48d43cef3c516838983a0bbd438089",
     "packages": [
         {
             "name": "composer/semver",
@@ -1445,6 +1445,128 @@
                 "source": "https://github.com/nelmio/NelmioCorsBundle/tree/2.5.0"
             },
             "time": "2024-06-24T21:25:28+00:00"
+        },
+        {
+            "name": "opctim/bruno-lang",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opctim/bruno-lang.git",
+                "reference": "56de72bc3c507c02679b3661e91d327ec5d24b12"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opctim/bruno-lang/zipball/56de72bc3c507c02679b3661e91d327ec5d24b12",
+                "reference": "56de72bc3c507c02679b3661e91d327ec5d24b12",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "symfony/filesystem": "^5.4 || ^6.4 || ^7.2",
+                "symfony/finder": "^5.4 || ^6.4 || ^7.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Opctim\\BrunoLang\\": "src/"
+                },
+                "classmap": [
+                    "src/V1/Tag/Schema"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "@opctim / Tim Nelles",
+                    "email": "kontakt@timnelles.de",
+                    "homepage": "https://github.com/opctim",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Framework-agnostic, bidirectional implementation of the Bruno (usebruno.com) .bru file language. Can be used to generate and parse from and to Bruno collections / request files.",
+            "keywords": [
+                "bruno",
+                "cakephp",
+                "codeigniter",
+                "framework-agnostic",
+                "fuelphp",
+                "generator",
+                "laminas",
+                "laravel",
+                "parser",
+                "phpixie",
+                "symfony",
+                "yii"
+            ],
+            "support": {
+                "issues": "https://github.com/opctim/bruno-lang/issues",
+                "source": "https://github.com/opctim/bruno-lang/tree/1.2.0"
+            },
+            "time": "2025-02-19T16:05:45+00:00"
+        },
+        {
+            "name": "opctim/symfony-bruno-generator",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opctim/symfony-bruno-generator.git",
+                "reference": "42fe3f57f6dbc515b080e5a69d7f6250c28805cd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opctim/symfony-bruno-generator/zipball/42fe3f57f6dbc515b080e5a69d7f6250c28805cd",
+                "reference": "42fe3f57f6dbc515b080e5a69d7f6250c28805cd",
+                "shasum": ""
+            },
+            "require": {
+                "opctim/bruno-lang": "^1.2",
+                "php": ">=8.1",
+                "symfony/console": "^5.4 || ^6.4 || ^7.0",
+                "symfony/filesystem": "^5.4 || ^6.4 || ^7.0",
+                "symfony/framework-bundle": "^5.4 || ^6.4 || ^7.0",
+                "symfony/string": "^5.4 || ^6.4 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.5"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Opctim\\BrunoGeneratorBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "@opctim / Tim Nelles",
+                    "email": "kontakt@timnelles.de",
+                    "homepage": "https://github.com/opctim",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This bundle provides a simple command that will generate .bru files based on your registered routes using opctim/bruno-lang. Its usage is very similar to the commands of symfony/maker-bundle.",
+            "keywords": [
+                "bruno",
+                "generator",
+                "maker",
+                "maker-bundle",
+                "parser",
+                "symfony"
+            ],
+            "support": {
+                "issues": "https://github.com/opctim/symfony-bruno-generator/issues",
+                "source": "https://github.com/opctim/symfony-bruno-generator/tree/1.0.0"
+            },
+            "time": "2025-02-20T11:16:34+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

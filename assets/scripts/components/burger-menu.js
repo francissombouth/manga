@@ -28,7 +28,6 @@ class BurgerMenu {
     }
 
     setupMenu() {
-        console.log('🍔 Initialisation du menu burger...');
         
         // Récupération des éléments
         this.burgerMenu = document.getElementById('burger-menu');
@@ -41,8 +40,6 @@ class BurgerMenu {
         if (!this.validateElements()) {
             return;
         }
-
-        console.log('✅ Tous les éléments du menu burger sont trouvés');
 
         // Initialisation des événements
         this.bindEvents();
@@ -89,7 +86,6 @@ class BurgerMenu {
     handleBurgerClick(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('🍔 Clic sur le menu burger');
         
         if (this.mobileNav.classList.contains('active')) {
             this.closeMobileMenu();
@@ -100,19 +96,16 @@ class BurgerMenu {
 
     handleCloseClick(e) {
         e.preventDefault();
-        console.log('❌ Clic sur le bouton fermer');
         this.closeMobileMenu();
     }
 
     handleOverlayClick(e) {
         if (e.target === this.mobileOverlay) {
-            console.log('🌐 Clic sur l\'overlay');
             this.closeMobileMenu();
         }
     }
 
     handleLinkClick() {
-        console.log('🔗 Clic sur un lien de navigation');
         // Petit délai pour permettre la navigation
         setTimeout(() => this.closeMobileMenu(), 100);
     }
@@ -120,13 +113,11 @@ class BurgerMenu {
     handleKeyDown(e) {
         // Fermer avec Escape
         if (e.key === 'Escape' && this.mobileNav.classList.contains('active')) {
-            console.log('⌨️ Touche Escape pressée');
             this.closeMobileMenu();
         }
     }
 
     openMobileMenu() {
-        console.log('📱 Ouverture du menu mobile');
         this.burgerMenu.classList.add('active');
         this.mobileNav.classList.add('active');
         this.mobileOverlay.style.display = 'block';
@@ -143,7 +134,6 @@ class BurgerMenu {
     }
 
     closeMobileMenu() {
-        console.log('📱 Fermeture du menu mobile');
         this.burgerMenu.classList.remove('active');
         this.mobileNav.classList.remove('active');
         this.mobileOverlay.classList.remove('active');

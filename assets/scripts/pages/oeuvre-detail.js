@@ -10,23 +10,19 @@ let isInitialized = false;
 
 // ================== INITIALISATION UNIQUE ==================
 function initOeuvrePage(id) {
-        console.log('[DEBUG] Appel de initOeuvrePage avec id =', id);
     // Éviter absolument les initialisations multiples
     if (isInitialized) {
-            console.log('[DEBUG] Page déjà initialisée, arrêt');
         return;
     }
     
     oeuvreId = id;
     isInitialized = true;
-        console.log('[DEBUG] Initialisation UNIQUE de la page œuvre:', oeuvreId);
     
     // Initialiser immédiatement sans attendre DOMContentLoaded
     initAllFeatures();
 }
 
 function initAllFeatures() {
-    console.log('🎯 Initialisation de toutes les fonctionnalités');
     
     try {
         initTabs();
@@ -36,7 +32,6 @@ function initAllFeatures() {
         loadAverageRating();
         checkFavoriteStatus();
         
-        console.log('✅ Page entièrement initialisée');
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation:', error);
     }
@@ -44,7 +39,6 @@ function initAllFeatures() {
 
 // ================== GESTION DES ONGLETS ==================
 function initTabs() {
-    console.log('🎯 Initialisation des onglets');
     
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -71,7 +65,6 @@ function handleTabClick(e) {
     e.preventDefault();
     
     const targetTab = this.getAttribute('data-tab');
-    console.log('📑 Changement vers onglet:', targetTab);
     
     // Désactiver tous les onglets
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -89,13 +82,11 @@ function handleTabClick(e) {
         
         // Réinitialiser les boutons si on va sur commentaires
         if (targetTab === 'commentaires') {
-                console.log('💬 Onglet commentaires activé - Réinitialisation des boutons d\'interaction');
             setTimeout(() => {
                 initInteractionButtons();
                     // Réinitialiser aussi le formulaire de commentaire
                     initCommentFormOnce();
                     // Réinitialiser spécifiquement les boutons toggle
-                    console.log('🔄 Réinitialisation spécifique des boutons toggle');
                     initToggleButtonsSimple();
             }, 100);
         }
@@ -104,7 +95,6 @@ function handleTabClick(e) {
 
 // ================== SYSTÈME DE NOTATION ==================
 function initRatingStars() {
-    console.log('⭐ Initialisation du système de notation');
     
     const stars = document.querySelectorAll('.star, .star-main');
     const submitBtn = document.getElementById('submit-rating-main');
@@ -260,7 +250,6 @@ function initCommentFormOnce() {
     const form = document.getElementById('commentaire-form');
     if (!form) return;
     
-    console.log('💬 Initialisation UNIQUE du formulaire commentaires');
     
     // Supprimer TOUS les event listeners
     const newForm = form.cloneNode(true);
@@ -275,7 +264,6 @@ function initCommentFormOnce() {
             
             // Protection absolue contre la double soumission
             if (commentSubmissionInProgress) {
-                console.log('💬 BLOCAGE: Soumission déjà en cours');
                 return false;
             }
             
@@ -283,19 +271,15 @@ function initCommentFormOnce() {
             return false;
         });
         
-        console.log('✅ Formulaire commentaires configuré avec protection');
     }
 }
 
 async function submitCommentSafely() {
-        console.log('[DEBUG] submitCommentSafely appelé');
-    if (commentSubmissionInProgress) {
-        console.log('💬 BLOCAGE: submitCommentSafely appelée en double');
+        if (commentSubmissionInProgress) {
         return;
     }
     
         commentSubmissionInProgress = true;
-        console.log('💬 DEBUT protection soumission commentaire');
         
         const textarea = document.getElementById('commentaire_contenu');
         const contenu = textarea?.value?.trim();
@@ -350,15 +334,13 @@ async function submitCommentSafely() {
         // Réinitialiser le flag après un délai de sécurité
         setTimeout(() => {
             commentSubmissionInProgress = false;
-            console.log('💬 FIN protection soumission commentaire');
         }, 3000);
     }
 }
 
     // ================== BOUTONS D'INTERACTION ==================
 function initInteractionButtons() {
-        console.log('🎯 Initialisation des boutons d\'interaction');
-    initLikeButtonsSimple();
+        initLikeButtonsSimple();
     initReplyButtonsSimple();
     initToggleButtonsSimple();
 }
@@ -416,14 +398,11 @@ function initReplyButtonsSimple() {
 
 function initToggleButtonsSimple() {
         const toggleButtons = document.querySelectorAll('.toggle-replies-btn, .toggle-replies-to-replies-btn');
-        console.log('🔄 Initialisation des boutons toggle - Trouvés:', toggleButtons.length);
     
     toggleButtons.forEach(button => {
-            console.log('🔄 Bouton toggle trouvé:', button.textContent?.trim());
             button.addEventListener('click', (e) => {
             e.preventDefault();
                 const commentaireId = button.getAttribute('data-commentaire-id');
-                console.log('🔄 Clic sur bouton toggle pour commentaire:', commentaireId);
             
                 if (button.classList.contains('toggle-replies-to-replies-btn')) {
                     toggleRepliesToReplies(commentaireId);
@@ -451,18 +430,12 @@ function showReplyToReplyForm(commentaireId) {
 }
 
 function toggleReplies(commentaireId) {
-        console.log('🔄 toggleReplies appelé pour commentaireId:', commentaireId);
         const replies = document.getElementById(`replies-${commentaireId}`);
         const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
     
-        console.log('🔄 Éléments trouvés:', {
-            replies: replies ? 'oui' : 'non',
-            button: button ? 'oui' : 'non'
-        });
         
         if (replies && button) {
             const isVisible = replies.style.display !== 'none';
-            console.log('🔄 État actuel - Visible:', isVisible);
             
             replies.style.display = isVisible ? 'none' : 'block';
         
@@ -471,33 +444,24 @@ function toggleReplies(commentaireId) {
         
             if (icon) {
                 icon.textContent = isVisible ? '▼' : '▲';
-                console.log('🔄 Icône mise à jour:', icon.textContent);
             }
             if (text) {
                 const count = replies.children.length;
                 text.textContent = isVisible ? 
                     `Voir ${count} réponse${count > 1 ? 's' : ''}` : 
                     'Masquer les réponses';
-                console.log('🔄 Texte mis à jour:', text.textContent);
             }
         } else {
-            console.log('🔄 ERREUR: Éléments manquants pour toggleReplies');
     }
 }
 
 function toggleRepliesToReplies(commentaireId) {
-        console.log('🔄 toggleRepliesToReplies appelé pour commentaireId:', commentaireId);
         const replies = document.getElementById(`replies-to-replies-${commentaireId}`);
         const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
     
-        console.log('🔄 Éléments trouvés (réponses à réponses):', {
-            replies: replies ? 'oui' : 'non',
-            button: button ? 'oui' : 'non'
-        });
         
         if (replies && button) {
             const isVisible = replies.style.display !== 'none';
-            console.log('🔄 État actuel - Visible:', isVisible);
             
             replies.style.display = isVisible ? 'none' : 'block';
         
@@ -506,24 +470,20 @@ function toggleRepliesToReplies(commentaireId) {
         
             if (icon) {
                 icon.textContent = isVisible ? '▼' : '▲';
-                console.log('🔄 Icône mise à jour:', icon.textContent);
             }
             if (text) {
                 const count = replies.children.length;
                 text.textContent = isVisible ? 
                     `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
                     'Masquer les réponses';
-                console.log('🔄 Texte mis à jour:', text.textContent);
-        }
+            }
         } else {
-            console.log('🔄 ERREUR: Éléments manquants pour toggleRepliesToReplies');
     }
 }
 
 // ================== FONCTIONS APPELÉES PAR LE TEMPLATE ==================
 async function submitReply(commentaireId) {
-        console.log('[DEBUG] submitReply appelé pour commentaireId =', commentaireId);
-    const textarea = document.getElementById(`reply-content-${commentaireId}`);
+        const textarea = document.getElementById(`reply-content-${commentaireId}`);
     const contenu = textarea?.value?.trim();
     
     if (!contenu) {
@@ -570,8 +530,7 @@ function cancelReply(commentaireId) {
 }
 
 async function submitReplyToReply(reponseId) {
-        console.log('[DEBUG] submitReplyToReply appelé pour reponseId =', reponseId);
-    const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
+        const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
     const contenu = textarea?.value?.trim();
     
     if (!contenu) {
@@ -734,51 +693,37 @@ window.initTabs = initTabs;
 window.initLikeButtons = initLikeButtons;
 window.initReplies = initReplies;
 
-    console.log('🎯 JavaScript page œuvre VERSION ENCAPSULÉE chargé');
-
     // ================== INITIALISATION IMMÉDIATE ==================
     // Essayer d'initialiser immédiatement au chargement du script
-    console.log('[DEBUG] Tentative d\'initialisation immédiate');
     const mainDivImmediate = document.querySelector('div[data-oeuvre-id]');
     if (mainDivImmediate) {
         const oeuvreIdImmediate = mainDivImmediate.dataset.oeuvreId;
-        console.log('[DEBUG] ID trouvé immédiatement:', oeuvreIdImmediate);
         if (!isInitialized) {
             window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdImmediate));
         }
-    } else {
-        console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (initialisation immédiate)');
     }
 
     // ================== INITIALISATION COMPATIBLE TURBO ==================
     // Écouter l'événement turbo:load pour l'initialisation
     document.addEventListener('turbo:load', function() {
-        console.log('[DEBUG] Événement turbo:load détecté');
         // Récupérer l'ID de l'œuvre depuis l'attribut data du div principal
         const mainDiv = document.querySelector('div[data-oeuvre-id]');
         if (mainDiv) {
             const oeuvreIdFromData = mainDiv.dataset.oeuvreId;
-            console.log('[DEBUG] ID trouvé dans data-oeuvre-id:', oeuvreIdFromData);
             // Réinitialiser le flag pour permettre une nouvelle initialisation
             isInitialized = false;
             window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFromData));
-        } else {
-            console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé');
         }
     });
 
     // Écouter aussi DOMContentLoaded pour les chargements initiaux
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('[DEBUG] Événement DOMContentLoaded détecté');
         const mainDiv = document.querySelector('div[data-oeuvre-id]');
         if (mainDiv) {
             const oeuvreIdFromData = mainDiv.dataset.oeuvreId;
-            console.log('[DEBUG] ID trouvé dans data-oeuvre-id (DOMContentLoaded):', oeuvreIdFromData);
             if (!isInitialized) {
                 window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFromData));
             }
-        } else {
-            console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (DOMContentLoaded)');
         }
     });
 
@@ -786,14 +731,10 @@ window.initReplies = initReplies;
     // Si rien ne fonctionne, essayer après un délai
     setTimeout(() => {
         if (!isInitialized) {
-            console.log('[DEBUG] Fallback: tentative d\'initialisation après timeout');
             const mainDivFallback = document.querySelector('div[data-oeuvre-id]');
             if (mainDivFallback) {
                 const oeuvreIdFallback = mainDivFallback.dataset.oeuvreId;
-                console.log('[DEBUG] ID trouvé dans fallback:', oeuvreIdFallback);
                 window.oeuvrePageInstance = initOeuvrePage(parseInt(oeuvreIdFallback));
-            } else {
-                console.log('[DEBUG] Aucun div avec data-oeuvre-id trouvé (fallback)');
             }
         }
     }, 1000);
