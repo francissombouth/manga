@@ -447,9 +447,8 @@ class MangaDxImportService
                 $chapitre->setMangadxChapterId($chapterInfo['id']);
                 
                 // Ne pas récupérer les pages lors de l'import pour éviter le rate limiting
-                $pages = $this->getChapterPages($chapterInfo['id']);
-                $chapitre->setPages($pages);
-                sleep(1); // Pour limiter le risque de rate limiting
+                // Les pages seront récupérées dynamiquement quand nécessaire
+                $chapitre->setPages([]);
                 
                 $this->logger->info("Chapitre {$chapterInfo['title']} importé avec mangadxChapterId: {$chapterInfo['id']}");
                 
