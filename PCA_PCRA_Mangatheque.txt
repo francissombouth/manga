@@ -1,0 +1,80 @@
+Plan de Continuité d’Activité (PCA) & Plan de Continuité/Reprise d’Activité (PCRA)
+Projet : Mangathèque
+Hébergement : Render.com
+
+1. Objectifs du PCA/PCRA
+- Garantir la disponibilité du site Mangathèque en cas d’incident technique (perte de données, crash serveur, erreur humaine…)
+- Permettre une restauration rapide et fiable du service et des données
+- Limiter l’impact pour les utilisateurs
+
+2. Périmètre
+- Code source (application Symfony, assets)
+- Base de données PostgreSQL (hébergée sur Render)
+- Fichiers uploadés (images, couvertures, pages de chapitres)
+- Configuration (variables d’environnement, secrets)
+
+3. Sauvegarde (Backup)
+
+a) Code source
+- Versionné sur GitHub (ou autre Git distant)
+- Redéployable à tout moment via Render
+
+b) Base de données
+- Sauvegarde automatique via le système de backup natif Render (activation dans le dashboard Render)
+- Restauration possible directement depuis l’interface Render (choix de la date/heure du backup)
+- Vérification régulière de la présence et de la validité des backups dans Render
+
+c) Fichiers uploadés
+- Stockage dans un service cloud compatible S3 (ex : Cloudflare R2) avec accès via CDN (Cloudflare)
+- Sauvegarde régulière manuelle ou automatisée (script de copie locale ou vers un autre cloud)
+- Distribution mondiale et haute disponibilité assurées par le CDN
+
+d) Configuration
+- Variables d’environnement exportées et sauvegardées dans un fichier sécurisé (hors Git)
+- Documentation de la configuration Render (services, endpoints, secrets)
+
+4. Procédure de restauration (Disaster Recovery)
+
+a) En cas de perte de la base de données
+1. Accéder au dashboard Render, section PostgreSQL > Backups
+2. Sélectionner le backup souhaité (date/heure) et lancer la restauration via l’interface Render
+3. Vérifier l’intégrité des données après restauration
+
+b) En cas de perte des fichiers uploadés
+1. Récupérer la dernière sauvegarde du bucket cloud (Cloudflare R2) ou du CDN
+2. Re-uploader le dossier ou restaurer les fichiers dans le bucket cloud
+3. Vérifier l’accessibilité via le CDN
+
+c) En cas de perte du code source
+1. Cloner le dépôt Git
+2. Redéployer sur Render (push ou déploiement manuel)
+
+d) En cas de perte totale (base + fichiers + code)
+1. Recréer les services Render (web, base) via le dashboard
+2. Restaurer la base de données via le backup Render
+3. Restaurer les fichiers uploadés
+4. Redéployer le code source
+5. Renseigner les variables d’environnement dans Render
+
+5. Tests et vérifications
+- Test de restauration complet à effectuer au moins 1 fois par an
+- Vérification régulière de la validité des sauvegardes (intégrité des dumps, accessibilité des fichiers)
+- Surveillance de l’espace disque pour les sauvegardes
+
+6. Responsabilités
+- Développeur/Administrateur :
+  - Mise en place et maintenance des scripts de sauvegarde
+  - Surveillance des sauvegardes et des restaurations
+  - Documentation et mise à jour du plan PCA/PCRA
+
+7. Bonnes pratiques et améliorations
+- Utilisation d’un CDN (Cloudflare) pour la distribution rapide et la résilience des fichiers uploadés
+- Automatisation complète de la sauvegarde des fichiers uploadés sur le cloud
+- Notification en cas d’échec de sauvegarde
+- Utilisation d’un stockage cloud dédié (S3, Cloudflare R2, etc.) pour les backups
+- Mise en place d’un cache intelligent pour les images externes
+
+8. Documentation
+- Scripts de sauvegarde et restauration documentés dans le dépôt ou un dossier /docs
+- Procédures détaillées accessibles à l’équipe technique
+
