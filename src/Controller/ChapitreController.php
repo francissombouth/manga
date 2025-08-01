@@ -21,8 +21,6 @@ class ChapitreController extends AbstractController
     public function __construct(
         private ChapitreRepository $chapitreRepository,
         private OeuvreRepository $oeuvreRepository,
-        private EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer,
         private ValidatorInterface $validator
     ) {
     }
@@ -51,16 +49,16 @@ class ChapitreController extends AbstractController
     {
         $chapitre = $this->chapitreRepository->find($id);
 
-        if (!$chapitre) {
+        if (!$chapitre || !$chapitre instanceof \App\Entity\Chapitre) {
             // Si c'est une requête AJAX ou avec Accept: application/json, retourner JSON
-            if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
+            if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', '') ?? '', 'application/json')) {
                 return $this->json(['message' => 'Chapitre non trouvé'], Response::HTTP_NOT_FOUND);
             }
             throw $this->createNotFoundException('Chapitre non trouvé');
         }
 
         // Si c'est une requête AJAX ou avec Accept: application/json, retourner JSON
-        if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
+        if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', '') ?? '', 'application/json')) {
             return $this->json($chapitre, Response::HTTP_OK, [], ['groups' => 'chapitre:read']);
         }
 
@@ -77,14 +75,14 @@ class ChapitreController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $chapitre = new Chapitre();
-        $chapitre->setTitre($data['titre']);
+        $chapitre->setTitre($data['titre'] ?? '');
         $chapitre->setOrdre($data['ordre'] ?? $data['numero'] ?? 1);
         $chapitre->setResume($data['resume'] ?? null);
         $chapitre->setPages($data['pages'] ?? []);
 
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $chapitre->setOeuvre($oeuvre);
@@ -106,7 +104,7 @@ class ChapitreController extends AbstractController
     {
         $chapitre = $this->chapitreRepository->find($id);
 
-        if (!$chapitre) {
+        if (!$chapitre || !$chapitre instanceof \App\Entity\Chapitre) {
             return $this->json(['message' => 'Chapitre non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -126,7 +124,7 @@ class ChapitreController extends AbstractController
         }
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $chapitre->setOeuvre($oeuvre);
@@ -148,7 +146,7 @@ class ChapitreController extends AbstractController
     {
         $chapitre = $this->chapitreRepository->find($id);
 
-        if (!$chapitre) {
+        if (!$chapitre || !$chapitre instanceof \App\Entity\Chapitre) {
             return $this->json(['message' => 'Chapitre non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -162,7 +160,7 @@ class ChapitreController extends AbstractController
     {
         $chapitre = $this->chapitreRepository->find($id);
 
-        if (!$chapitre) {
+        if (!$chapitre || !$chapitre instanceof \App\Entity\Chapitre) {
             return $this->json(['message' => 'Chapitre non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -180,7 +178,7 @@ class ChapitreController extends AbstractController
     {
         $chapitre = $this->chapitreRepository->find($id);
 
-        if (!$chapitre) {
+        if (!$chapitre || !$chapitre instanceof \App\Entity\Chapitre) {
             return $this->json(['message' => 'Chapitre non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
