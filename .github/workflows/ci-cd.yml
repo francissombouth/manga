@@ -10,6 +10,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   # Job de tests et analyse de code
   test:
@@ -50,8 +54,13 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Install Node.js dependencies
-      run: npm ci
+    - name: Install Node.js dependencies (if package.json exists)
+      run: |
+        if [ -f "package.json" ]; then
+          npm ci
+        else
+          echo "No package.json found, skipping Node.js dependencies"
+        fi
 
     - name: Copy environment file
       run: cp .env .env.test
@@ -161,7 +170,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
