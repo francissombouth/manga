@@ -21,8 +21,6 @@ class StatutController extends AbstractController
     public function __construct(
         private StatutRepository $statutRepository,
         private OeuvreRepository $oeuvreRepository,
-        private EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer,
         private ValidatorInterface $validator
     ) {
     }
@@ -70,7 +68,7 @@ class StatutController extends AbstractController
     {
         $statut = $this->statutRepository->find($id);
 
-        if (!$statut) {
+        if (!$statut || !$statut instanceof \App\Entity\Statut) {
             return $this->json(['message' => 'Statut non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -81,16 +79,21 @@ class StatutController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function create(Request $request): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $statut = new Statut();
-        $statut->setNom($data['nom']);
+        $statut->setNom($data['nom'] ?? '');
         $statut->setDescription($data['description'] ?? null);
-        $statut->setUser($this->getUser());
+        $statut->setUser($user);
 
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $statut->setOeuvre($oeuvre);
@@ -110,13 +113,18 @@ class StatutController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function update(int $id, Request $request): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $statut = $this->statutRepository->find($id);
 
-        if (!$statut) {
+        if (!$statut || !$statut instanceof \App\Entity\Statut) {
             return $this->json(['message' => 'Statut non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        if ($statut->getUser() !== $this->getUser()) {
+        if ($statut->getUser() !== $user) {
             return $this->json(['message' => 'Accès non autorisé'], Response::HTTP_FORBIDDEN);
         }
 
@@ -130,7 +138,7 @@ class StatutController extends AbstractController
         }
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $statut->setOeuvre($oeuvre);
@@ -150,13 +158,18 @@ class StatutController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function delete(int $id): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $statut = $this->statutRepository->find($id);
 
-        if (!$statut) {
+        if (!$statut || !$statut instanceof \App\Entity\Statut) {
             return $this->json(['message' => 'Statut non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        if ($statut->getUser() !== $this->getUser()) {
+        if ($statut->getUser() !== $user) {
             return $this->json(['message' => 'Accès non autorisé'], Response::HTTP_FORBIDDEN);
         }
 
