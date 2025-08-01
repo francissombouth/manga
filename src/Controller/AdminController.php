@@ -68,7 +68,7 @@ class AdminController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
-        $search = $request->query->get('search', '');
+        $search = (string) $request->query->get('search', '');
 
         if ($search) {
             $oeuvres = $this->oeuvreRepository->findByTitre($search);
@@ -155,7 +155,12 @@ class AdminController extends AbstractController
     #[Route('/oeuvres/{id}/chapitres', name: 'admin_oeuvre_chapitres')]
     public function oeuvreChapitres(Oeuvre $oeuvre): Response
     {
-        $chapitres = $this->chapitreRepository->findByOeuvre($oeuvre->getId());
+        $oeuvreId = $oeuvre->getId();
+        if ($oeuvreId === null) {
+            throw new \InvalidArgumentException('L\'œuvre n\'a pas d\'ID valide');
+        }
+        
+        $chapitres = $this->chapitreRepository->findByOeuvre($oeuvreId);
 
         // Récupérer les pages dynamiquement pour chaque chapitre (comme le catalogue)
         $chapitresAvecPages = [];
@@ -183,7 +188,7 @@ class AdminController extends AbstractController
         
         // Définir l'ordre automatiquement
         $lastChapitre = $this->chapitreRepository->findOneBy(['oeuvre' => $oeuvre], ['ordre' => 'DESC']);
-        $chapitre->setOrdre($lastChapitre ? $lastChapitre->getOrdre() + 1 : 1);
+        $chapitre->setOrdre($lastChapitre instanceof \App\Entity\Chapitre ? $lastChapitre->getOrdre() + 1 : 1);
 
         $form = $this->createForm(ChapitreType::class, $chapitre);
         $form->handleRequest($request);

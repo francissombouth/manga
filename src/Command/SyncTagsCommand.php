@@ -162,7 +162,7 @@ class SyncTagsCommand extends Command
         $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | 📚 %message%');
 
         foreach ($oeuvres as $oeuvre) {
-            $progressBar->setMessage($oeuvre->getTitre());
+            $progressBar->setMessage($oeuvre->getTitre() ?? 'Sans titre');
             
             $genresAssociated = $this->associateGenresForOeuvre($oeuvre);
             if ($genresAssociated > 0) {
@@ -273,11 +273,20 @@ class SyncTagsCommand extends Command
         $errors = 0;
 
         foreach ($oeuvres as $oeuvre) {
-            $progressBar->setMessage($oeuvre->getTitre());
+            if (!$oeuvre instanceof \App\Entity\Oeuvre) {
+                continue;
+            }
+            
+            $progressBar->setMessage($oeuvre->getTitre() ?? 'Sans titre');
             
             try {
                 // Récupérer les données depuis MangaDx
-                $response = $this->httpClient->request('GET', 'https://api.mangadex.org/manga/' . $oeuvre->getMangadxId(), [
+                $mangadxId = $oeuvre->getMangadxId();
+                if (!$mangadxId) {
+                    continue;
+                }
+                
+                $response = $this->httpClient->request('GET', 'https://api.mangadex.org/manga/' . $mangadxId, [
                     'headers' => ['User-Agent' => 'MangaTheque/1.0 (Educational Project)']
                 ]);
 
@@ -315,7 +324,7 @@ class SyncTagsCommand extends Command
                             }
                             
                             // Associer le tag à l'œuvre
-                            if (!$oeuvre->getTags()->contains($tag)) {
+                            if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                                 $oeuvre->addTag($tag);
                                 $tagsAdded++;
                             }
