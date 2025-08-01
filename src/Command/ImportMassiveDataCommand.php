@@ -239,6 +239,9 @@ Exemples :
         return Command::SUCCESS;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getOeuvresFromMangaDx(string $category, int $limit, int $offset): array
     {
         try {
@@ -259,6 +262,9 @@ Exemples :
         }
     }
 
+    /**
+     * @return array<string, int>
+     */
     private function getStats(): array
     {
         return [
@@ -305,11 +311,7 @@ Exemples :
             ];
             
             foreach ($sequencesToReset as $sequence) {
-                try {
-                    $this->entityManager->getConnection()->executeStatement("ALTER SEQUENCE {$sequence} RESTART WITH 1");
-                } catch (\Exception $e) {
-                    // Ignorer si la séquence n'existe pas
-                }
+                $this->entityManager->getConnection()->executeStatement("ALTER SEQUENCE {$sequence} RESTART WITH 1");
             }
         } catch (\Exception $e) {
             // Si les séquences n'existent pas ou si on est sur MySQL, ignorer l'erreur

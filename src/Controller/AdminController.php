@@ -217,7 +217,13 @@ class AdminController extends AbstractController
             $chapitre->setUpdatedAt(new \DateTimeImmutable());
             $this->chapitreRepository->save($chapitre, true);
             $this->addFlash('success', 'Le chapitre a été modifié avec succès !');
-            return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $chapitre->getOeuvre()->getId()]);
+            
+            $oeuvre = $chapitre->getOeuvre();
+            if ($oeuvre === null) {
+                throw new \InvalidArgumentException('Le chapitre n\'a pas d\'œuvre associée');
+            }
+            
+            return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvre->getId()]);
         }
 
         return $this->render('admin/chapitres/form.html.twig', [
@@ -231,7 +237,12 @@ class AdminController extends AbstractController
     #[Route('/chapitres/{id}/delete', name: 'admin_chapitre_delete', methods: ['POST'])]
     public function deleteChapitre(Chapitre $chapitre): Response
     {
-        $oeuvreId = $chapitre->getOeuvre()->getId();
+        $oeuvre = $chapitre->getOeuvre();
+        if ($oeuvre === null) {
+            throw new \InvalidArgumentException('Le chapitre n\'a pas d\'œuvre associée');
+        }
+        
+        $oeuvreId = $oeuvre->getId();
         $this->chapitreRepository->remove($chapitre, true);
         $this->addFlash('success', 'Le chapitre a été supprimé avec succès !');
         return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvreId]);
@@ -241,7 +252,7 @@ class AdminController extends AbstractController
     public function importMangaDx(Request $request, MangaDxImportService $importService): Response
     {
         if ($request->isMethod('POST')) {
-            $mangadxId = $request->request->get('mangadx_id');
+            $mangadxId = (string) $request->request->get('mangadx_id', '');
             
             if ($mangadxId) {
                 try {
@@ -254,7 +265,12 @@ class AdminController extends AbstractController
                             count($oeuvre->getChapitres())
                         ));
                         
-                        return $this->redirectToRoute('admin_oeuvre_edit', ['id' => $oeuvre->getId()]);
+                        $oeuvreId = $oeuvre->getId();
+                        if ($oeuvreId === null) {
+                            throw new \InvalidArgumentException('L\'œuvre importée n\'a pas d\'ID valide');
+                        }
+                        
+                        return $this->redirectToRoute('admin_oeuvre_edit', ['id' => $oeuvreId]);
                     }
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Erreur lors de l\'import : ' . $e->getMessage());
@@ -265,7 +281,7 @@ class AdminController extends AbstractController
             
             // Redirection après traitement du formulaire pour éviter l'erreur Turbo
             return $this->redirectToRoute('admin_import_mangadx');
-                }
+        }
 
         // Fournir les statistiques pour le template
         $totalOeuvres = $this->oeuvreRepository->count([]);
@@ -392,7 +408,7 @@ class AdminController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
-        $search = $request->query->get('search', '');
+        $search = (string) $request->query->get('search', '');
 
         if ($search) {
             $auteurs = $this->auteurRepository->findByNom($search);

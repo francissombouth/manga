@@ -101,7 +101,7 @@ class SyncTagsCommand extends Command
                 ['Genres disponibles', $totalTags],
                 ['Œuvres totales', $totalOeuvres],
                 ['Œuvres avec genres', $oeuvresWithTags],
-                ['Couverture', $totalOeuvres > 0 ? round(($oeuvresWithTags / $totalOeuvres) * 100, 1) . '%' : '0%']
+                ['Couverture', $totalOeuvres > 0 ? round((float) $oeuvresWithTags / (float) $totalOeuvres * 100, 1) . '%' : '0%']
             ]
         );
 
