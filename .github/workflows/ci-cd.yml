@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - MangaThèque
+name: Tests et Qualité du Code
 
 on:
   push:
@@ -8,14 +8,13 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: francissombouth/manga
 
 permissions:
   contents: read
   security-events: write
 
 jobs:
-  # Job de tests et analyse de code
   test:
     name: Tests et Analyse
     runs-on: ubuntu-latest
@@ -42,7 +41,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, gd, zip
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_pgsql, pgsql
         coverage: xdebug
 
     - name: Setup Node.js
@@ -51,31 +50,24 @@ jobs:
         node-version: '18'
         cache: 'npm'
 
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress
-
     - name: Install Node.js dependencies
       run: npm install
 
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress
+
     - name: Debug environment
       run: |
-        echo "=== Debug Environment ==="
+        echo "=== Environment Debug ==="
         pwd
         ls -la
-        echo "=== PHP Version ==="
-        php --version
-        echo "=== Composer Version ==="
-        composer --version
-        echo "=== Node Version ==="
-        node --version
-        echo "=== NPM Version ==="
-        npm --version
-
-    - name: Copy environment file
-      run: |
-        if [ -f ".env" ]; then
-          cp .env .env.test
-          echo "✅ .env file copied to .env.test"
+        echo "PHP version: $(php --version)"
+        echo "Composer version: $(composer --version)"
+        echo "Node version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo "=== .env.test content ==="
+        if [ -f .env.test ]; then
+          cat .env.test
         else
           echo "⚠️ No .env file found, creating basic .env.test"
           echo "APP_ENV=test" > .env.test
@@ -116,71 +108,11 @@ jobs:
         flags: unittests
         name: codecov-umbrella
 
-  # Job de construction Docker
-  build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && false  # Temporairement désactivé
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Réactiver quand les permissions seront configurées
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  # Job de déploiement (optionnel - nécessite un serveur)
-  deploy:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: production
-    
-    steps:
-    - name: Deploy to server
-      run: |
-        echo "🚀 Déploiement en production"
-        echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-        # Ici vous ajouteriez les commandes pour déployer sur votre serveur
-        # Par exemple avec SSH, ou un service comme Railway, Render, etc.
-
-  # Job de sécurité
+  # Job de sécurité (optionnel)
   security:
     name: Security Scan
     runs-on: ubuntu-latest
-    if: false  # Temporairement désactivé - réactiver après activation du CodeQL
+    if: false  # Désactivé - réactiver si besoin
     permissions:
       contents: read
       security-events: write
@@ -208,12 +140,12 @@ jobs:
   notify:
     name: Notify on Success
     runs-on: ubuntu-latest
-    needs: [test, build, deploy]
+    needs: [test]
     if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
     - name: Notify success
       run: |
-        echo "✅ Pipeline CI/CD terminé avec succès !"
-        echo "📦 Image Docker: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-        echo "🌐 Application déployée sur: https://votre-domaine.com" 
+        echo "✅ Tests terminés avec succès !"
+        echo "🚀 Déploiement automatique via Render en cours..."
+        echo "🌐 Application: https://votre-app.onrender.com" 
