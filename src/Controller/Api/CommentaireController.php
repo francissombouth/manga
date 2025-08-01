@@ -25,8 +25,7 @@ class CommentaireController extends AbstractController
         private OeuvreRepository $oeuvreRepository,
         private OeuvreNoteRepository $noteRepository,
         private CommentaireLikeRepository $likeRepository,
-        private CommentaireRepository $commentaireRepository,
-        private SerializerInterface $serializer
+        private CommentaireRepository $commentaireRepository
     ) {
     }
 
@@ -37,6 +36,10 @@ class CommentaireController extends AbstractController
         
         if (!$oeuvre) {
             return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$oeuvre instanceof \App\Entity\Oeuvre) {
+            return $this->json(['message' => 'Type d\'œuvre invalide'], Response::HTTP_BAD_REQUEST);
         }
 
         // Récupérer seulement les commentaires principaux (sans parent)
@@ -50,7 +53,7 @@ class CommentaireController extends AbstractController
         $user = $this->getUser();
         $commentairesData = [];
         foreach ($commentaires as $commentaire) {
-            $commentairesData[] = $this->formatCommentaire($commentaire, $user);
+            $commentairesData[] = $this->formatCommentaire($commentaire, $user instanceof \App\Entity\User ? $user : null);
         }
 
         return $this->json([
@@ -63,7 +66,10 @@ class CommentaireController extends AbstractController
         ]);
     }
 
-    private function formatCommentaire(Commentaire $commentaire, ?User $user): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatCommentaire(Commentaire $commentaire, ?\App\Entity\User $user): array
     {
         $likesCount = $this->likeRepository->countByCommentaire($commentaire);
         $isLikedByUser = false;
@@ -79,13 +85,16 @@ class CommentaireController extends AbstractController
             $reponses[] = $this->formatCommentaire($reponse, $user);
         }
 
+        $createdAt = $commentaire->getCreatedAt();
+        $auteur = $commentaire->getAuteur();
+
         return [
             'id' => $commentaire->getId(),
             'contenu' => $commentaire->getContenu(),
-            'createdAt' => $commentaire->getCreatedAt()->format('d/m/Y à H:i'),
+            'createdAt' => $createdAt ? $createdAt->format('d/m/Y à H:i') : 'Date inconnue',
             'auteur' => [
-                'username' => $commentaire->getAuteur()->getNom(),
-                'initial' => strtoupper(substr($commentaire->getAuteur()->getNom(), 0, 1))
+                'username' => $auteur ? $auteur->getNom() : 'Utilisateur inconnu',
+                'initial' => $auteur ? strtoupper(substr($auteur->getNom(), 0, 1)) : '?'
             ],
             'likes' => [
                 'count' => $likesCount,

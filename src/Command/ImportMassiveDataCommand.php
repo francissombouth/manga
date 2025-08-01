@@ -188,7 +188,7 @@ Exemples :
                 $progressBar->advance();
 
                 // Petite pause pour éviter le rate limiting
-                if (($index + 1) % 5 === 0) {
+                if ((int) $index + 1 % 5 === 0) {
                     usleep(500000); // 0.5 secondes
                 }
             }
