@@ -154,9 +154,10 @@ class SyncTagsCommand extends Command
 
     private function associateGenresBasedOnMetadata(SymfonyStyle $io): int
     {
+        /** @var \App\Entity\Oeuvre[] $oeuvres */
         $oeuvres = $this->oeuvreRepository->findAll();
+        
         $associated = 0;
-
         $progressBar = $io->createProgressBar(count($oeuvres));
         $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | 📚 %message%');
 
@@ -194,7 +195,7 @@ class SyncTagsCommand extends Command
         // Association basée sur le demographic
         if ($demographic) {
             $tag = $this->tagRepository->findOneBy(['nom' => ucfirst($demographic)]);
-            if ($tag) {
+            if ($tag instanceof \App\Entity\Tag) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }
@@ -216,7 +217,7 @@ class SyncTagsCommand extends Command
             foreach ($words as $word) {
                 if (str_contains($title, $word) || str_contains($resume, $word)) {
                     $tag = $this->tagRepository->findOneBy(['nom' => $genre]);
-                    if ($tag && !$oeuvre->getTags()->contains($tag)) {
+                    if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                         $oeuvre->addTag($tag);
                         $genresAssociated++;
                         break; // Un seul mot-clé suffit pour ce genre
@@ -228,7 +229,7 @@ class SyncTagsCommand extends Command
         // Association basée sur le content rating
         if ($contentRating === 'suggestive' || $contentRating === 'erotica') {
             $tag = $this->tagRepository->findOneBy(['nom' => 'Ecchi']);
-            if ($tag && !$oeuvre->getTags()->contains($tag)) {
+            if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }
@@ -237,7 +238,7 @@ class SyncTagsCommand extends Command
         // Ajouter au moins "Tranche de vie" si aucun genre trouvé
         if ($genresAssociated === 0) {
             $tag = $this->tagRepository->findOneBy(['nom' => 'Tranche de vie']);
-            if ($tag) {
+            if ($tag instanceof \App\Entity\Tag) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }

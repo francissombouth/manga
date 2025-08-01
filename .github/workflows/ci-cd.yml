@@ -121,7 +121,8 @@ jobs:
     name: Build Docker Image
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && false  # Temporairement désactivé
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Réactiver quand les permissions seront configurées
     
     steps:
     - name: Checkout code
