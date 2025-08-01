@@ -180,6 +180,7 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    if: false  # Temporairement désactivé - réactiver après activation du CodeQL
     permissions:
       contents: read
       security-events: write
