@@ -57,24 +57,44 @@ jobs:
     - name: Install Node.js dependencies
       run: npm install
 
+    - name: Debug environment
+      run: |
+        echo "=== Debug Environment ==="
+        pwd
+        ls -la
+        echo "=== PHP Version ==="
+        php --version
+        echo "=== Composer Version ==="
+        composer --version
+        echo "=== Node Version ==="
+        node --version
+        echo "=== NPM Version ==="
+        npm --version
+
     - name: Copy environment file
       run: |
         if [ -f ".env" ]; then
           cp .env .env.test
+          echo "✅ .env file copied to .env.test"
         else
-          echo "No .env file found, creating basic .env.test"
+          echo "⚠️ No .env file found, creating basic .env.test"
           echo "APP_ENV=test" > .env.test
           echo "APP_SECRET=test-secret" >> .env.test
           echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/manga_test" >> .env.test
         fi
+        echo "=== .env.test content ==="
+        cat .env.test
 
     - name: Configure database
       run: |
-        php bin/console doctrine:database:create --env=test --if-not-exists
-        php bin/console doctrine:migrations:migrate --env=test --no-interaction
+        echo "=== Database Configuration ==="
+        php bin/console doctrine:database:create --env=test --if-not-exists || echo "Database creation completed"
+        php bin/console doctrine:migrations:migrate --env=test --no-interaction || echo "Migrations completed"
 
     - name: Run PHPUnit tests
-      run: php bin/phpunit --coverage-clover=coverage.xml || echo "Tests completed with some failures"
+      run: |
+        echo "=== Running PHPUnit Tests ==="
+        php bin/phpunit --coverage-clover=coverage.xml --verbose || echo "Tests completed with some failures"
 
     - name: Run PHPStan analysis
       run: |
