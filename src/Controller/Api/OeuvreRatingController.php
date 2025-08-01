@@ -27,14 +27,14 @@ class OeuvreRatingController extends AbstractController
     {
         try {
             $oeuvre = $this->oeuvreRepository->find($id);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
             $user = $this->getUser();
             $userRating = null;
 
-            if ($user) {
+            if ($user && $user instanceof \App\Entity\User) {
                 $userNoteEntity = $this->noteRepository->findByUserAndOeuvre($user, $oeuvre);
                 $userRating = $userNoteEntity ? $userNoteEntity->getNote() : null;
             }
@@ -61,12 +61,12 @@ class OeuvreRatingController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $oeuvre = $this->oeuvreRepository->find($id);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
@@ -128,12 +128,12 @@ class OeuvreRatingController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $oeuvre = $this->oeuvreRepository->find($id);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
