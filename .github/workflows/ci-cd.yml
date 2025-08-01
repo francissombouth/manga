@@ -54,13 +54,8 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Install Node.js dependencies (if package.json exists)
-      run: |
-        if [ -f "package.json" ]; then
-          npm ci
-        else
-          echo "No package.json found, skipping Node.js dependencies"
-        fi
+    - name: Install Node.js dependencies
+      run: npm install
 
     - name: Copy environment file
       run: cp .env .env.test
@@ -156,6 +151,10 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     
     steps:
     - name: Checkout code
