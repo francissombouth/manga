@@ -1,0 +1,147 @@
+Architecture du Projet Mangathèque
+Explication des choix techniques et des décisions d'architecture
+
+1. Hébergement : Render.com
+
+Choix :
+- Hébergement cloud moderne avec déploiement automatique depuis Git
+- Gestion simplifiée des services (web, base de données)
+- Intégration native avec les outils de développement
+
+Justifications :
+- Facilité de déploiement et de maintenance
+- Pas de gestion d'infrastructure complexe
+- Tarification claire et prévisible
+- Support des technologies modernes (PHP, PostgreSQL, Docker)
+
+Alternatives considérées :
+- AWS/GCP/Azure (trop complexe pour un projet de cette taille)
+- VPS traditionnel (gestion manuelle, maintenance lourde)
+- Heroku (plus cher, moins de contrôle)
+
+2. Base de données : PostgreSQL
+
+Choix :
+- Base de données relationnelle robuste et performante
+- Support natif des types JSON (pour le champ 'pages' des chapitres)
+- Hébergement managé sur Render
+
+Justifications :
+- Fiabilité et performances pour les requêtes complexes
+- Support des transactions et de l'intégrité référentielle
+- Type JSON natif pour stocker les tableaux d'URLs de pages
+- Sauvegardes automatiques via Render
+
+Alternatives considérées :
+- MySQL (moins de fonctionnalités avancées)
+- MongoDB (pas nécessaire pour des données relationnelles)
+- SQLite (pas adapté pour la production)
+
+3. Stockage des fichiers : Cloudflare R2 + CDN
+
+Choix :
+- Stockage d'objets compatible S3 (Cloudflare R2)
+- Distribution via CDN Cloudflare
+- Intégration avec Symfony via Flysystem
+
+Justifications :
+- Scalabilité illimitée pour les fichiers uploadés
+- Pas de frais de sortie de bande passante (contrairement à AWS S3)
+- Performance mondiale grâce au CDN
+- Haute disponibilité et redondance automatique
+- Économique pour un projet qui peut grandir
+
+Alternatives considérées :
+- Stockage local sur Render (limité en espace, pas scalable)
+- AWS S3 (plus cher en bande passante)
+- Google Cloud Storage (plus complexe à configurer)
+
+4. Framework : Symfony
+
+Choix :
+- Framework PHP mature et robuste
+- Architecture MVC claire
+- Écosystème riche (Doctrine ORM, Twig, etc.)
+
+Justifications :
+- Développement rapide et maintenable
+- Sécurité intégrée
+- Documentation excellente
+- Communauté active et support long terme
+
+5. Gestion des assets : AssetMapper
+
+Choix :
+- Système moderne de gestion des assets JavaScript/CSS
+- Pas de bundler complexe (Webpack, Vite)
+- Intégration native avec Symfony
+
+Justifications :
+- Simplicité de configuration
+- Performance optimale
+- Pas de dépendance externe complexe
+
+6. Authentification et sécurité
+
+Choix :
+- Système d'authentification Symfony Security
+- Gestion des rôles (ROLE_USER, ROLE_ADMIN)
+- Protection CSRF intégrée
+
+Justifications :
+- Sécurité robuste et éprouvée
+- Intégration native avec Symfony
+- Facilité de maintenance
+
+7. API et communication
+
+Choix :
+- API REST native Symfony
+- Sérialisation JSON avec les groupes de sérialisation
+- Endpoints pour les commentaires, notes, etc.
+
+Justifications :
+- Architecture moderne et scalable
+- Facilité d'intégration frontend/backend
+- Séparation claire des responsabilités
+
+8. Cache et performance
+
+Choix :
+- Cache intelligent pour les images externes (proxy)
+- Cache Symfony pour les données fréquemment accédées
+- Optimisation des requêtes Doctrine
+
+Justifications :
+- Réduction de la latence
+- Protection contre les liens cassés
+- Meilleure expérience utilisateur
+
+9. Monitoring et logs
+
+Choix :
+- Logs Symfony/Monolog
+- Monitoring via Render
+- Gestion des erreurs centralisée
+
+Justifications :
+- Debugging facilité
+- Surveillance de la santé de l'application
+- Détection rapide des problèmes
+
+10. Évolutivité et maintenance
+
+Choix :
+- Architecture modulaire
+- Séparation claire des couches
+- Documentation du code
+
+Justifications :
+- Facilité d'ajout de nouvelles fonctionnalités
+- Maintenance simplifiée
+- Onboarding rapide de nouveaux développeurs
+
+Conclusion :
+Cette architecture permet de démarrer simple tout en gardant la possibilité de scaler facilement. 
+Le choix de services managés (Render, Cloudflare) réduit la complexité opérationnelle 
+tout en offrant des performances et une fiabilité professionnelles. 

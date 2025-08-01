@@ -275,7 +275,7 @@ function initCommentFormOnce() {
 }
 
 async function submitCommentSafely() {
-        if (commentSubmissionInProgress) {
+    if (commentSubmissionInProgress) {
         return;
     }
     
@@ -340,7 +340,7 @@ async function submitCommentSafely() {
 
     // ================== BOUTONS D'INTERACTION ==================
 function initInteractionButtons() {
-        initLikeButtonsSimple();
+    initLikeButtonsSimple();
     initReplyButtonsSimple();
     initToggleButtonsSimple();
 }
@@ -476,14 +476,14 @@ function toggleRepliesToReplies(commentaireId) {
                 text.textContent = isVisible ? 
                     `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
                     'Masquer les réponses';
-            }
+        }
         } else {
     }
 }
 
 // ================== FONCTIONS APPELÉES PAR LE TEMPLATE ==================
 async function submitReply(commentaireId) {
-        const textarea = document.getElementById(`reply-content-${commentaireId}`);
+    const textarea = document.getElementById(`reply-content-${commentaireId}`);
     const contenu = textarea?.value?.trim();
     
     if (!contenu) {
@@ -530,7 +530,7 @@ function cancelReply(commentaireId) {
 }
 
 async function submitReplyToReply(reponseId) {
-        const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
+    const textarea = document.getElementById(`reply-to-reply-content-${reponseId}`);
     const contenu = textarea?.value?.trim();
     
     if (!contenu) {
