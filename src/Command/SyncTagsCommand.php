@@ -318,7 +318,7 @@ class SyncTagsCommand extends Command
                                     $tag->setNom($tagName);
                                     $tag->setMangadxId($mangadxId);
                                     $this->entityManager->persist($tag);
-                                } else if (!$tag->getMangadxId()) {
+                                } else if ($tag instanceof \App\Entity\Tag && !$tag->getMangadxId()) {
                                     $tag->setMangadxId($mangadxId);
                                 }
                             }
