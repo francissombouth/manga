@@ -68,7 +68,6 @@ Thumbs.db
 /composer.phar
 
 # NPM/Yarn
-package-lock.json
 yarn.lock
 
 # Environment files
