@@ -1,0 +1,100 @@
+@startuml Architecture Système MangaThèque
+
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam componentBackgroundColor #E3F2FD
+skinparam componentBorderColor #1976D2
+skinparam databaseBackgroundColor #F3E5F5
+skinparam databaseBorderColor #7B1FA2
+skinparam cloudBackgroundColor #E8F5E8
+skinparam cloudBorderColor #388E3C
+
+title Architecture Système MangaThèque
+
+package "Frontend" {
+    [Interface Utilisateur] as UI
+    [JavaScript/Stimulus] as JS
+    [Twig Templates] as TWIG
+}
+
+package "Backend Symfony" {
+    [Controllers] as CTRL
+    [Services] as SVC
+    [Repositories] as REPO
+    [Entities] as ENT
+    [Forms] as FORM
+    [Security] as SEC
+}
+
+package "Base de Données" {
+    database "PostgreSQL" as DB {
+        [Users] as USERS
+        [Oeuvres] as OEUVRE
+        [Chapitres] as CHAP
+        [Commentaires] as COMM
+        [Collections] as COLL
+        [Tags] as TAGS
+    }
+}
+
+package "Services Externes" {
+    cloud "MangaDex API" as MDX
+    cloud "Cloudflare R2" as R2
+    cloud "Cloudflare CDN" as CDN
+    cloud "Render.com" as RENDER
+}
+
+package "Cache & Performance" {
+    [Redis Cache] as REDIS
+    [Image Proxy] as PROXY
+    [Asset Mapper] as ASSET
+}
+
+package "Sécurité" {
+    [JWT Tokens] as JWT
+    [CSRF Protection] as CSRF
+    [Rate Limiting] as RATE
+}
+
+' Relations Frontend
+UI --> JS : Utilise
+JS --> TWIG : Manipule
+TWIG --> CTRL : Appelle
+
+' Relations Backend
+CTRL --> SVC : Utilise
+SVC --> REPO : Interroge
+REPO --> ENT : Gère
+CTRL --> FORM : Valide
+CTRL --> SEC : Authentifie
+
+' Relations Base de Données
+REPO --> DB : Persiste
+ENT --> DB : Mappé vers
+
+' Relations Services Externes
+SVC --> MDX : Importe données
+SVC --> R2 : Stocke fichiers
+R2 --> CDN : Distribue
+RENDER --> UI : Héberge
+
+' Relations Cache
+SVC --> REDIS : Met en cache
+PROXY --> CDN : Récupère images
+ASSET --> CDN : Optimise assets
+
+' Relations Sécurité
+SEC --> JWT : Génère
+CTRL --> CSRF : Valide
+CTRL --> RATE : Limite
+
+' Notes explicatives
+note top of UI : "Interface utilisateur\nresponsive et moderne"
+note top of SVC : "Logique métier\ncentralisée"
+note top of DB : "Données structurées\navec relations"
+note top of MDX : "Import automatique\ndes mangas"
+note top of R2 : "Stockage cloud\npour les fichiers"
+note top of CDN : "Distribution mondiale\ndu contenu"
+
+@enduml 
