@@ -71,17 +71,27 @@ class CollectionUserController extends AbstractController
     public function favoris(): Response
     {
         $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            throw new \InvalidArgumentException('Utilisateur non authentifié');
+        }
+        
         $collections = $this->collectionUserRepository->findBy(['user' => $user], ['dateAjout' => 'DESC']);
 
         $oeuvres = [];
         $auteursUniques = [];
         foreach ($collections as $collection) {
             $oeuvre = $collection->getOeuvre();
-            $oeuvres[] = $oeuvre;
-            
-            // Compter les auteurs uniques
-            if ($oeuvre->getAuteur()) {
-                $auteursUniques[$oeuvre->getAuteur()->getId()] = $oeuvre->getAuteur();
+            if ($oeuvre) {
+                $oeuvres[] = $oeuvre;
+                
+                // Compter les auteurs uniques
+                $auteur = $oeuvre->getAuteur();
+                if ($auteur) {
+                    $auteurId = $auteur->getId();
+                    if ($auteurId) {
+                        $auteursUniques[$auteurId] = $auteur;
+                    }
+                }
             }
         }
 
@@ -97,6 +107,12 @@ class CollectionUserController extends AbstractController
     public function ajouterFavoris(Oeuvre $oeuvre): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
 
         // Vérifier si l'œuvre est déjà dans les favoris
         $existingCollection = $this->collectionUserRepository->findOneBy([
@@ -131,6 +147,12 @@ class CollectionUserController extends AbstractController
     public function retirerFavoris(Oeuvre $oeuvre): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
 
         $collection = $this->collectionUserRepository->findOneBy([
             'user' => $user,
@@ -159,6 +181,12 @@ class CollectionUserController extends AbstractController
     public function toggleFavoris(Oeuvre $oeuvre): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
 
         $collection = $this->collectionUserRepository->findOneBy([
             'user' => $user,
@@ -197,6 +225,11 @@ class CollectionUserController extends AbstractController
     public function verifierFavoris(Oeuvre $oeuvre): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return new JsonResponse([
+                'isFavorite' => false
+            ]);
+        }
 
         $collection = $this->collectionUserRepository->findOneBy([
             'user' => $user,
@@ -213,7 +246,7 @@ class CollectionUserController extends AbstractController
     {
         $collection = $this->collectionUserRepository->find($id);
 
-        if (!$collection) {
+        if (!$collection || !$collection instanceof \App\Entity\CollectionUser) {
             return $this->json(['message' => 'Collection non trouvée'], Response::HTTP_NOT_FOUND);
         }
 
@@ -224,15 +257,20 @@ class CollectionUserController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function create(Request $request): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $collection = new CollectionUser();
-        $collection->setUser($this->getUser());
+        $collection->setUser($user);
         $collection->setDateAjout(new \DateTime());
 
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $collection->setOeuvre($oeuvre);
@@ -252,13 +290,18 @@ class CollectionUserController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function update(int $id, Request $request): JsonResponse
     {
+        $user = $this->getUser();
+        if (!$user || !$user instanceof \App\Entity\User) {
+            return $this->json(['message' => 'Utilisateur non authentifié'], Response::HTTP_UNAUTHORIZED);
+        }
+
         $collection = $this->collectionUserRepository->find($id);
 
-        if (!$collection) {
+        if (!$collection || !$collection instanceof \App\Entity\CollectionUser) {
             return $this->json(['message' => 'Collection non trouvée'], Response::HTTP_NOT_FOUND);
         }
 
-        if ($collection->getUser() !== $this->getUser()) {
+        if ($collection->getUser() !== $user) {
             return $this->json(['message' => 'Accès non autorisé'], Response::HTTP_FORBIDDEN);
         }
 
@@ -266,7 +309,7 @@ class CollectionUserController extends AbstractController
 
         if (isset($data['oeuvre_id'])) {
             $oeuvre = $this->oeuvreRepository->find($data['oeuvre_id']);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             $collection->setOeuvre($oeuvre);
