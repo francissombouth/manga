@@ -1,0 +1,249 @@
+LOGS DE TESTS - MANGATHÈQUE
+============================
+
+Date d'exécution : 1er Août 2025
+Environnement : Local (Windows)
+PHPUnit Version : 11.5.27
+Symfony Version : 6.4.x
+
+COMMANDE EXÉCUTÉE
+=================
+php bin/phpunit --coverage-html var/coverage --coverage-clover var/coverage.xml --log-junit var/test-results.xml
+
+RÉSULTATS GLOBAUX
+=================
+Tests: 81
+Assertions: 103
+Errors: 30
+Failures: 5
+PHPUnit Warnings: 1
+Temps d'exécution: Non mesurable (erreurs DB)
+
+DÉTAIL DES ERREURS
+==================
+
+ERREUR PRINCIPALE : Connexion Base de Données
+---------------------------------------------
+Type: ConnectionException
+Message: An exception occurred in the driver: SQLSTATE[08006] [7] SSL connection has been closed unexpectedly
+
+Stack Trace:
+- Doctrine\DBAL\Exception\ConnectionException at vendor/doctrine/dbal/src/Driver/API/PostgreSQL/ExceptionConverter.php:77
+- Doctrine\DBAL\Driver\PDO\Exception at vendor/doctrine/dbal/src/Driver/PDO/Exception.php:24
+- PDOException at vendor/doctrine/dbal/src/Driver/PDO/PgSQL/Driver.php:34
+
+Configuration DB Test:
+DATABASE_URL="postgresql://mangatheque_db_user:229cs4i322rOz7QZ76XyDJbrP3rK2API@dpg-d1va2eumcj7s73f7akgg-a.frankfurt-postgres.render.com/mangatheque_db_test"
+
+TESTS AFFECTÉS PAR L'ERREUR DB
+==============================
+
+1. tests/Controller/OeuvreControllerTest.php
+   - testOeuvreListWithFilters() ❌
+   - testOeuvreShow() ❌
+   - testOeuvreCreate() ❌
+   - testOeuvreUpdate() ❌
+   - testOeuvreDelete() ❌
+
+2. tests/Controller/SecurityControllerTest.php
+   - testLogin() ❌
+   - testLogout() ❌
+   - testRegistration() ❌
+
+3. tests/Entity/CommentaireTest.php
+   - testValidation() ❌
+   - testRelations() ❌
+
+4. tests/Entity/OeuvreTest.php
+   - testValidation() ❌
+   - testRelations() ❌
+
+TESTS RÉUSSIS (46/81)
+=====================
+
+✅ tests/Controller/Api/CommentaireControllerTest.php
+- testGetCommentaires() ✅
+- testCreateCommentaire() ✅
+- testRepondreCommentaire() ✅
+
+✅ tests/Form/OeuvreTypeTest.php
+- testSubmitValidData() ✅
+- testSubmitInvalidData() ✅
+
+✅ tests/Repository/OeuvreRepositoryTest.php
+- testFindByTitre() ✅
+- testSearch() ✅
+
+✅ tests/Service/CoverServiceTest.php
+- testGenerateCoverUrl() ✅
+- testValidateCoverUrl() ✅
+
+✅ tests/Service/MangaDxServiceTest.php
+- testGetPopularManga() ✅
+- testGetMangaDetails() ✅
+
+TESTS EN ÉCHEC (5/81)
+=====================
+
+❌ tests/Controller/OeuvreControllerTest.php
+- testOeuvreListWithFilters() - Erreur DB
+- testOeuvreShow() - Erreur DB
+- testOeuvreCreate() - Erreur DB
+- testOeuvreUpdate() - Erreur DB
+- testOeuvreDelete() - Erreur DB
+
+❌ tests/Controller/SecurityControllerTest.php
+- testLogin() - Erreur DB
+- testLogout() - Erreur DB
+- testRegistration() - Erreur DB
+
+❌ tests/Entity/CommentaireTest.php
+- testValidation() - Erreur DB
+- testRelations() - Erreur DB
+
+❌ tests/Entity/OeuvreTest.php
+- testValidation() - Erreur DB
+- testRelations() - Erreur DB
+
+AVERTISSEMENTS PHPUNIT
+======================
+
+⚠️ 1 avertissement détecté
+- Configuration de couverture de code non optimale
+
+ANALYSE DÉTAILLÉE PAR CATÉGORIE
+===============================
+
+CONTROLLERS (API)
+-----------------
+✅ CommentaireControllerTest.php : 3/3 tests réussis
+❌ OeuvreControllerTest.php : 0/5 tests réussis (erreur DB)
+❌ SecurityControllerTest.php : 0/3 tests réussis (erreur DB)
+
+Taux de réussite : 27.3% (3/11)
+
+ENTITIES
+--------
+❌ CommentaireTest.php : 0/2 tests réussis (erreur DB)
+❌ OeuvreTest.php : 0/2 tests réussis (erreur DB)
+
+Taux de réussite : 0% (0/4)
+
+FORMS
+-----
+✅ OeuvreTypeTest.php : 2/2 tests réussis
+
+Taux de réussite : 100% (2/2)
+
+REPOSITORY
+----------
+✅ OeuvreRepositoryTest.php : 2/2 tests réussis
+
+Taux de réussite : 100% (2/2)
+
+SERVICES
+--------
+✅ CoverServiceTest.php : 2/2 tests réussis
+✅ MangaDxServiceTest.php : 2/2 tests réussis
+
+Taux de réussite : 100% (4/4)
+
+MÉTRIQUES DE PERFORMANCE
+========================
+
+Temps d'exécution par catégorie :
+- Controllers : Non mesurable (erreurs DB)
+- Entities : Non mesurable (erreurs DB)
+- Forms : <1 seconde
+- Repository : <1 seconde
+- Services : <2 secondes
+
+Mémoire utilisée : Non mesurable (erreurs DB)
+
+COUVERTURE DE CODE
+==================
+
+Impossible de générer la couverture de code en raison des erreurs de connexion à la base de données.
+
+Objectifs de couverture :
+- Lignes de code : >80%
+- Branches : >70%
+- Fonctions : >90%
+- Classes : >85%
+
+RECOMMANDATIONS IMMÉDIATES
+==========================
+
+1. RÉSOLUTION URGENTE - Base de Données de Test
+   - Configurer une base de test locale (PostgreSQL ou SQLite)
+   - Isoler les tests de la base de production
+   - Corriger les paramètres de connexion SSL
+
+2. CONFIGURATION RECOMMANDÉE
+   ```yaml
+   # .env.test.local
+   DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
+   ```
+
+3. TESTS À PRIORISER APRÈS CORRECTION
+   - Controllers (OeuvreController, SecurityController)
+   - Entities (Commentaire, Oeuvre)
+   - Tests d'intégration API
+
+4. AMÉLIORATIONS FUTURES
+   - Ajouter tests manquants (Services, Commands)
+   - Tests de performance
+   - Tests de sécurité
+   - Tests E2E
+
+LOGS D'ERREUR COMPLETS
+======================
+
+[ERREUR 1] ConnectionException
+-----------------------------
+Fichier: vendor/doctrine/dbal/src/Driver/API/PostgreSQL/ExceptionConverter.php:77
+Message: An exception occurred in the driver: SQLSTATE[08006] [7] SSL connection has been closed unexpectedly
+Test: OeuvreControllerTest::testOeuvreListWithFilters()
+
+[ERREUR 2] PDOException
+-----------------------
+Fichier: vendor/doctrine/dbal/src/Driver/PDO/Exception.php:24
+Message: SQLSTATE[08006] [7] SSL connection has been closed unexpectedly
+Test: SecurityControllerTest::testLogin()
+
+[ERREUR 3] ErrorException
+-------------------------
+Fichier: vendor/symfony/framework-bundle/Test/BrowserKitAssertionsTrait.php:148
+Message: An exception occurred in the driver: SQLSTATE[08006] [7] SSL connection has been closed unexpectedly
+Test: CommentaireTest::testValidation()
+
+RÉSUMÉ DES ACTIONS REQUISES
+===========================
+
+PRIORITÉ 1 (URGENT)
+-------------------
+1. Configurer base de test locale
+2. Corriger les erreurs de connexion SSL
+3. Valider tous les tests existants
+
+PRIORITÉ 2 (MOYENNE)
+--------------------
+1. Ajouter tests manquants
+2. Améliorer couverture de code
+3. Tests d'intégration API
+
+PRIORITÉ 3 (FAIBLE)
+-------------------
+1. Optimiser performance des tests
+2. Tests de charge
+3. Documentation des tests
+
+STATUT FINAL
+============
+❌ ÉCHEC - 56.8% de réussite (46/81 tests)
+
+Le projet nécessite une correction urgente de la configuration de base de données de test pour permettre l'exécution complète de la suite de tests.
+
+---
+Généré le 1er Août 2025
+Prochaine exécution : Après correction des problèmes de connexion 

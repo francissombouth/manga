@@ -1,0 +1,24 @@
+doctrine:
+    dbal:
+        # Configuration SQLite pour les tests
+        url: 'sqlite:///%kernel.project_dir%/var/test.db'
+        driver: 'pdo_sqlite'
+        memory: false
+        charset: utf8mb4
+        default_table_options:
+            charset: utf8mb4
+            collate: utf8mb4_unicode_ci
+
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App 

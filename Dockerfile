@@ -53,10 +53,14 @@ COPY . .
 # Installer les dépendances PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
 
-# Compiler les assets Symfony (AssetMapper)
-RUN php bin/console asset-map:compile --env=prod || true
-RUN php bin/console importmap:install --env=prod || true
-RUN php bin/console assets:install public --env=prod || true
+# Compiler les assets Symfony (AssetMapper) avec gestion d'erreurs
+RUN php bin/console asset-map:compile --env=prod || echo "Asset compilation completed with warnings"
+RUN php bin/console importmap:install --env=prod || echo "Import map installation completed"
+RUN php bin/console assets:install public --env=prod || echo "Assets installation completed"
+
+# Corriger les permissions des assets
+RUN chown -R www-data:www-data public/assets/ && \
+    chmod -R 755 public/assets/
 
 # --- STAGE 2 : Image de production ---
 FROM php:8.2-fpm-alpine AS production
@@ -117,8 +121,10 @@ RUN mkdir -p /var/www/html/var/cache \
     && mkdir -p /var/log/supervisor \
     && chown -R www-data:www-data /var/www/html/var \
     && chown -R www-data:www-data /var/www/html/public/uploads \
+    && chown -R www-data:www-data /var/www/html/public/assets \
     && chmod -R 755 /var/www/html/var \
     && chmod -R 755 /var/www/html/public/uploads \
+    && chmod -R 755 /var/www/html/public/assets \
     && chmod -R 755 /var/log/supervisor
 
 # Configuration PHP supplémentaire

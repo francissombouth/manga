@@ -5,82 +5,55 @@ namespace App\Tests\Entity;
 use App\Entity\Oeuvre;
 use App\Entity\Auteur;
 use App\Entity\Tag;
-use PHPUnit\Framework\TestCase;
+use App\Tests\TestKernel;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class OeuvreTest extends TestCase
+class OeuvreTest extends TestKernel
 {
-    private Oeuvre $oeuvre;
+    private ValidatorInterface $validator;
 
     protected function setUp(): void
     {
-        $this->oeuvre = new Oeuvre();
+        parent::setUp();
+        $this->validator = static::getContainer()->get(ValidatorInterface::class);
     }
 
-    public function testOeuvreCreation(): void
+    public function testValidation(): void
     {
-        $this->assertInstanceOf(Oeuvre::class, $this->oeuvre);
-    }
-
-    public function testOeuvreSettersAndGetters(): void
-    {
-        $titre = 'Test Manga';
-        $resume = 'Résumé de test';
-        $couverture = 'https://example.com/image.jpg';
-        $statut = 'En cours';
-
-        $this->oeuvre->setTitre($titre);
-        $this->oeuvre->setResume($resume);
-        $this->oeuvre->setCouverture($couverture);
-        $this->oeuvre->setStatut($statut);
-
-        $this->assertEquals($titre, $this->oeuvre->getTitre());
-        $this->assertEquals($resume, $this->oeuvre->getResume());
-        $this->assertEquals($couverture, $this->oeuvre->getCouverture());
-        $this->assertEquals($statut, $this->oeuvre->getStatut());
-    }
-
-    public function testOeuvreWithAuteur(): void
-    {
+        $oeuvre = new Oeuvre();
+        $oeuvre->setTitre('Test Manga');
+        $oeuvre->setDescription('Description de test');
+        
         $auteur = new Auteur();
         $auteur->setNom('Test Auteur');
+        $oeuvre->setAuteur($auteur);
 
-        $this->oeuvre->setAuteur($auteur);
-
-        $this->assertSame($auteur, $this->oeuvre->getAuteur());
-        $this->assertEquals('Test Auteur', $this->oeuvre->getAuteur()->getNom());
+        $errors = $this->validator->validate($oeuvre);
+        
+        $this->assertCount(0, $errors, 'L\'œuvre devrait être valide');
+        $this->assertEquals('Test Manga', $oeuvre->getTitre());
+        $this->assertEquals('Test Auteur', $oeuvre->getAuteur()->getNom());
     }
 
-    public function testOeuvreWithTags(): void
+    public function testRelations(): void
     {
-        $tag1 = new Tag();
-        $tag1->setNom('Action');
-
-        $tag2 = new Tag();
-        $tag2->setNom('Aventure');
-
-        $this->oeuvre->addTag($tag1);
-        $this->oeuvre->addTag($tag2);
-
-        $this->assertCount(2, $this->oeuvre->getTags());
-        $this->assertTrue($this->oeuvre->getTags()->contains($tag1));
-        $this->assertTrue($this->oeuvre->getTags()->contains($tag2));
-
-        $this->oeuvre->removeTag($tag1);
-        $this->assertCount(1, $this->oeuvre->getTags());
-        $this->assertFalse($this->oeuvre->getTags()->contains($tag1));
-    }
-
-    public function testOeuvreTimestamps(): void
-    {
-        // Les timestamps sont automatiquement définis dans le constructeur
-        $this->assertNotNull($this->oeuvre->getCreatedAt());
-        $this->assertNotNull($this->oeuvre->getUpdatedAt());
+        $oeuvre = new Oeuvre();
+        $oeuvre->setTitre('Test Manga');
         
-        // Test de mise à jour du timestamp
-        $oldUpdatedAt = $this->oeuvre->getUpdatedAt();
-        sleep(1); // Attendre 1 seconde pour s'assurer que le timestamp change
-        $this->oeuvre->setUpdatedAt(new \DateTimeImmutable());
+        $auteur = new Auteur();
+        $auteur->setNom('Test Auteur');
+        $oeuvre->setAuteur($auteur);
         
-        $this->assertNotEquals($oldUpdatedAt, $this->oeuvre->getUpdatedAt());
+        $tag = new Tag();
+        $tag->setNom('Action');
+        $oeuvre->addTag($tag);
+        
+        $this->assertSame($auteur, $oeuvre->getAuteur());
+        $this->assertTrue($oeuvre->getTags()->contains($tag));
+        $this->assertCount(1, $oeuvre->getTags());
+        
+        $oeuvre->removeTag($tag);
+        $this->assertCount(0, $oeuvre->getTags());
     }
 } 

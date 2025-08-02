@@ -1,80 +1,162 @@
-Plan de Continuité d’Activité (PCA) & Plan de Continuité/Reprise d’Activité (PCRA)
-Projet : Mangathèque
-Hébergement : Render.com
-
-1. Objectifs du PCA/PCRA
-- Garantir la disponibilité du site Mangathèque en cas d’incident technique (perte de données, crash serveur, erreur humaine…)
-- Permettre une restauration rapide et fiable du service et des données
-- Limiter l’impact pour les utilisateurs
-
-2. Périmètre
-- Code source (application Symfony, assets)
-- Base de données PostgreSQL (hébergée sur Render)
-- Fichiers uploadés (images, couvertures, pages de chapitres)
-- Configuration (variables d’environnement, secrets)
-
-3. Sauvegarde (Backup)
-
-a) Code source
-- Versionné sur GitHub (ou autre Git distant)
-- Redéployable à tout moment via Render
-
-b) Base de données
-- Sauvegarde automatique via le système de backup natif Render (activation dans le dashboard Render)
-- Restauration possible directement depuis l’interface Render (choix de la date/heure du backup)
-- Vérification régulière de la présence et de la validité des backups dans Render
-
-c) Fichiers uploadés
-- Stockage dans un service cloud compatible S3 (ex : Cloudflare R2) avec accès via CDN (Cloudflare)
-- Sauvegarde régulière manuelle ou automatisée (script de copie locale ou vers un autre cloud)
-- Distribution mondiale et haute disponibilité assurées par le CDN
-
-d) Configuration
-- Variables d’environnement exportées et sauvegardées dans un fichier sécurisé (hors Git)
-- Documentation de la configuration Render (services, endpoints, secrets)
-
-4. Procédure de restauration (Disaster Recovery)
-
-a) En cas de perte de la base de données
-1. Accéder au dashboard Render, section PostgreSQL > Backups
-2. Sélectionner le backup souhaité (date/heure) et lancer la restauration via l’interface Render
-3. Vérifier l’intégrité des données après restauration
-
-b) En cas de perte des fichiers uploadés
-1. Récupérer la dernière sauvegarde du bucket cloud (Cloudflare R2) ou du CDN
-2. Re-uploader le dossier ou restaurer les fichiers dans le bucket cloud
-3. Vérifier l’accessibilité via le CDN
-
-c) En cas de perte du code source
-1. Cloner le dépôt Git
-2. Redéployer sur Render (push ou déploiement manuel)
-
-d) En cas de perte totale (base + fichiers + code)
-1. Recréer les services Render (web, base) via le dashboard
-2. Restaurer la base de données via le backup Render
-3. Restaurer les fichiers uploadés
-4. Redéployer le code source
-5. Renseigner les variables d’environnement dans Render
-
-5. Tests et vérifications
-- Test de restauration complet à effectuer au moins 1 fois par an
-- Vérification régulière de la validité des sauvegardes (intégrité des dumps, accessibilité des fichiers)
-- Surveillance de l’espace disque pour les sauvegardes
-
-6. Responsabilités
-- Développeur/Administrateur :
-  - Mise en place et maintenance des scripts de sauvegarde
-  - Surveillance des sauvegardes et des restaurations
-  - Documentation et mise à jour du plan PCA/PCRA
-
-7. Bonnes pratiques et améliorations
-- Utilisation d’un CDN (Cloudflare) pour la distribution rapide et la résilience des fichiers uploadés
-- Automatisation complète de la sauvegarde des fichiers uploadés sur le cloud
-- Notification en cas d’échec de sauvegarde
-- Utilisation d’un stockage cloud dédié (S3, Cloudflare R2, etc.) pour les backups
-- Mise en place d’un cache intelligent pour les images externes
-
-8. Documentation
-- Scripts de sauvegarde et restauration documentés dans le dépôt ou un dossier /docs
-- Procédures détaillées accessibles à l’équipe technique
-
+Plan de Continuité d’Activité (PCA/PCRA) 
+1. Présentation du projet 
+Contexte 
+Mangathèque est une application web développée avec Symfony permettant aux 
+utilisateurs de consulter et gérer une bibliothèque de mangas en ligne. Le service est 
+hébergé sur Render.com avec une base PostgreSQL et utilise Cloudflare pour la distribution 
+des images. 
+Objectifs du PCA/PCRA 
+● Assurer la continuité du service en cas d’incident 
+● Protéger les données utilisateurs et les contenus 
+● Minimiser les temps d’arrêt 
+● Définir des procédures de reprise claires 
+Indicateurs cibles 
+● Temps de rétablissement maximal : 4 heures 
+● Perte de données maximale : 24 heures 
+● Objectif de disponibilité : 99 % (~7h d’arrêt/mois tolérés) 
+2. Architecture et composants 
+Principaux composants 
+● Utilisateurs → Cloudflare CDN → Render.com → PostgreSQL 
+● Stockage des images : Cloudflare R2 
+● Code source : GitHub 
+Éléments critiques 
+Composant Importance Localisation Impact si perdu 
+Code source Critique GitHub Impossible de 
+corriger ou déployer 
+Base de données Critique Render PostgreSQL Perte de comptes et 
+données utilisateurs 
+Images uploadées Importante Cloudflare R2 Visuels manquants 
+Configuration Importante Variables Render Impossible de 
+redéployer 
+ 
+3. Principaux risques 
+ 
+Risque Probabilité Gravité Cause possible 
+Panne Render Moyenne Élevée Problème chez 
+l’hébergeur 
+Erreur de code Élevée Moyenne Bug en production 
+Perte de base de 
+données 
+Faible Très élevée Corruption ou 
+mauvaise 
+manipulation 
+Perte d’images Faible Moyenne Défaillance du 
+stockage cloud 
+Piratage / attaque Faible Élevée Faille de sécurité 
+Impacts estimés 
+● Panne Render : indisponibilité 2–6h 
+ 
+● Bug critique : fonctionnalité cassée 1–3h 
+ 
+● Perte BDD : restauration partielle 4–8h 
+ 
+● Perte images : contenu manquant 2–4h 
+ 
+ 
+ 
+4. Sauvegardes 
+4.1 Code source 
+● Sauvegarde : GitHub (push à chaque modification) 
+● Restauration : clone + redéploiement 
+4.2 Base de données 
+● Backup quotidien automatique Render (7 jours) 
+● Export manuel hebdomadaire via pg_dump 
+● Stockage local et cloud personnel 
+● Test mensuel de restauration 
+4.3 Images 
+● Stockage principal : Cloudflare R2 
+● Synchronisation mensuelle vers Google Drive via rclone 
+4.4 Configuration 
+● Export des variables d’environnement dans un fichier chiffré 
+● Documentation dans README.md 
+● Stockage des secrets via un gestionnaire sécurisé 
+5. Procédures de restauration 
+Bug applicatif (30 min – 2h) 
+● Analyser les logs Render 
+● Reproduire le bug en local 
+● Correction rapide ou rollback 
+● Redéploiement via GitHub 
+Perte base de données (1–3h) 
+● Restauration via backup Render 
+● Vérification connexion et données 
+Perte images (1–4h) 
+● Restauration depuis Google Drive 
+● Purge du cache Cloudflare 
+● Vérification affichage 
+Perte totale (4–8h) 
+● Recréer l’infrastructure Render 
+● Importer base et images 
+● Redéployer l’application et reconfigurer 
+6. Monitoring et alertes 
+● UptimeRobot : surveillance toutes les 5 minutes 
+● Logs Render : surveillance des erreurs 
+● Google Analytics : suivi trafic 
+● Tests manuels hebdomadaires 
+Alertes 
+● Site inaccessible → email UptimeRobot 
+● Erreurs serveur → logs Render 
+● Backup échoué → notification Render 
+Réponse 
+● Vérifier gravité 
+● Identifier cause 
+● Suivre les procédures définies 
+● Informer les utilisateurs si besoin 
+7. Tests et validation 
+Test 
+Restauration BDD 
+Fréquence 
+Mensuel 
+Durée 
+~30 min 
+Objectif 
+Vérifier validité des 
+backups 
+Sauvegarde images Mensuel 
+Simulation panne 
+Mise à jour doc 
+Semestrie 
+Trimestriel 
+~15 min 
+~2h 
+~1h 
+Contrôler 
+synchronisation 
+Tester la procédure 
+complète 
+Garder 
+documentation à 
+jour 
+8. Communication 
+En cas d’incident majeur (> 2h) 
+● Page d’accueil, réseaux sociaux, email 
+Message type 
+Incident technique en cours – Temps estimé de reprise : [XX]h 
+⚠
+ ✅
+ Problème résolu – Incident de [XX] minutes, données sauvegardées. 
+9. Coûts et budget 
+Poste 
+Render.com 
+Cloudflare & GitHub 
+Montant 
+0–25€/mois 
+0€ 
+Monitoring 
+Budget d’urgence 
+● Render Pro : ~25€/mois 
+● Stockage cloud : 5–10€/mois 
+● Domaine backup : 10€/an 
+Optimisations 
+● VPS moins cher 
+● AWS Free Tier pour backups 
+● Alternatives gratuites pour images 
+0€ 
+10. Améliorations prévues 
+Court terme 
+● Script automatique de sauvegarde 
+● Environnement local complet 
+● Documentation pour utilisateurs 
+Long terme 
+● Architecture plus robuste 
+● Cache Redis 
+● Monitoring avancé

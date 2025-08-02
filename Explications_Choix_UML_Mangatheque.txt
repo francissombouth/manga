@@ -4,7 +4,6 @@ EXPLICATIONS DES CHOIX UML - MANGATHÈQUE
 PHILOSOPHIE DE CONCEPTION
 =========================
 
-L'UML suit les principes Domain-Driven Design (DDD) pour créer un modèle qui reflète fidèlement le domaine métier de la gestion de mangas et d'œuvres.
 
 ANALYSE DÉTAILLÉE DES ENTITÉS
 ==============================
@@ -394,11 +393,3 @@ LONG TERME
 - Blockchain pour la propriété intellectuelle
 - Architecture microservices
 
-CONCLUSION
-==========
-
-Cette modélisation UML garantit une base solide pour une application évolutive et maintenable, tout en conservant la simplicité d'utilisation et la performance. Les choix architecturaux reflètent une compréhension approfondie du domaine métier et des contraintes techniques modernes.
-
-Les principes DDD appliqués permettent une séparation claire entre les entités du domaine métier et les préoccupations techniques, facilitant ainsi la maintenance et l'évolution de l'application.
-
-L'intégration native avec MangaDex et le support des métadonnées flexibles positionnent l'application pour une croissance future et l'ajout de nouvelles fonctionnalités sans remise en question de l'architecture de base. 
