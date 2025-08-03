@@ -1,4 +1,6 @@
 {
+    "name": "mangatheque/app",
+    "description": "Application web moderne pour gérer votre collection de mangas, développée avec Symfony 7.3",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -35,6 +37,7 @@
         "symfony/property-info": "7.3.*",
         "symfony/runtime": "7.3.*",
         "symfony/security-bundle": "7.3.*",
+        "symfony/security-csrf": "7.3.*",
         "symfony/serializer": "7.3.*",
         "symfony/stimulus-bundle": "^2.26",
         "symfony/string": "7.3.*",

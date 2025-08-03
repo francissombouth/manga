@@ -3,8 +3,8 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Commentaire;
-use App\Entity\User;
 use App\Entity\Oeuvre;
+use App\Entity\User;
 use App\Tests\TestKernel;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -21,40 +21,43 @@ class CommentaireTest extends TestKernel
     public function testValidation(): void
     {
         $commentaire = new Commentaire();
-        $commentaire->setContenu('Test commentaire');
+        $commentaire->setContenu('Contenu de test');
         
         $user = new User();
         $user->setEmail('test@example.com');
-        $user->setPassword('password');
-        $commentaire->setUser($user);
+        $user->setNom('Test User');
+        $commentaire->setAuteur($user);
         
         $oeuvre = new Oeuvre();
         $oeuvre->setTitre('Test Oeuvre');
+        $oeuvre->setType('Manga');
         $commentaire->setOeuvre($oeuvre);
 
         $errors = $this->validator->validate($commentaire);
         
         $this->assertCount(0, $errors, 'Le commentaire devrait être valide');
-        $this->assertEquals('Test commentaire', $commentaire->getContenu());
-        $this->assertSame($user, $commentaire->getUser());
-        $this->assertSame($oeuvre, $commentaire->getOeuvre());
+        $this->assertEquals('Contenu de test', $commentaire->getContenu());
+        $this->assertEquals('Test User', $commentaire->getAuteur()->getNom());
     }
 
     public function testRelations(): void
     {
         $commentaire = new Commentaire();
-        $commentaire->setContenu('Test commentaire');
+        $commentaire->setContenu('Contenu de test');
         
         $user = new User();
         $user->setEmail('test@example.com');
-        $commentaire->setUser($user);
+        $user->setNom('Test User');
+        $commentaire->setAuteur($user);
         
         $oeuvre = new Oeuvre();
         $oeuvre->setTitre('Test Oeuvre');
+        $oeuvre->setType('Manga');
         $commentaire->setOeuvre($oeuvre);
         
-        $this->assertSame($user, $commentaire->getUser());
+        $this->assertSame($user, $commentaire->getAuteur());
         $this->assertSame($oeuvre, $commentaire->getOeuvre());
-        $this->assertEquals('Test commentaire', $commentaire->getContenu());
+        $this->assertEquals(0, $commentaire->getLikesCount());
+        $this->assertEquals(0, $commentaire->getReponsesCount());
     }
 } 

@@ -23,7 +23,8 @@ class OeuvreTest extends TestKernel
     {
         $oeuvre = new Oeuvre();
         $oeuvre->setTitre('Test Manga');
-        $oeuvre->setDescription('Description de test');
+        $oeuvre->setResume('Résumé de test');
+        $oeuvre->setType('Manga');
         
         $auteur = new Auteur();
         $auteur->setNom('Test Auteur');
@@ -40,6 +41,7 @@ class OeuvreTest extends TestKernel
     {
         $oeuvre = new Oeuvre();
         $oeuvre->setTitre('Test Manga');
+        $oeuvre->setType('Manga');
         
         $auteur = new Auteur();
         $auteur->setNom('Test Auteur');

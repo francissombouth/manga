@@ -16,49 +16,49 @@ class TestKernel extends KernelTestCase
     {
         $kernel = parent::createKernel($options);
         $kernel->boot();
-        
         return $kernel;
     }
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Créer la base de données de test
         $this->createTestDatabase();
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        
-        // Nettoyer la base de données de test
         $this->cleanupTestDatabase();
     }
 
     private function createTestDatabase(): void
     {
         $container = static::getContainer();
-        
-        // Créer la base de données SQLite
         $entityManager = $container->get('doctrine')->getManager();
-        $connection = $entityManager->getConnection();
         
-        // Créer les tables
+        // Supprimer toutes les tables existantes
+        $connection = $entityManager->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $tables = $schemaManager->listTableNames();
+        
+        foreach ($tables as $table) {
+            $connection->executeStatement('DROP TABLE IF EXISTS ' . $table);
+        }
+        
+        // Créer le schéma complet avec toutes les entités
         $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
         $schemaTool = new \Doctrine\ORM\Tools\SchemaTool($entityManager);
         $schemaTool->createSchema($metadata);
+        
+        // Vérifier que les tables principales sont créées
+        $tablesAfter = $schemaManager->listTableNames();
+        if (empty($tablesAfter)) {
+            throw new \RuntimeException('Aucune table n\'a été créée dans la base de données de test');
+        }
     }
 
     private function cleanupTestDatabase(): void
     {
-        $container = static::getContainer();
-        
-        // Fermer les connexions
-        $entityManager = $container->get('doctrine')->getManager();
-        $entityManager->close();
-        
-        // Supprimer la base de test
         $testDbPath = dirname(__DIR__).'/var/test.db';
         if (file_exists($testDbPath)) {
             unlink($testDbPath);
