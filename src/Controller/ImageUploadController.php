@@ -69,13 +69,8 @@ class ImageUploadController extends AbstractController
         $uploadResults = $request->getSession()->get('upload_results', []);
         $request->getSession()->remove('upload_results');
 
-        $apiInfo = $this->imgBBService->getApiInfo();
-        $coverStats = $this->oeuvreImageService->getCoverStatistics();
-
         return $this->render('admin/image_upload.html.twig', [
-            'upload_results' => $uploadResults,
-            'api_info' => $apiInfo,
-            'cover_stats' => $coverStats
+            'upload_results' => $uploadResults
         ]);
     }
 

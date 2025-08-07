@@ -11,85 +11,9 @@
                     <i class="fas fa-cloud-upload-alt text-primary"></i>
                     Upload d'Images via ImgBB
                 </h1>
-                <div>
-                    <a href="{{ path('admin_image_covers') }}" class="btn btn-outline-info me-2">
-                        <i class="fas fa-book-open"></i> Gérer les Couvertures
-                    </a>
-                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Retour au Dashboard
-                    </a>
-                </div>
-            </div>
-
-            <!-- Statistiques des couvertures -->
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-pie"></i> Statistiques des Couvertures
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h3 class="text-primary">{{ cover_stats.total_oeuvres }}</h3>
-                                <small class="text-muted">Total des œuvres</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h3 class="text-success">{{ cover_stats.with_cover }}</h3>
-                                <small class="text-muted">Avec couverture</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h3 class="text-warning">{{ cover_stats.without_cover }}</h3>
-                                <small class="text-muted">Sans couverture</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <h3 class="text-info">{{ cover_stats.coverage_percentage }}%</h3>
-                                <small class="text-muted">Taux de couverture</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="progress mt-3">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ cover_stats.coverage_percentage }}%">
-                            {{ cover_stats.coverage_percentage }}%
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Informations sur l'API -->
-            <div class="card mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle"></i> Informations sur ImgBB
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <strong>Service :</strong> {{ api_info.name }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Taille max :</strong> {{ api_info.max_file_size }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>Formats :</strong> {{ api_info.supported_formats|join(', ') }}
-                        </div>
-                        <div class="col-md-3">
-                            <strong>API URL :</strong> 
-                            <a href="{{ api_info.api_url }}" target="_blank" class="text-decoration-none">
-                                {{ api_info.api_url|replace({'https://': ''}) }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour au Dashboard
+                </a>
             </div>
 
             <!-- Zone d'upload -->
@@ -142,7 +66,7 @@
             <div class="card mt-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-check-circle"></i> Résultats de l'Upload
+                        <i class="fas fa-check-circle"></i> URLs des Images
                     </h5>
                 </div>
                 <div class="card-body">
@@ -157,26 +81,16 @@
                                             <h6 class="card-title text-success">
                                                 <i class="fas fa-check"></i> {{ result.filename }}
                                             </h6>
-                                            <p class="card-text small">
-                                                <strong>Taille :</strong> {{ result.size|number_format(0, ',', ' ') }} octets<br>
-                                                <strong>Dimensions :</strong> {{ result.width }}x{{ result.height }}<br>
-                                                <strong>ID ImgBB :</strong> {{ result.id }}
-                                            </p>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-sm btn-outline-primary copy-url" 
-                                                        data-url="{{ result.url }}" 
-                                                        title="Copier l'URL">
-                                                    <i class="fas fa-copy"></i> URL
-                                                </button>
-                                                <a href="{{ result.url }}" target="_blank" 
-                                                   class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fas fa-external-link-alt"></i> Voir
-                                                </a>
-                                                <button class="btn btn-sm btn-outline-danger delete-image" 
-                                                        data-delete-url="{{ result.delete_url }}"
-                                                        title="Supprimer l'image">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                            <div class="mb-3">
+                                                <label class="form-label"><strong>URL :</strong></label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" value="{{ result.url }}" readonly>
+                                                    <button class="btn btn-outline-primary copy-url" 
+                                                            data-url="{{ result.url }}" 
+                                                            type="button">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     {% else %}
@@ -347,36 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     btn.classList.add('btn-outline-primary');
                 }, 2000);
             });
-        }
-    });
-
-    // Supprimer une image
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('delete-image') || e.target.closest('.delete-image')) {
-            const btn = e.target.classList.contains('delete-image') ? e.target : e.target.closest('.delete-image');
-            const deleteUrl = btn.dataset.deleteUrl;
-            
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
-                fetch('{{ path("admin_image_delete") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'delete_url=' + encodeURIComponent(deleteUrl)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        btn.closest('.col-md-6').remove();
-                        alert('Image supprimée avec succès !');
-                    } else {
-                        alert('Erreur lors de la suppression : ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    alert('Erreur : ' + error.message);
-                });
-            }
         }
     });
 });
