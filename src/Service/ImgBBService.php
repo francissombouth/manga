@@ -20,21 +20,27 @@ class ImgBBService
     /**
      * Upload une image vers ImgBB et retourne l'URL
      */
-    public function uploadImage(UploadedFile $file): ?array
+    public function uploadImage(UploadedFile $file): array
     {
         try {
             // Vérifier le type de fichier
             if (!$this->isValidImageType($file)) {
-                throw new \Exception('Type de fichier non supporté. Utilisez JPG, PNG, GIF ou WEBP.');
+                return [
+                    'success' => false,
+                    'error' => 'Type de fichier non supporté. Utilisez JPG, PNG, GIF ou WEBP.'
+                ];
             }
 
             // Vérifier la taille (max 32MB pour ImgBB)
             if ($file->getSize() > 32 * 1024 * 1024) {
-                throw new \Exception('Fichier trop volumineux. Taille maximum : 32MB.');
+                return [
+                    'success' => false,
+                    'error' => 'Fichier trop volumineux. Taille maximum : 32MB.'
+                ];
             }
 
             // Récupérer la clé API depuis les variables d'environnement
-            $apiKey = $_ENV['IMGBB_API_KEY'] ;
+            $apiKey = $_ENV['IMGBB_API_KEY'] ?? '3d6b632357972a8ad3352f9d63791e5b';
             
             // Log pour debug
             $this->logger->info('Clé API ImgBB récupérée', [
@@ -45,13 +51,19 @@ class ImgBBService
             ]);
             
             if (!$apiKey) {
-                throw new \Exception('Clé API ImgBB non configurée. Veuillez configurer la variable d\'environnement IMGBB_API_KEY sur Render.com');
+                return [
+                    'success' => false,
+                    'error' => 'Clé API ImgBB non configurée. Veuillez configurer la variable d\'environnement IMGBB_API_KEY sur Render.com'
+                ];
             }
 
             // Lire le contenu du fichier
             $imageContent = file_get_contents($file->getPathname());
             if ($imageContent === false) {
-                throw new \Exception('Impossible de lire le fichier.');
+                return [
+                    'success' => false,
+                    'error' => 'Impossible de lire le fichier.'
+                ];
             }
 
             // Encoder en base64
@@ -74,13 +86,19 @@ class ImgBBService
             ]);
 
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('Erreur HTTP: ' . $response->getStatusCode());
+                return [
+                    'success' => false,
+                    'error' => 'Erreur HTTP: ' . $response->getStatusCode()
+                ];
             }
 
             $result = json_decode($response->getContent(), true);
 
             if (!$result['success']) {
-                throw new \Exception('Erreur ImgBB: ' . ($result['error']['message'] ?? 'Erreur inconnue'));
+                return [
+                    'success' => false,
+                    'error' => 'Erreur ImgBB: ' . ($result['error']['message'] ?? 'Erreur inconnue')
+                ];
             }
 
             $this->logger->info('Image uploadée avec succès vers ImgBB', [
@@ -110,7 +128,7 @@ class ImgBBService
 
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => 'Erreur lors de l\'upload : ' . $e->getMessage()
             ];
         }
     }
