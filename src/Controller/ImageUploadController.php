@@ -77,41 +77,49 @@ class ImageUploadController extends AbstractController
     #[Route('/upload-ajax', name: 'admin_image_upload_ajax', methods: ['POST'])]
     public function uploadAjax(Request $request): JsonResponse
     {
-        $uploadedFiles = $request->files->get('images', []);
-        
-        if (empty($uploadedFiles)) {
-            return new JsonResponse([
-                'success' => false,
-                'error' => 'Aucun fichier sélectionné.'
-            ]);
-        }
+        try {
+            $uploadedFiles = $request->files->get('images', []);
+            
+            if (empty($uploadedFiles)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Aucun fichier sélectionné.'
+                ]);
+            }
 
-        $results = [];
-        $successCount = 0;
-        $errorCount = 0;
+            $results = [];
+            $successCount = 0;
+            $errorCount = 0;
 
-        foreach ($uploadedFiles as $file) {
-            if ($file) {
-                $result = $this->imgBBService->uploadImage($file);
-                $results[] = $result;
-                
-                if ($result['success']) {
-                    $successCount++;
-                } else {
-                    $errorCount++;
+            foreach ($uploadedFiles as $file) {
+                if ($file) {
+                    $result = $this->imgBBService->uploadImage($file);
+                    $results[] = $result;
+                    
+                    if ($result['success']) {
+                        $successCount++;
+                    } else {
+                        $errorCount++;
+                    }
                 }
             }
-        }
 
-        return new JsonResponse([
-            'success' => true,
-            'results' => $results,
-            'summary' => [
-                'total' => count($results),
-                'success' => $successCount,
-                'errors' => $errorCount
-            ]
-        ]);
+            return new JsonResponse([
+                'success' => true,
+                'results' => $results,
+                'summary' => [
+                    'total' => count($results),
+                    'success' => $successCount,
+                    'errors' => $errorCount
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Erreur serveur : ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     #[Route('/delete', name: 'admin_image_delete', methods: ['POST'])]
@@ -221,5 +229,24 @@ class ImageUploadController extends AbstractController
                 'fallback_used' => !isset($_ENV['IMGBB_API_KEY'])
             ]
         ]);
+    }
+
+    #[Route('/test-service', name: 'admin_test_service', methods: ['GET'])]
+    public function testService(): JsonResponse
+    {
+        try {
+            $apiInfo = $this->imgBBService->getApiInfo();
+            
+            return new JsonResponse([
+                'success' => true,
+                'service_status' => 'OK',
+                'api_info' => $apiInfo
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 } 
