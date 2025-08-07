@@ -183,4 +183,43 @@ class ImageUploadController extends AbstractController
             'stats' => $stats
         ]);
     }
+
+    #[Route('/test-env', name: 'admin_test_env', methods: ['GET'])]
+    public function testEnvironment(): JsonResponse
+    {
+        $apiKey = $_ENV['IMGBB_API_KEY'] ?? null;
+        $envApiKey = $_ENV['IMGBB_API_KEY'] ?? null;
+        
+        return new JsonResponse([
+            'success' => true,
+            'data' => [
+                'app.imgbb_api_key' => $apiKey ? 'CONFIGURÉE' : 'NON CONFIGURÉE',
+                '$_ENV[IMGBB_API_KEY]' => $envApiKey ? 'CONFIGURÉE' : 'NON CONFIGURÉE',
+                'api_key_length' => $apiKey ? strlen($apiKey) : 0,
+                'api_key_start' => $apiKey ? substr($apiKey, 0, 10) . '...' : 'N/A',
+                'environment' => $this->params->get('kernel.environment'),
+                'env_vars' => [
+                    'IMGBB_API_KEY' => $envApiKey ? 'DÉFINIE' : 'NON DÉFINIE',
+                    'env_length' => $envApiKey ? strlen($envApiKey) : 0
+                ]
+            ]
+        ]);
+    }
+
+    #[Route('/debug-key', name: 'admin_debug_key', methods: ['GET'])]
+    public function debugKey(): JsonResponse
+    {
+        $apiKey = $_ENV['IMGBB_API_KEY'] ?? '3d6b632357972a8ad3352f9d63791e5b';
+        
+        return new JsonResponse([
+            'success' => true,
+            'debug' => [
+                'api_key_used' => substr($apiKey, 0, 10) . '...',
+                'api_key_length' => strlen($apiKey),
+                'from_env' => isset($_ENV['IMGBB_API_KEY']),
+                'env_value' => $_ENV['IMGBB_API_KEY'] ?? 'NON DÉFINIE',
+                'fallback_used' => !isset($_ENV['IMGBB_API_KEY'])
+            ]
+        ]);
+    }
 } 
