@@ -1,0 +1,356 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Couvertures - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-book-open text-info"></i>
+                    Gestion des Couvertures d'Œuvres
+                </h1>
+                <div>
+                    <a href="{{ path('admin_image_upload') }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload d'Images
+                    </a>
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour au Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Statistiques des Couvertures
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ cover_stats.total_oeuvres }}</h3>
+                                <small class="text-muted">Total des œuvres</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ cover_stats.with_cover }}</h3>
+                                <small class="text-muted">Avec couverture</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-warning">{{ cover_stats.without_cover }}</h3>
+                                <small class="text-muted">Sans couverture</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-info">{{ cover_stats.coverage_percentage }}%</h3>
+                                <small class="text-muted">Taux de couverture</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ cover_stats.coverage_percentage }}%">
+                            {{ cover_stats.coverage_percentage }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Œuvres sans couverture -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Œuvres sans Couverture ({{ oeuvres_without_cover|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if oeuvres_without_cover is not empty %}
+                        <div class="row">
+                            {% for oeuvre in oeuvres_without_cover %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100 border-warning">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="fas fa-book fa-3x text-muted"></i>
+                                            </div>
+                                            <h6 class="card-title">{{ oeuvre.titre }}</h6>
+                                            <p class="card-text small text-muted">
+                                                {{ oeuvre.type }} • {{ oeuvre.auteur.nom }}
+                                            </p>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-primary upload-cover-btn" 
+                                                        data-oeuvre-id="{{ oeuvre.id }}"
+                                                        data-oeuvre-titre="{{ oeuvre.titre }}">
+                                                    <i class="fas fa-upload"></i> Ajouter Couverture
+                                                </button>
+                                                <a href="{{ path('admin_oeuvre_edit', {id: oeuvre.id}) }}" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-edit"></i> Éditer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <h5 class="text-success">Parfait !</h5>
+                            <p class="text-muted">Toutes les œuvres ont une couverture.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Œuvres avec couverture -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> 
+                        Œuvres avec Couverture ({{ oeuvres_with_cover|length }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if oeuvres_with_cover is not empty %}
+                        <div class="row">
+                            {% for oeuvre in oeuvres_with_cover %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100 border-success">
+                                        <img src="{{ oeuvre.imageUrl }}" class="card-img-top" alt="{{ oeuvre.titre }}" 
+                                             style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ oeuvre.titre }}</h6>
+                                            <p class="card-text small text-muted">
+                                                {{ oeuvre.type }} • {{ oeuvre.auteur.nom }}
+                                            </p>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary copy-url" 
+                                                        data-url="{{ oeuvre.imageUrl }}"
+                                                        title="Copier l'URL">
+                                                    <i class="fas fa-copy"></i> URL
+                                                </button>
+                                                <a href="{{ oeuvre.imageUrl }}" target="_blank" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-external-link-alt"></i> Voir
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-warning upload-cover-btn" 
+                                                        data-oeuvre-id="{{ oeuvre.id }}"
+                                                        data-oeuvre-titre="{{ oeuvre.titre }}">
+                                                    <i class="fas fa-upload"></i> Remplacer
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger remove-cover-btn" 
+                                                        data-oeuvre-id="{{ oeuvre.id }}"
+                                                        data-oeuvre-titre="{{ oeuvre.titre }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book text-muted fa-3x mb-3"></i>
+                            <h5 class="text-muted">Aucune œuvre avec couverture</h5>
+                            <p class="text-muted">Commencez par ajouter des couvertures aux œuvres sans couverture.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour upload de couverture -->
+<div class="modal fade" id="uploadCoverModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload de Couverture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadCoverForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="coverFile" class="form-label">Sélectionner une image de couverture :</label>
+                        <input type="file" class="form-control" id="coverFile" name="cover" 
+                               accept="image/*" required>
+                        <div class="form-text">
+                            Formats acceptés : JPG, PNG, GIF, WEBP. Taille maximum : 32MB.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Œuvre :</strong> <span id="oeuvreTitle"></span>
+                    </div>
+                    <div id="uploadProgress" class="mb-3" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted" id="progressText">Upload en cours...</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="uploadCoverBtn">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentOeuvreId = null;
+    const uploadCoverModal = new bootstrap.Modal(document.getElementById('uploadCoverModal'));
+    const uploadCoverForm = document.getElementById('uploadCoverForm');
+    const uploadCoverBtn = document.getElementById('uploadCoverBtn');
+    const progressContainer = document.getElementById('uploadProgress');
+    const progressBar = document.querySelector('#uploadProgress .progress-bar');
+    const progressText = document.getElementById('progressText');
+
+    // Ouvrir le modal d'upload de couverture
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('upload-cover-btn') || e.target.closest('.upload-cover-btn')) {
+            const btn = e.target.classList.contains('upload-cover-btn') ? e.target : e.target.closest('.upload-cover-btn');
+            currentOeuvreId = btn.dataset.oeuvreId;
+            document.getElementById('oeuvreTitle').textContent = btn.dataset.oeuvreTitre;
+            uploadCoverModal.show();
+        }
+    });
+
+    // Upload de couverture
+    uploadCoverBtn.addEventListener('click', function() {
+        const fileInput = document.getElementById('coverFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Veuillez sélectionner un fichier.');
+            return;
+        }
+
+        if (!currentOeuvreId) {
+            alert('Erreur : ID de l\'œuvre manquant.');
+            return;
+        }
+
+        // Afficher la progression
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Upload en cours...';
+        
+        // Désactiver le bouton
+        uploadCoverBtn.disabled = true;
+        uploadCoverBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload...';
+
+        // Créer FormData
+        const formData = new FormData();
+        formData.append('cover', file);
+
+        // Upload via AJAX
+        fetch(`/admin/images/upload-cover/${currentOeuvreId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Upload réussi !';
+                
+                setTimeout(() => {
+                    uploadCoverModal.hide();
+                    window.location.reload();
+                }, 1500);
+            } else {
+                throw new Error(data.error || 'Erreur lors de l\'upload');
+            }
+        })
+        .catch(error => {
+            progressBar.style.width = '100%';
+            progressBar.classList.add('bg-danger');
+            progressText.textContent = 'Erreur : ' + error.message;
+        })
+        .finally(() => {
+            // Réactiver le bouton
+            uploadCoverBtn.disabled = false;
+            uploadCoverBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload';
+        });
+    });
+
+    // Supprimer une couverture
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-cover-btn') || e.target.closest('.remove-cover-btn')) {
+            const btn = e.target.classList.contains('remove-cover-btn') ? e.target : e.target.closest('.remove-cover-btn');
+            const oeuvreId = btn.dataset.oeuvreId;
+            const oeuvreTitre = btn.dataset.oeuvreTitre;
+            
+            if (confirm(`Êtes-vous sûr de vouloir supprimer la couverture de "${oeuvreTitre}" ?`)) {
+                fetch(`/admin/images/remove-cover/${oeuvreId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Couverture supprimée avec succès !');
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression : ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Erreur : ' + error.message);
+                });
+            }
+        }
+    });
+
+    // Copier l'URL dans le presse-papiers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-url') || e.target.closest('.copy-url')) {
+            const btn = e.target.classList.contains('copy-url') ? e.target : e.target.closest('.copy-url');
+            const url = btn.dataset.url;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                // Changer temporairement le texte du bouton
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-primary');
+                }, 2000);
+            });
+        }
+    });
+
+    // Réinitialiser le modal
+    document.getElementById('uploadCoverModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('coverFile').value = '';
+        progressContainer.style.display = 'none';
+        progressBar.style.width = '0%';
+        progressBar.classList.remove('bg-danger');
+        currentOeuvreId = null;
+    });
+});
+</script>
+{% endblock %} 

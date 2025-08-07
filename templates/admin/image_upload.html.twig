@@ -1,0 +1,397 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Upload d'Images - Administration{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-cloud-upload-alt text-primary"></i>
+                    Upload d'Images via ImgBB
+                </h1>
+                <div>
+                    <a href="{{ path('admin_image_covers') }}" class="btn btn-outline-info me-2">
+                        <i class="fas fa-book-open"></i> Gérer les Couvertures
+                    </a>
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour au Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistiques des couvertures -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> Statistiques des Couvertures
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ cover_stats.total_oeuvres }}</h3>
+                                <small class="text-muted">Total des œuvres</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ cover_stats.with_cover }}</h3>
+                                <small class="text-muted">Avec couverture</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-warning">{{ cover_stats.without_cover }}</h3>
+                                <small class="text-muted">Sans couverture</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h3 class="text-info">{{ cover_stats.coverage_percentage }}%</h3>
+                                <small class="text-muted">Taux de couverture</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress mt-3">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ cover_stats.coverage_percentage }}%">
+                            {{ cover_stats.coverage_percentage }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations sur l'API -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Informations sur ImgBB
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Service :</strong> {{ api_info.name }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Taille max :</strong> {{ api_info.max_file_size }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Formats :</strong> {{ api_info.supported_formats|join(', ') }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>API URL :</strong> 
+                            <a href="{{ api_info.api_url }}" target="_blank" class="text-decoration-none">
+                                {{ api_info.api_url|replace({'https://': ''}) }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone d'upload -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload"></i> Upload d'Images
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Sélectionner des images :</label>
+                            <input type="file" class="form-control" id="images" name="images[]" 
+                                   multiple accept="image/*" required>
+                            <div class="form-text">
+                                Formats acceptés : JPG, PNG, GIF, WEBP. Taille maximum : 32MB par fichier.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary" id="uploadBtn">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload vers ImgBB
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="clearBtn">
+                                <i class="fas fa-times"></i> Effacer la sélection
+                            </button>
+                        </div>
+
+                        <!-- Zone de prévisualisation -->
+                        <div id="previewZone" class="mb-3" style="display: none;">
+                            <h6>Images sélectionnées :</h6>
+                            <div id="imagePreview" class="row"></div>
+                        </div>
+
+                        <!-- Barre de progression -->
+                        <div id="progressContainer" class="mb-3" style="display: none;">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="progressText">Préparation...</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Résultats d'upload -->
+            {% if upload_results is not empty %}
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Résultats de l'Upload
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="uploadResults">
+                        {% for result in upload_results %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100 {% if result.success %}border-success{% else %}border-danger{% endif %}">
+                                    {% if result.success %}
+                                        <img src="{{ result.url }}" class="card-img-top" alt="{{ result.filename }}" 
+                                             style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-success">
+                                                <i class="fas fa-check"></i> {{ result.filename }}
+                                            </h6>
+                                            <p class="card-text small">
+                                                <strong>Taille :</strong> {{ result.size|number_format(0, ',', ' ') }} octets<br>
+                                                <strong>Dimensions :</strong> {{ result.width }}x{{ result.height }}<br>
+                                                <strong>ID ImgBB :</strong> {{ result.id }}
+                                            </p>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary copy-url" 
+                                                        data-url="{{ result.url }}" 
+                                                        title="Copier l'URL">
+                                                    <i class="fas fa-copy"></i> URL
+                                                </button>
+                                                <a href="{{ result.url }}" target="_blank" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-external-link-alt"></i> Voir
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger delete-image" 
+                                                        data-delete-url="{{ result.delete_url }}"
+                                                        title="Supprimer l'image">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-exclamation-triangle text-danger fa-3x mb-3"></i>
+                                            <h6 class="card-title text-danger">{{ result.filename }}</h6>
+                                            <p class="card-text text-danger">{{ result.error }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour afficher l'image en grand -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Aperçu de l'image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary copy-url" id="modalCopyBtn">
+                    <i class="fas fa-copy"></i> Copier l'URL
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('images');
+    const previewZone = document.getElementById('previewZone');
+    const imagePreview = document.getElementById('imagePreview');
+    const clearBtn = document.getElementById('clearBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+
+    // Prévisualisation des images
+    fileInput.addEventListener('change', function() {
+        const files = this.files;
+        if (files.length > 0) {
+            previewZone.style.display = 'block';
+            imagePreview.innerHTML = '';
+            
+            Array.from(files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-3 col-sm-6 mb-2';
+                    col.innerHTML = `
+                        <div class="card">
+                            <img src="${e.target.result}" class="card-img-top" alt="${file.name}" 
+                                 style="height: 150px; object-fit: cover; cursor: pointer;" 
+                                 onclick="showImageModal('${e.target.result}', '${file.name}')">
+                            <div class="card-body p-2">
+                                <small class="text-muted">${file.name}</small><br>
+                                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                            </div>
+                        </div>
+                    `;
+                    imagePreview.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            previewZone.style.display = 'none';
+        }
+    });
+
+    // Effacer la sélection
+    clearBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        previewZone.style.display = 'none';
+        imagePreview.innerHTML = '';
+    });
+
+    // Gestion de l'upload avec progression
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const files = fileInput.files;
+        if (files.length === 0) {
+            alert('Veuillez sélectionner au moins une image.');
+            return;
+        }
+
+        // Afficher la barre de progression
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Préparation...';
+        
+        // Désactiver le bouton d'upload
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload en cours...';
+
+        // Créer FormData
+        const formData = new FormData();
+        Array.from(files).forEach(file => {
+            formData.append('images[]', file);
+        });
+
+        // Upload via AJAX
+        fetch('{{ path("admin_image_upload_ajax") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                progressBar.style.width = '100%';
+                progressText.textContent = `Upload terminé ! ${data.summary.success} succès, ${data.summary.errors} erreurs.`;
+                
+                // Recharger la page pour afficher les résultats
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                throw new Error(data.error || 'Erreur lors de l\'upload');
+            }
+        })
+        .catch(error => {
+            progressBar.style.width = '100%';
+            progressBar.classList.add('bg-danger');
+            progressText.textContent = 'Erreur : ' + error.message;
+        })
+        .finally(() => {
+            // Réactiver le bouton d'upload
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload vers ImgBB';
+        });
+    });
+
+    // Copier l'URL dans le presse-papiers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('copy-url') || e.target.closest('.copy-url')) {
+            const btn = e.target.classList.contains('copy-url') ? e.target : e.target.closest('.copy-url');
+            const url = btn.dataset.url;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                // Changer temporairement le texte du bouton
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-primary');
+                }, 2000);
+            });
+        }
+    });
+
+    // Supprimer une image
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-image') || e.target.closest('.delete-image')) {
+            const btn = e.target.classList.contains('delete-image') ? e.target : e.target.closest('.delete-image');
+            const deleteUrl = btn.dataset.deleteUrl;
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) {
+                fetch('{{ path("admin_image_delete") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'delete_url=' + encodeURIComponent(deleteUrl)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.closest('.col-md-6').remove();
+                        alert('Image supprimée avec succès !');
+                    } else {
+                        alert('Erreur lors de la suppression : ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Erreur : ' + error.message);
+                });
+            }
+        }
+    });
+});
+
+// Fonction pour afficher l'image en modal
+function showImageModal(src, filename) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalCopyBtn = document.getElementById('modalCopyBtn');
+    
+    modalImage.src = src;
+    modalImage.alt = filename;
+    modalCopyBtn.dataset.url = src;
+    
+    new bootstrap.Modal(modal).show();
+}
+</script>
+{% endblock %} 
