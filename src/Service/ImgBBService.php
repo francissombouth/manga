@@ -34,9 +34,14 @@ class ImgBBService
             }
 
             // Récupérer la clé API depuis les variables d'environnement
-            $apiKey = $this->params->get('app.imgbb_api_key');
+            $apiKey = $_ENV['IMGBB_API_KEY'] ?? null;
             if (!$apiKey) {
-                throw new \Exception('Clé API ImgBB non configurée. Ajoutez IMGBB_API_KEY dans votre fichier .env');
+                // En développement, on peut utiliser une clé par défaut
+                if ($this->params->get('kernel.environment') === 'dev') {
+                    $apiKey = '3d6b632357972a8ad3352f9d63791e5b';
+                } else {
+                    throw new \Exception('Clé API ImgBB non configurée. Ajoutez IMGBB_API_KEY dans votre fichier .env ou dans les variables d\'environnement de Render.com');
+                }
             }
 
             // Lire le contenu du fichier
@@ -160,7 +165,7 @@ class ImgBBService
      */
     public function getApiInfo(): array
     {
-        $apiKey = $this->params->get('app.imgbb_api_key');
+        $apiKey = $_ENV['IMGBB_API_KEY'] ?? null;
         
         return [
             'name' => 'ImgBB',

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[Route('/admin/images')]
 #[IsGranted('ROLE_ADMIN')]
@@ -18,7 +19,8 @@ class ImageUploadController extends AbstractController
 {
     public function __construct(
         private ImgBBService $imgBBService,
-        private OeuvreImageService $oeuvreImageService
+        private OeuvreImageService $oeuvreImageService,
+        private ParameterBagInterface $params
     ) {}
 
     #[Route('/upload', name: 'admin_image_upload', methods: ['GET', 'POST'])]
