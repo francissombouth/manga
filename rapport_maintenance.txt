@@ -13,7 +13,7 @@ Version : 1.1.0
 ✅ Statut : Déployé sur Render.com, fonctionnel en production
 ✅ Bugs critiques : 0
 ✅ Bugs majeurs : 0
-✅ Bugs mineurs : 49 (corrigés)
+✅ Bugs mineurs : 50 (corrigés)
 ✅ Améliorations : 25 implémentées
 ✅ Déploiement : ✅ OPÉRATIONNEL
 
@@ -29,7 +29,7 @@ Aucun bug critique détecté pendant cette période.
 -------------------------------------------------------------------------------
 Aucun bug majeur détecté pendant cette période.
 
-2.3 BUGS MINEURS (49 - TOUS CORRIGÉS)
+2.3 BUGS MINEURS (50 - TOUS CORRIGÉS)
 -------------------------------------------------------------------------------
 
 
@@ -288,7 +288,27 @@ BUG #025 - Validation des domaines MangaDx incomplète
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Controller/ImageProxyController.php
 
-BUG #026 - Gestion des timeouts insuffisante
+BUG #029 - Images Let's Enhance non autorisées
+├── Description : Images de letsenhance.io non affichées
+├── Symptômes : Placeholder "Image non disponible" pour les images Let's Enhance
+├── Cause : Domaines letsenhance.io non dans la liste autorisée
+├── Impact : Images d'amélioration non visibles
+├── Solution : Ajout de letsenhance.io et static.letsenhance.io aux domaines autorisés
+├── Statut : ✅ CORRIGÉ
+├── Date : 2025-08-02
+└── Fichiers modifiés : src/Controller/ImageProxyController.php
+
+BUG #030 - Images iBB.co non autorisées
+├── Description : Images de ibb.co non affichées
+├── Symptômes : Placeholder "Image non disponible" pour les images iBB.co
+├── Cause : Domaines ibb.co non dans la liste autorisée
+├── Impact : Images hébergées sur iBB.co non visibles
+├── Solution : Ajout de ibb.co et i.ibb.co aux domaines autorisés
+├── Statut : ✅ CORRIGÉ
+├── Date : 2025-08-02
+└── Fichiers modifiés : src/Controller/ImageProxyController.php
+
+BUG #031 - Gestion des timeouts insuffisante
 ├── Description : Timeout fixe de 10s pour toutes les images
 ├── Symptômes : Échecs sur les images volumineuses ou lentes
 ├── Cause : Timeout non adaptatif selon la taille d'image
@@ -298,7 +318,7 @@ BUG #026 - Gestion des timeouts insuffisante
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Controller/ImageProxyController.php
 
-BUG #027 - Headers User-Agent hardcodés
+BUG #032 - Headers User-Agent hardcodés
 ├── Description : User-Agent fixe dans les requêtes HTTP
 ├── Symptômes : Détection facile par les serveurs cibles
 ├── Cause : User-Agent non aléatoire
@@ -308,7 +328,7 @@ BUG #027 - Headers User-Agent hardcodés
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Controller/ImageProxyController.php
 
-BUG #028 - Gestion des sessions non sécurisée
+BUG #033 - Gestion des sessions non sécurisée
 ├── Description : Sessions sans configuration de sécurité
 ├── Symptômes : Risque de fixation de session
 ├── Cause : Configuration de session par défaut
@@ -318,7 +338,7 @@ BUG #028 - Gestion des sessions non sécurisée
 ├── Date : 2025-07-22
 └── Fichiers modifiés : config/packages/framework.yaml
 
-BUG #029 - Validation des entrées utilisateur insuffisante
+BUG #034 - Validation des entrées utilisateur insuffisante
 ├── Description : Validation basique des données utilisateur
 ├── Symptômes : Risque d'injection SQL, XSS
 ├── Cause : Validation des entrées incomplète
@@ -328,7 +348,7 @@ BUG #029 - Validation des entrées utilisateur insuffisante
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Form/*, src/Entity/*
 
-BUG #030 - Gestion des erreurs de base de données
+BUG #035 - Gestion des erreurs de base de données
 ├── Description : Gestion basique des erreurs de base de données
 ├── Symptômes : Erreurs non informatives pour l'utilisateur
 ├── Cause : Exceptions non gérées proprement
@@ -338,7 +358,7 @@ BUG #030 - Gestion des erreurs de base de données
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Repository/*, src/Service/*
 
-BUG #031 - Cache Doctrine non optimisé
+BUG #036 - Cache Doctrine non optimisé
 ├── Description : Cache Doctrine sans configuration optimale
 ├── Symptômes : Requêtes répétées, performance dégradée
 ├── Cause : Cache non configuré pour la production
@@ -348,7 +368,7 @@ BUG #031 - Cache Doctrine non optimisé
 ├── Date : 2025-07-22
 └── Fichiers modifiés : config/packages/doctrine.yaml
 
-BUG #032 - Gestion des fichiers uploads non sécurisée
+BUG #037 - Gestion des fichiers uploads non sécurisée
 ├── Description : Upload de fichiers sans validation stricte
 ├── Symptômes : Risque d'upload de fichiers malveillants
 ├── Cause : Validation des types de fichiers insuffisante
@@ -358,7 +378,7 @@ BUG #032 - Gestion des fichiers uploads non sécurisée
 ├── Date : 2025-07-22
 └── Fichiers modifiés : src/Service/CoverService.php
 
-BUG #033 - Configuration CORS insuffisante
+BUG #038 - Configuration CORS insuffisante
 ├── Description : Configuration CORS basique
 ├── Symptômes : Problèmes d'accès depuis d'autres domaines
 ├── Cause : Headers CORS non configurés
@@ -368,7 +388,7 @@ BUG #033 - Configuration CORS insuffisante
 ├── Date : 2025-07-22
 └── Fichiers modifiés : config/packages/nelmio_cors.yaml
 
-BUG #034 - Gestion des erreurs d'API externes
+BUG #039 - Gestion des erreurs d'API externes
 ├── Description : Gestion basique des erreurs d'API MangaDx
 ├── Symptômes : Erreurs non informatives lors des échecs API
 ├── Cause : Exceptions non gérées proprement

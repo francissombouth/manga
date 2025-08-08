@@ -91,7 +91,11 @@ class ImageProxyController extends AbstractController
             'api.mangadx.org',
             'api.mangadex.org',
             'mangadx.network',
-            'mangadex.network'
+            'mangadex.network',
+            'letsenhance.io',
+            'static.letsenhance.io',
+            'ibb.co',
+            'i.ibb.co'
         ];
 
         $parsedUrl = parse_url($url);
