@@ -36,8 +36,8 @@ class ImageProxyController extends AbstractController
         
         $this->logger->info('Proxy image demandé pour: ' . $url);
 
-        // Vérifier que l'URL provient bien de MangaDx
-        if (!$this->isMangaDxUrl($url)) {
+        // Vérifier que l'URL provient bien d'une source autorisée
+        if (!$this->isAllowedUrl($url)) {
             $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url]);
             return $this->createPlaceholderResponse();
         }
@@ -45,34 +45,43 @@ class ImageProxyController extends AbstractController
         $this->logger->info('Proxy image: URL autorisée, récupération en cours...');
 
         try {
-            // Headers pour imiter une requête depuis MangaDx
-            $headers = [
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Referer' => 'https://mangadex.org/',
-                'Accept' => 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Accept-Language' => 'en-US,en;q=0.9,fr;q=0.8',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache',
-            ];
+            // Headers adaptés selon le domaine
+            $headers = $this->getHeadersForDomain($url);
 
             $response = $this->httpClient->request('GET', $url, [
                 'headers' => $headers,
-                'timeout' => 10,
-                'max_redirects' => 3,
+                'timeout' => 15, // Augmenté à 15 secondes
+                'max_redirects' => 5, // Augmenté à 5 redirections
             ]);
 
             if ($response->getStatusCode() !== 200) {
-                throw new \Exception('Image non trouvée');
+                $this->logger->warning('Proxy image: Statut HTTP non 200', [
+                    'url' => $url, 
+                    'status' => $response->getStatusCode()
+                ]);
+                throw new \Exception('Image non trouvée - Statut: ' . $response->getStatusCode());
             }
 
             $content = $response->getContent();
             $contentType = $response->getHeaders()['content-type'][0] ?? 'image/jpeg';
+
+            // Vérifier que le contenu n'est pas vide
+            if (empty($content)) {
+                $this->logger->warning('Proxy image: Contenu vide', ['url' => $url]);
+                throw new \Exception('Contenu de l\'image vide');
+            }
 
             // Créer la réponse avec l'image
             $imageResponse = new Response($content);
             $imageResponse->headers->set('Content-Type', $contentType);
             $imageResponse->headers->set('Cache-Control', 'public, max-age=3600'); // Cache 1 heure
             $imageResponse->headers->set('Access-Control-Allow-Origin', '*');
+            
+            $this->logger->info('Proxy image: Image récupérée avec succès', [
+                'url' => $url, 
+                'size' => strlen($content),
+                'content-type' => $contentType
+            ]);
             
             return $imageResponse;
 
@@ -82,7 +91,7 @@ class ImageProxyController extends AbstractController
         }
     }
 
-    private function isMangaDxUrl(string $url): bool
+    private function isAllowedUrl(string $url): bool
     {
         $allowedDomains = [
             'uploads.mangadex.org',
@@ -109,6 +118,37 @@ class ImageProxyController extends AbstractController
         }
 
         return false;
+    }
+
+    private function getHeadersForDomain(string $url): array
+    {
+        $parsedUrl = parse_url($url);
+        $host = $parsedUrl['host'] ?? '';
+
+        // Headers spécifiques pour IBB.co
+        if (str_ends_with($host, 'ibb.co') || str_ends_with($host, '.ibb.co')) {
+            return [
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept' => 'image/webp,image/apng,image/*,*/*;q=0.8',
+                'Accept-Language' => 'fr-FR,fr;q=0.9,en;q=0.8',
+                'Accept-Encoding' => 'gzip, deflate, br',
+                'Cache-Control' => 'no-cache',
+                'Pragma' => 'no-cache',
+                'Sec-Fetch-Dest' => 'image',
+                'Sec-Fetch-Mode' => 'no-cors',
+                'Sec-Fetch-Site' => 'cross-site',
+            ];
+        }
+
+        // Headers pour MangaDx et autres
+        return [
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer' => 'https://mangadex.org/',
+            'Accept' => 'image/webp,image/apng,image/*,*/*;q=0.8',
+            'Accept-Language' => 'en-US,en;q=0.9,fr;q=0.8',
+            'Cache-Control' => 'no-cache',
+            'Pragma' => 'no-cache',
+        ];
     }
 
     private function createPlaceholderResponse(): Response
