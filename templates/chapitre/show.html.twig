@@ -68,7 +68,7 @@
             {% if chapitre.pages|length > 0 %}
                 {% for page in chapitre.pages %}
                     <div class="page-content" style="margin-bottom: 0; text-align: center;">
-'                        <img src="{{ path('image_proxy') ~ '?url=' ~ page|url_encode }}" alt="Page {{ loop.index }}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" class="page-image">
+                        <img src="{{ page }}" alt="Page {{ loop.index }}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" class="page-image">
                     </div>
                 {% endfor %}
             {% else %}
