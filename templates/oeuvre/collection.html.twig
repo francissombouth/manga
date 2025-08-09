@@ -200,10 +200,7 @@ select[name="tag"] option:hover {
     <main>
         <!-- Header du catalogue -->
         <div class="collection-header">
-            <h1 class="collection-title">🚨 DEBUG MODE - CATALOGUE SANS PROXY 🚨</h1>
-            <div style="background: orange; color: black; padding: 10px; margin: 10px; text-align: center;">
-                VERSION AVEC DEBUG INTENSIF ACTIVÉ
-            </div>
+            <h1 class="collection-title">🔥 Catalogue des Mangas</h1>
             <p class="collection-subtitle">Découvrez notre collection exceptionnelle de mangas</p>
             
             <!-- Barre de recherche par genres -->
@@ -301,7 +298,7 @@ select[name="tag"] option:hover {
                 <div class="manga-grid">
                     {% for oeuvre in oeuvres %}
                         <div class="manga-card">
-                                <!-- Couverture sans proxy -->
+
                                 <div class="manga-cover-container">
                                     {% if oeuvre.couverture %}
                                         <img src="{{ oeuvre.couverture }}" 
