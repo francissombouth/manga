@@ -32,6 +32,7 @@
         <div class="manga-grid">
             {% for oeuvre in oeuvres %}
                 <div class="manga-card">
+                        <!-- Couverture sans proxy -->
                         <div class="manga-cover-container">
                             {% if oeuvre.couverture %}
                                 <img src="{{ oeuvre.couverture }}" 
