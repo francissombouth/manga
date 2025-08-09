@@ -34,11 +34,10 @@
                 <div class="manga-card">
                         <div class="manga-cover-container">
                             {% if oeuvre.couverture %}
-                                <img src="{{ path('image_proxy') }}?url={{ oeuvre.couverture|url_encode }}" 
+                                <img src="{{ oeuvre.couverture }}" 
                                      alt="{{ oeuvre.titre }}" 
                                      class="manga-cover"
-                                     loading="lazy"
-                                     onerror="this.src='{{ path('image_proxy') }}';">
+                                     loading="lazy">
                             {% else %}
                                 <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
                                     📖
