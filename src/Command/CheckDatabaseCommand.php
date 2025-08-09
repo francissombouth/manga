@@ -77,8 +77,6 @@ class CheckDatabaseCommand extends Command
 
             $io->success('✅ Vérification terminée');
 
-
-
             return Command::SUCCESS;
 
         } catch (\Exception $e) {
