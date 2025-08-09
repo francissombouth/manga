@@ -304,12 +304,16 @@ select[name="tag"] option:hover {
                                              alt="{{ oeuvre.titre }}" 
                                              class="manga-cover"
                                              loading="lazy"
-                                             onerror="this.src='{{ path('image_proxy') }}';">
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     {% else %}
                                         <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
                                             📖
                                         </div>
                                     {% endif %}
+                                    <!-- Fallback cover si l'image échoue -->
+                                    <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: none; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
+                                        📖
+                                    </div>
                                     <!-- Cœur favori en haut à droite -->
                                     {% if is_granted('ROLE_USER') %}
                                     <button 
