@@ -77,6 +77,31 @@ class CheckDatabaseCommand extends Command
 
             $io->success('✅ Vérification terminée');
 
+            // Inspection des URLs de pages de chapitres
+            $io->section('Inspection des URLs de pages');
+            $chapitres = $this->entityManager->getRepository(Chapitre::class)->findAll();
+            $found = false;
+            foreach ($chapitres as $chapitre) {
+                $pages = $chapitre->getPages();
+                if (!empty($pages)) {
+                    $found = true;
+                    $io->text('Chapitre: ' . $chapitre->getTitre() . ' (ID: ' . $chapitre->getId() . ')');
+                    for ($i = 0; $i < min(2, count($pages)); $i++) {
+                        $url = $pages[$i];
+                        $io->text("Page " . ($i + 1) . ": " . $url);
+                        if (str_contains($url, '/proxy/image')) {
+                            $io->error("⚠️  URL avec proxy trouvée !");
+                        } else {
+                            $io->success("✅ URL directe");
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!$found) {
+                $io->warning('Aucun chapitre avec pages trouvé');
+            }
+
             return Command::SUCCESS;
 
         } catch (\Exception $e) {
