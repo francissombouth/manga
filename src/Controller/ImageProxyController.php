@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -21,10 +22,10 @@ class ImageProxyController extends AbstractController
     }
 
     #[Route('/proxy/image', name: 'image_proxy', methods: ['GET'])]
-    public function proxyImage(): Response
+    public function proxyImage(Request $request): Response
     {
-        // Récupérer l'URL depuis les paramètres de requête
-        $url = $_GET['url'] ?? null;
+        // Récupérer l'URL depuis les paramètres de requête avec l'objet Request
+        $url = $request->query->get('url');
         
         if (!$url) {
             $this->logger->warning('Proxy image: URL manquante');
@@ -35,10 +36,18 @@ class ImageProxyController extends AbstractController
         $url = urldecode($url);
         
         $this->logger->info('Proxy image demandé pour: ' . $url);
+        
+        // Debug: log des détails de l'URL
+        $parsedUrl = parse_url($url);
+        $host = $parsedUrl['host'] ?? '';
+        $this->logger->info('Proxy image debug: host extrait = ' . $host);
 
         // Vérifier que l'URL provient bien de MangaDx
-        if (!$this->isMangaDxUrl($url)) {
-            $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url]);
+        $isAuthorized = $this->isMangaDxUrl($url);
+        $this->logger->info('Proxy image debug: isAuthorized = ' . ($isAuthorized ? 'true' : 'false'));
+        
+        if (!$isAuthorized) {
+            $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url, 'host' => $host]);
             return $this->createPlaceholderResponse();
         }
 
@@ -100,14 +109,32 @@ class ImageProxyController extends AbstractController
 
         $parsedUrl = parse_url($url);
         $host = $parsedUrl['host'] ?? '';
+        
+        $this->logger->info('Proxy validation debug', [
+            'url' => $url,
+            'host' => $host,
+            'allowed_domains' => $allowedDomains
+        ]);
 
         foreach ($allowedDomains as $domain) {
+            $test1 = str_ends_with($host, $domain);
+            $test2 = str_ends_with($host, '.' . $domain);
+            
+            $this->logger->info('Proxy validation test', [
+                'domain' => $domain,
+                'host' => $host,
+                'ends_with_domain' => $test1,
+                'ends_with_dot_domain' => $test2
+            ]);
+            
             // Vérifier si l'host se termine par le domaine (pour inclure les sous-domaines)
-            if (str_ends_with($host, $domain) || str_ends_with($host, '.' . $domain)) {
+            if ($test1 || $test2) {
+                $this->logger->info('Proxy validation: MATCH trouvé', ['domain' => $domain]);
                 return true;
             }
         }
 
+        $this->logger->warning('Proxy validation: AUCUN MATCH trouvé', ['host' => $host]);
         return false;
     }
 
