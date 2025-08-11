@@ -9,6 +9,9 @@ import './styles/app.css';
 import './styles/components/burger-menu.css';
 import './styles/components/flash-messages.css';
 
+// Import du lecteur de chapitre optimisé
+import './js/chapter-reader.js';
+
 // Gestion des onglets
 document.addEventListener('DOMContentLoaded', function() {
     initTabs();
