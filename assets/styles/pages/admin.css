@@ -602,6 +602,13 @@
     flex-wrap: wrap;
 }
 
+.admin-controls .search-and-add {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .search-form {
     display: flex;
     gap: 0.5rem;

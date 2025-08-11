@@ -375,15 +375,18 @@ img {
 .manga-cover-container {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 250px;
     overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
 }
 
 .manga-cover {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .manga-card:hover .manga-cover {
@@ -858,7 +861,7 @@ img {
     }
 
     .manga-cover-container {
-        height: 180px;
+        height: 200px;
         width: 100%;
         max-width: 100%;
     }
@@ -1108,7 +1111,7 @@ img {
 /* Specific Components Responsive Styles */
 @media (max-width: 768px) {
     .manga-cover-container {
-        height: 200px;
+        height: 220px;
     }
 
     .manga-title {

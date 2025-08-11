@@ -139,6 +139,17 @@ select[name="tag"] option:hover {
 
 .manga-cover-container {
     position: relative;
+    height: 250px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.manga-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .coeur-favori {
@@ -190,12 +201,22 @@ select[name="tag"] option:hover {
         gap: 1rem;
     }
     
+    .manga-cover-container {
+        height: 220px;
+    }
+    
     .sidebar {
         display: none;
     }
     
     .main-container {
         flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .manga-cover-container {
+        height: 200px;
     }
 }
 

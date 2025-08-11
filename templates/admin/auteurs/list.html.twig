@@ -34,18 +34,21 @@
                 <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
                     ⬅️ Retour au dashboard
                 </a>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <form method="GET" class="search-form">
+                    <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un auteur..." class="search-input">
+                    <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
+                    {% if search %}
+                        <a href="{{ path('admin_auteurs') }}" class="btn btn-secondary">❌ Effacer</a>
+                    {% endif %}
+                </form>
+                
                 <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary">
                     ➕ Nouvel auteur
                 </a>
             </div>
-            
-            <form method="GET" class="search-form">
-                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un auteur..." class="search-input">
-                <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
-                {% if search %}
-                    <a href="{{ path('admin_auteurs') }}" class="btn btn-secondary">❌ Effacer</a>
-                {% endif %}
-            </form>
         </div>
 
         <!-- Liste des auteurs -->

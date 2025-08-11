@@ -29,18 +29,21 @@
                 <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
                     ⬅️ Retour au dashboard
                 </a>
+            </div>
+            
+            <div class="search-and-add">
+                <form method="GET" class="search-form">
+                    <input type="text" name="search" value="{{ search }}" placeholder="Rechercher une œuvre..." class="search-input">
+                    <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
+                    {% if search %}
+                        <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">❌ Effacer</a>
+                    {% endif %}
+                </form>
+                
                 <a href="{{ path('admin_oeuvre_new') }}" class="btn btn-primary">
                     ➕ Ajouter une œuvre MangaDx
                 </a>
             </div>
-            
-            <form method="GET" class="search-form">
-                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher une œuvre..." class="search-input">
-                <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
-                {% if search %}
-                    <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">❌ Effacer</a>
-                {% endif %}
-            </form>
         </div>
 
         <!-- Table des œuvres -->
