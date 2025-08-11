@@ -47,6 +47,12 @@
 
         <!-- Contrôles -->
         <div class="admin-controls">
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
+                </a>
+            </div>
+            
             <form method="GET" class="search-form">
                 <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un utilisateur..." class="search-input">
                 <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
@@ -54,12 +60,6 @@
                     <a href="{{ path('admin_users') }}" class="btn btn-secondary">❌ Effacer</a>
                 {% endif %}
             </form>
-            
-            <div>
-                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
-                    ⬅️ Retour au dashboard
-                </a>
-            </div>
         </div>
 
         <!-- Table des utilisateurs -->
