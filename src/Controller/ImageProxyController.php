@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class ImageProxyController extends AbstractController
 {
@@ -27,7 +26,6 @@ class ImageProxyController extends AbstractController
     {
         // Récupérer l'URL depuis les paramètres de requête avec l'objet Request
         $url = $request->query->get('url');
-        $quality = $request->query->get('quality', 'auto'); // auto, high, medium, low
         
         if (!$url) {
             $this->logger->warning('Proxy image: URL manquante');
@@ -36,17 +34,6 @@ class ImageProxyController extends AbstractController
 
         // Décoder l'URL si elle est encodée
         $url = urldecode($url);
-        
-        // Générer une clé de cache basée sur l'URL et la qualité
-        $cacheKey = md5($url . $quality);
-        $cacheDir = $this->getParameter('kernel.cache_dir') . '/images';
-        $cacheFile = $cacheDir . '/' . $cacheKey . '.img';
-        
-        // Vérifier si l'image est en cache et toujours valide (24h)
-        if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 86400) {
-            $this->logger->info('Proxy image: cache hit pour ' . $url);
-            return $this->createCachedImageResponse($cacheFile, $request);
-        }
         
         $this->logger->info('Proxy image demandé pour: ' . $url);
 
@@ -82,16 +69,11 @@ class ImageProxyController extends AbstractController
             $content = $response->getContent();
             $contentType = $response->getHeaders()['content-type'][0] ?? 'image/jpeg';
 
-            // Sauvegarder en cache
-            $this->saveToCache($cacheFile, $content, $contentType);
-            
             // Créer la réponse avec l'image
             $imageResponse = new Response($content);
             $imageResponse->headers->set('Content-Type', $contentType);
-            $imageResponse->headers->set('Cache-Control', 'public, max-age=86400'); // Cache 24h
+            $imageResponse->headers->set('Cache-Control', 'public, max-age=3600'); // Cache 1 heure
             $imageResponse->headers->set('Access-Control-Allow-Origin', '*');
-            $imageResponse->headers->set('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T'));
-            $imageResponse->headers->set('ETag', '"' . md5($content) . '"');
             
             return $imageResponse;
 
@@ -152,79 +134,5 @@ class ImageProxyController extends AbstractController
         $response->headers->set('Cache-Control', 'public, max-age=86400'); // Cache 24h
         
         return $response;
-    }
-    
-    /**
-     * Sauvegarde l'image en cache local
-     */
-    private function saveToCache(string $cacheFile, string $content, string $contentType): void
-    {
-        try {
-            $cacheDir = dirname($cacheFile);
-            if (!is_dir($cacheDir)) {
-                mkdir($cacheDir, 0755, true);
-            }
-            
-            // Sauvegarder avec métadonnées
-            $cacheData = [
-                'content_type' => $contentType,
-                'content' => base64_encode($content),
-                'timestamp' => time(),
-                'size' => strlen($content)
-            ];
-            
-            file_put_contents($cacheFile, json_encode($cacheData));
-            $this->logger->info('Image mise en cache: ' . basename($cacheFile));
-        } catch (\Exception $e) {
-            $this->logger->warning('Erreur mise en cache: ' . $e->getMessage());
-        }
-    }
-    
-    /**
-     * Crée une réponse depuis le cache
-     */
-    private function createCachedImageResponse(string $cacheFile, Request $request): Response
-    {
-        try {
-            $cacheData = json_decode(file_get_contents($cacheFile), true);
-            
-            if (!$cacheData || !isset($cacheData['content'])) {
-                throw new \Exception('Cache corrompu');
-            }
-            
-            $content = base64_decode($cacheData['content']);
-            $contentType = $cacheData['content_type'] ?? 'image/jpeg';
-            $lastModified = gmdate('D, d M Y H:i:s \G\M\T', $cacheData['timestamp']);
-            $etag = '"' . md5($content) . '"';
-            
-            // Vérifier si le client a déjà cette version (304 Not Modified)
-            $clientEtag = $request->headers->get('If-None-Match');
-            $clientModified = $request->headers->get('If-Modified-Since');
-            
-            if ($clientEtag === $etag || $clientModified === $lastModified) {
-                return new Response(null, 304, [
-                    'Cache-Control' => 'public, max-age=86400',
-                    'ETag' => $etag,
-                    'Last-Modified' => $lastModified,
-                ]);
-            }
-            
-            return new Response($content, 200, [
-                'Content-Type' => $contentType,
-                'Cache-Control' => 'public, max-age=86400',
-                'Access-Control-Allow-Origin' => '*',
-                'Last-Modified' => $lastModified,
-                'ETag' => $etag,
-                'X-Cache' => 'HIT',
-            ]);
-            
-        } catch (\Exception $e) {
-            $this->logger->warning('Erreur lecture cache: ' . $e->getMessage());
-            // Supprimer le cache corrompu
-            if (file_exists($cacheFile)) {
-                unlink($cacheFile);
-            }
-            throw $e;
-        }
     }
 } 

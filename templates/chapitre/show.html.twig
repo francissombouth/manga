@@ -2,91 +2,6 @@
 
 {% block title %}{{ chapitre.titre }} - {{ chapitre.oeuvre.titre }}{% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        // Suivi de progression de lecture
-        document.addEventListener('DOMContentLoaded', function() {
-            const progressIndicator = document.getElementById('progress-indicator');
-            const progressFill = document.getElementById('progress-fill');
-            const pages = document.querySelectorAll('.page-content');
-            
-            if (!progressIndicator || !progressFill || pages.length === 0) return;
-            
-            // Observer pour surveiller les pages visibles
-            const progressObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const page = entry.target;
-                        const pageNumber = parseInt(page.dataset.page);
-                        const totalPages = pages.length;
-                        
-                        // Mettre à jour l'indicateur
-                        progressIndicator.textContent = `Page ${pageNumber} / ${totalPages}`;
-                        
-                        // Mettre à jour la barre de progression
-                        const progressPercent = (pageNumber / totalPages) * 100;
-                        progressFill.style.width = progressPercent + '%';
-                        
-                        // Mettre à jour l'URL sans recharger
-                        const url = new URL(window.location);
-                        url.searchParams.set('page', pageNumber);
-                        window.history.replaceState({}, '', url);
-                    }
-                });
-            }, {
-                threshold: 0.5
-            });
-            
-            // Observer toutes les pages
-            pages.forEach(page => {
-                progressObserver.observe(page);
-            });
-            
-            // Aller à une page spécifique depuis l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const startPage = urlParams.get('page');
-            if (startPage && startPage > 1) {
-                const targetPage = document.querySelector(`[data-page="${startPage}"]`);
-                if (targetPage) {
-                    setTimeout(() => {
-                        targetPage.scrollIntoView({ behavior: 'smooth' });
-                    }, 500);
-                }
-            }
-        });
-        
-        // Raccourcis clavier pour la navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return; // Ignorer si on est dans un champ de saisie
-            }
-            
-            switch(e.key) {
-                case 'ArrowUp':
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    window.scrollBy(0, -window.innerHeight * 0.8);
-                    break;
-                case 'ArrowDown':
-                case 'ArrowRight':
-                case ' ':
-                    e.preventDefault();
-                    window.scrollBy(0, window.innerHeight * 0.8);
-                    break;
-                case 'Home':
-                    e.preventDefault();
-                    window.scrollTo(0, 0);
-                    break;
-                case 'End':
-                    e.preventDefault();
-                    window.scrollTo(0, document.body.scrollHeight);
-                    break;
-            }
-        });
-    </script>
-{% endblock %}
-
 {% block body %}
 <div class="main-container">
     <!-- Contenu principal -->
@@ -151,35 +66,9 @@
         <!-- Contenu du chapitre -->
         <div class="chapitre-content" style="background: var(--card-bg); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 2rem;">
             {% if chapitre.pages|length > 0 %}
-                <!-- Indicateur de progression -->
-                <div class="chapter-progress" style="position: sticky; top: 0; background: var(--surface); padding: 0.5rem 1rem; border-bottom: 1px solid var(--border-color); z-index: 5;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--text-secondary);">
-                        <span>📖 {{ chapitre.titre }}</span>
-                        <span id="progress-indicator">Page 1 / {{ chapitre.pages|length }}</span>
-                    </div>
-                    <div class="progress-bar" style="width: 100%; height: 3px; background: var(--border-color); border-radius: 2px; margin-top: 0.5rem;">
-                        <div id="progress-fill" style="height: 100%; background: var(--accent-primary); border-radius: 2px; width: 0%; transition: width 0.3s ease;"></div>
-                    </div>
-                </div>
-                
                 {% for page in chapitre.pages %}
-                    <div class="page-content" style="margin-bottom: 0; text-align: center; position: relative;" data-page="{{ loop.index }}">
-                        <img 
-                            {% if loop.index <= 2 %}
-                                src="{{ smart_image_url(page) }}"
-                            {% else %}
-                                data-src="{{ smart_image_url(page) }}"
-                                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1200'%3E%3Crect width='100%25' height='100%25' fill='%23374151'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-size='24'%3E📖 Chargement...%3C/text%3E%3C/svg%3E"
-                            {% endif %}
-                            alt="Page {{ loop.index }}" 
-                            style="max-width: 100%; height: auto; display: block; margin: 0 auto;" 
-                            class="page-image"
-                            loading="{% if loop.index <= 2 %}eager{% else %}lazy{% endif %}"
-                            decoding="async"
-                        >
-                        <div class="page-number" style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
-                            {{ loop.index }} / {{ chapitre.pages|length }}
-                        </div>
+                    <div class="page-content" style="margin-bottom: 0; text-align: center;">
+                        <img src="{{ smart_image_url(page) }}" alt="Page {{ loop.index }}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" class="page-image">
                     </div>
                 {% endfor %}
             {% else %}
