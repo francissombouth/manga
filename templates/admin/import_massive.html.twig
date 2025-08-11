@@ -18,7 +18,7 @@
                 🏭 Import Massif depuis MangaDx
             </h1>
             <p class="admin-subtitle">Importez de vraies œuvres depuis MangaDx pour alimenter rapidement votre base de données</p>
-                    </div>
+        </div>
 
         <!-- Flash Messages -->
         {% for type, messages in app.flashes %}
@@ -26,75 +26,75 @@
                 <div class="status-message {{ type == 'error' ? 'error' : type }}">
                     {% if type == 'success' %}✅{% elseif type == 'error' %}❌{% elseif type == 'warning' %}⚠️{% else %}ℹ️{% endif %}
                     {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
         <!-- Contenu principal -->
         <div class="admin-content">
             <div class="admin-grid">
-            <!-- Formulaire de génération -->
+                <!-- Formulaire de génération -->
                 <div class="admin-card">
-                <h2 class="card-title">
-                    📥 Importateur MangaDx
-                </h2>
-                
-                                    <form method="post" id="importForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="limit" class="form-label">
-                                Nombre d'œuvres à importer
-                            </label>
-                            <select class="form-select" id="limit" name="limit">
-                                <option value="5">5 œuvres (Test rapide)</option>
-                                <option value="10" selected>10 œuvres (Recommandé)</option>
-                                <option value="20">20 œuvres (Base moyenne)</option>
-                                <option value="50">50 œuvres (Grosse base)</option>
-                                <option value="100">100 œuvres (Énorme !)</option>
-                            </select>
-                            <div class="form-help">
-                                Œuvres récupérées depuis l'API MangaDx avec leurs chapitres réels
+                    <h2 class="card-title">
+                        📥 Importateur MangaDx
+                    </h2>
+                    
+                    <form method="post" id="importForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="limit" class="form-label">
+                                    Nombre d'œuvres à importer
+                                </label>
+                                <select class="form-select" id="limit" name="limit">
+                                    <option value="5">5 œuvres (Test rapide)</option>
+                                    <option value="10" selected>10 œuvres (Recommandé)</option>
+                                    <option value="20">20 œuvres (Base moyenne)</option>
+                                    <option value="50">50 œuvres (Grosse base)</option>
+                                    <option value="100">100 œuvres (Énorme !)</option>
+                                </select>
+                                <div class="form-help">
+                                    Œuvres récupérées depuis l'API MangaDx avec leurs chapitres réels
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="category" class="form-label">
+                                    Catégorie d'œuvres
+                                </label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="popular" selected>🎯 Populaires (Les plus suivies)</option>
+                                    <option value="latest">🆕 Récentes (Nouvelles sorties)</option>
+                                    <option value="random">🎲 Aléatoires (Découvertes)</option>
+                                </select>
+                                <div class="form-help">
+                                    Type d'œuvres à importer depuis MangaDx
+                                </div>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="category" class="form-label">
-                                Catégorie d'œuvres
+                            <label class="form-label">
+                                Options avancées
                             </label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="popular" selected>🎯 Populaires (Les plus suivies)</option>
-                                <option value="latest">🆕 Récentes (Nouvelles sorties)</option>
-                                <option value="random">🎲 Aléatoires (Découvertes)</option>
-                            </select>
-                            <div class="form-help">
-                                Type d'œuvres à importer depuis MangaDx
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            Options avancées
-                        </label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item danger-checkbox">
-                                <input type="checkbox" id="force" name="force" value="1">
-                                <div class="checkbox-content">
-                                    <h6>⚠️ Vider la base avant import</h6>
-                                    <small>Supprime toutes les œuvres existantes ! Irréversible.</small>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item danger-checkbox">
+                                    <input type="checkbox" id="force" name="force" value="1">
+                                    <div class="checkbox-content">
+                                        <h6>⚠️ Vider la base avant import</h6>
+                                        <small>Supprime toutes les œuvres existantes ! Irréversible.</small>
+                                    </div>
                                 </div>
-                            </div>
 
+                            </div>
                         </div>
-                    </div>
-                    
+                        
                         <div class="admin-actions">
                             <button type="button" class="btn btn-primary" onclick="startImport()">
-                            📥 Importer depuis MangaDx
-                                            </button>
-                                        </div>
-                                    </form>
-                            </div>
+                                📥 Importer depuis MangaDx
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -123,7 +123,7 @@ function startImport() {
             return;
         }
     }
-        document.getElementById('importForm').submit();
+    document.getElementById('importForm').submit();
 }
 
 // Mettre à jour les estimations au changement de limit
@@ -132,4 +132,4 @@ document.getElementById('limit').addEventListener('change', updateEstimates);
 // Initialisation
 updateEstimates();
 </script>
-{% endblock %} 
+{% endblock %}

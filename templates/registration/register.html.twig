@@ -6,299 +6,41 @@
     <link rel="stylesheet" href="{{ asset('styles/pages/auth.css') }}">
 {% endblock %}
 
-{% comment %}
-<style>
-/* Réutilisation des styles d'authentification */
-.auth-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.auth-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.auth-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 3rem;
-    width: 100%;
-    max-width: 500px;
-    box-shadow: var(--shadow-secondary);
-    position: relative;
-    z-index: 1;
-}
-
-.auth-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.auth-logo {
-    font-size: 2.5rem;
-    font-weight: 800;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.auth-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    color: var(--text-primary);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.form-input {
-    width: 100%;
-    padding: 1rem 1.2rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-input::placeholder {
-    color: var(--text-muted);
-}
-
-.form-error {
-    color: #fca5a5;
-    font-size: 0.85rem;
-    margin-top: 0.3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.form-checkbox-wrapper {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-checkbox {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent-primary);
-    margin-top: 0.2rem;
-}
-
-.checkbox-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    cursor: pointer;
-    line-height: 1.4;
-}
-
-.btn-auth {
-    width: 100%;
-    padding: 1rem;
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 1.5rem;
-}
-
-.btn-auth:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-}
-
-.auth-divider {
-    text-align: center;
-    position: relative;
-    margin: 2rem 0;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-.auth-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--border-secondary);
-    z-index: 1;
-}
-
-.auth-divider span {
-    background: var(--bg-card);
-    padding: 0 1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.auth-link {
-    text-align: center;
-}
-
-.auth-link a {
-    color: var(--accent-primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.auth-link a:hover {
-    color: var(--accent-secondary);
-}
-
-.back-to-home {
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    z-index: 10;
-}
-
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.2rem;
-    background: var(--bg-card);
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: 10px;
-    border: 1px solid var(--border-secondary);
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.back-btn:hover {
-    background: var(--accent-primary);
-    color: white;
-    text-decoration: none;
-    transform: translateY(-2px);
-}
-
-.success-message {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    color: #6ee7b7;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .auth-card {
-        padding: 2rem 1.5rem;
-        margin: 1rem;
-    }
-    
-    .back-to-home {
-        position: static;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-{% endcomment %}
-
 {% block body %}
-<div class="back-to-home">
-    <a href="{{ path('app_home') }}" class="back-btn">
-        🏠 Retour à l'accueil
-    </a>
-</div>
-
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
-            <div class="auth-logo">🎌 MangaThèque</div>
-            <h1 class="auth-title">Inscription</h1>
-            <p class="auth-subtitle">Créez votre compte pour commencer votre collection</p>
+            <div class="auth-logo">🎌</div>
+            <h1 class="auth-title">Rejoignez MangaThèque</h1>
+            <p class="auth-subtitle">Créez votre compte pour découvrir des milliers de mangas</p>
         </div>
 
-        {{ form_start(registrationForm) }}
+        {{ form_start(registrationForm, {'attr': {'class': 'auth-form'}}) }}
             <div class="form-group">
-                {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(registrationForm.nom) }}
-                {{ form_errors(registrationForm.nom) }}
+                {{ form_label(registrationForm.nom, 'Nom d\'affichage', {'attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-input', 'placeholder': 'Votre nom d\'affichage'}}) }}
+                {{ form_errors(registrationForm.nom, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <div class="form-group">
-                {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(registrationForm.email) }}
-                {{ form_errors(registrationForm.email) }}
+                {{ form_label(registrationForm.email, 'Adresse email', {'attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-input', 'placeholder': 'votre@email.com'}}) }}
+                {{ form_errors(registrationForm.email, {'attr': {'class': 'form-error'}}) }}
             </div>
 
             <div class="form-group">
-                {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(registrationForm.plainPassword.first) }}
-                {{ form_errors(registrationForm.plainPassword.first) }}
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'attr': {'class': 'form-label'}}) }}
+                {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-input', 'placeholder': 'Mot de passe sécurisé'}}) }}
+                {{ form_errors(registrationForm.plainPassword, {'attr': {'class': 'form-error'}}) }}
             </div>
 
-            <div class="form-group">
-                {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(registrationForm.plainPassword.second) }}
-                {{ form_errors(registrationForm.plainPassword.second) }}
-            </div>
-
-            <div class="form-checkbox-wrapper">
+            <div class="checkbox-group">
                 {{ form_widget(registrationForm.agreeTerms) }}
-                {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'checkbox-label'}}) }}
+                {{ form_label(registrationForm.agreeTerms, 'J\'accepte les conditions d\'utilisation') }}
             </div>
-            {{ form_errors(registrationForm.agreeTerms) }}
+            {{ form_errors(registrationForm.agreeTerms, {'attr': {'class': 'form-error'}}) }}
 
-            <button type="submit" class="btn-auth">
+            <button type="submit" class="auth-submit">
                 ✨ Créer mon compte
             </button>
         {{ form_end(registrationForm) }}
@@ -312,4 +54,4 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

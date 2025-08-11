@@ -13,7 +13,7 @@ Version : 1.1.0
 ✅ Statut : Déployé sur Render.com, fonctionnel en production
 ✅ Bugs critiques : 0
 ✅ Bugs majeurs : 0
-✅ Bugs mineurs : 52 (corrigés)
+✅ Bugs mineurs : 50 (corrigés)
 ✅ Améliorations : 25 implémentées
 ✅ Déploiement : ✅ OPÉRATIONNEL
 
@@ -29,7 +29,7 @@ Aucun bug critique détecté pendant cette période.
 -------------------------------------------------------------------------------
 Aucun bug majeur détecté pendant cette période.
 
-2.3 BUGS MINEURS (52 - TOUS CORRIGÉS)
+2.3 BUGS MINEURS (50 - TOUS CORRIGÉS)
 -------------------------------------------------------------------------------
 
 
@@ -544,26 +544,6 @@ BUG #048 - Configuration de logs non optimisée
 ├── Date : 2025-07-22
 └── Fichiers modifiés : config/packages/monolog.yaml
 
-BUG #049 - Conflit CSS entre styles inline et externes sur page import massive
-├── Description : Problème de styles CSS conflictuels causant des erreurs de navigation
-├── Symptômes : CSS qui change lors de la navigation entre pages admin
-├── Cause : Page import_massive.html.twig utilisant 400+ lignes de CSS inline au lieu du fichier externe
-├── Impact : Conflits de priorité CSS, navigation problématique entre pages
-├── Solution : Suppression des styles inline, utilisation du CSS externe cohérent
-├── Statut : ✅ CORRIGÉ
-├── Date : 2025-08-11
-└── Fichiers modifiés : templates/admin/import_massive.html.twig, assets/styles/pages/admin.css
-
-BUG #050 - Problème d'affichage des images via proxy
-├── Description : Images de certains domaines (imgbb.com) non affichées malgré URLs valides
-├── Symptômes : "Image non disponible" pour des URLs fonctionnelles d'imgbb.com
-├── Cause : Logique de proxy trop restrictive et conflits entre accès direct et proxy
-├── Impact : Images manquantes dans l'interface utilisateur
-├── Solution : Implémentation d'une extension Twig intelligente (smart_image_url) pour décider automatiquement entre proxy et accès direct selon le domaine
-├── Statut : ✅ CORRIGÉ
-├── Date : 2025-08-11
-└── Fichiers modifiés : src/Twig/ImageExtension.php, templates/oeuvre/collection.html.twig, templates/collection/favoris.html.twig, templates/home/index.html.twig, templates/chapitre/show.html.twig
-
 ================================================================================
 3. MODIFICATIONS RÉALISÉES SUITE AUX RETOURS UTILISATEURS
 ================================================================================
@@ -885,7 +865,7 @@ AMÉLIORATION #021 - Configuration de base de données
 
 Le projet Mangathèque a été déployé avec succès sur Render.com avec :
 - 0 bug critique ou majeur
-- 52 bugs mineurs corrigés
+- 49 bugs mineurs corrigés
 - 25 améliorations implémentées
 - 100% de tests réussis
 - Pipeline CI/CD opérationnelle

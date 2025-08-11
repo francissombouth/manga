@@ -1,5 +1,28 @@
 /* Styles pour la page de détail d'une œuvre */
 
+/* Style pour le bouton de favoris */
+.sidebar-btn-favorite {
+    transition: all 0.3s ease;
+}
+
+.sidebar-btn-favorite.favorited {
+    background: linear-gradient(135deg, #e11d48, #be185d) !important;
+    color: white !important;
+    border-color: #e11d48 !important;
+}
+
+.sidebar-btn-favorite.favorited:hover {
+    background: linear-gradient(135deg, #be185d, #9f1239) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+}
+
+.sidebar-btn-favorite:not(.favorited):hover {
+    background: rgba(225, 29, 72, 0.1) !important;
+    border-color: #e11d48 !important;
+    color: #e11d48 !important;
+}
+
 /* Styles pour les onglets */
 .tab-btn {
     background: rgba(139, 92, 246, 0.1);

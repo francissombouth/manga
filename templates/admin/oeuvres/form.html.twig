@@ -7,102 +7,96 @@
 {% endblock %}
 
 {% block body %}
+
+
 <div class="admin-container">
     <div class="form-container">
         <!-- Breadcrumb -->
         <div class="breadcrumb">
-            <a href="{{ path('admin_oeuvres') }}" class="breadcrumb-link">📚 Œuvres</a>
-            <span class="breadcrumb-separator">›</span>
-            <span class="breadcrumb-current">{{ title }}</span>
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <a href="{{ path('admin_oeuvres') }}">Œuvres</a>
+            <span>></span>
+            <span>{{ title }}</span>
         </div>
 
-        <!-- Header -->
         <div class="admin-header">
-            <a href="{{ path('admin_oeuvres') }}" class="back-btn">
-                ← Retour à la liste
-            </a>
             <h1 class="admin-title">
-                {% if oeuvre.id %}✏️ Modifier l'œuvre{% else %}✨ Créer une œuvre{% endif %}
+                {% if oeuvre.id %}✏️{% else %}➕{% endif %} {{ title }}
             </h1>
-            <p class="admin-subtitle">Gérez les informations de votre manga</p>
         </div>
 
-        <!-- Formulaire -->
+        <!-- Flash Messages -->
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
         <div class="form-card">
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-            
-            <div class="form-grid">
-                <div>
-                    <div class="form-group">
-                        {{ form_label(form.titre) }}
-                        {{ form_widget(form.titre) }}
-                        {{ form_errors(form.titre) }}
-                    </div>
+            {{ form_start(form) }}
 
-                    <div class="form-group">
-                        {{ form_label(form.auteur) }}
-                        {{ form_widget(form.auteur) }}
-                        {{ form_errors(form.auteur) }}
-                        <div class="form-help">
-                            Sélectionnez un auteur existant ou <a href="{{ path('admin_auteurs_new') }}" target="_blank" style="color: var(--accent-primary);">créez-en un nouveau</a>
-                        </div>
-                    </div>
+            <div class="form-group">
+                {{ form_label(form.titre) }}
+                {{ form_widget(form.titre) }}
+                {{ form_errors(form.titre) }}
+                <div class="form-help">Le titre principal de l'œuvre</div>
+            </div>
 
-                    <div class="form-group">
-                        {{ form_label(form.statut) }}
-                        {{ form_widget(form.statut) }}
-                        {{ form_errors(form.statut) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.type) }}
-                        {{ form_widget(form.type) }}
-                        {{ form_errors(form.type) }}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.datePublication) }}
-                        {{ form_widget(form.datePublication) }}
-                        {{ form_errors(form.datePublication) }}
-                    </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.auteur) }}
+                    {{ form_widget(form.auteur) }}
+                    {{ form_errors(form.auteur) }}
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        {{ form_label(form.mangadxId) }}
-                        {{ form_widget(form.mangadxId) }}
-                        {{ form_errors(form.mangadxId) }}
-                        <div class="form-help">
-                            ID unique de l'œuvre sur MangaDx (optionnel)<br>
-                            💡 <strong>Comment l'obtenir :</strong> Allez sur <a href="{{ path('app_oeuvre_list') }}" target="_blank" style="color: var(--accent-primary);">le catalogue des œuvres</a>, 
-                            trouvez votre manga et copiez l'ID depuis l'URL (ex: a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6)<br>
-                            🔄 <strong>Laissez vide</strong> pour créer une œuvre sans lien MangaDx
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        {{ form_label(form.tags, 'Genres') }}
-                        {{ form_widget(form.tags) }}
-                        {{ form_errors(form.tags) }}
-                        <div class="form-help">Sélectionne un ou plusieurs genres pour cette œuvre. Tu peux en ajouter, modifier ou retirer.</div>
-                    </div>
+                <div class="form-group">
+                    {{ form_label(form.type) }}
+                    {{ form_widget(form.type) }}
+                    {{ form_errors(form.type) }}
                 </div>
             </div>
 
             <div class="form-group">
-                {{ form_label(form.description) }}
-                {{ form_widget(form.description) }}
-                {{ form_errors(form.description) }}
-                <div class="form-help">Décrivez brièvement l'histoire et l'univers de cette œuvre</div>
+                {{ form_label(form.resume) }}
+                {{ form_widget(form.resume) }}
+                {{ form_errors(form.resume) }}
+                <div class="form-help">Résumé ou description de l'œuvre (optionnel)</div>
             </div>
 
-            <div class="form-group">
-                {{ form_label(form.couverture) }}
-                {{ form_widget(form.couverture) }}
-                {{ form_errors(form.couverture) }}
-                <div class="form-help">
-                    URL de l'image de couverture (format JPG, PNG, WebP recommandé)<br>
-                    💡 <strong>Conseil :</strong> Utilisez une image de haute qualité pour un meilleur rendu
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.couverture) }}
+                    {{ form_widget(form.couverture) }}
+                    {{ form_errors(form.couverture) }}
+                    <div class="form-help">URL vers l'image de couverture</div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.datePublication) }}
+                    {{ form_widget(form.datePublication) }}
+                    {{ form_errors(form.datePublication) }}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    {{ form_label(form.mangadxId) }}
+                    {{ form_widget(form.mangadxId) }}
+                    {{ form_errors(form.mangadxId) }}
+                    <div class="form-help">
+                        ID unique de l'œuvre sur MangaDx (optionnel)<br>
+                        💡 <strong>Comment l'obtenir :</strong> Allez sur <a href="{{ path('app_oeuvre_list') }}" target="_blank" style="color: var(--accent-primary);">le catalogue des œuvres</a>, 
+                        trouvez votre manga et copiez l'ID depuis l'URL (ex: a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6)<br>
+                        🔄 <strong>Laissez vide</strong> pour créer une œuvre sans lien MangaDx
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.tags, 'Genres') }}
+                    {{ form_widget(form.tags) }}
+                    {{ form_errors(form.tags) }}
+                    <div class="form-help">Sélectionne un ou plusieurs genres pour cette œuvre. Tu peux en ajouter, modifier ou retirer.</div>
                 </div>
             </div>
 
@@ -118,18 +112,13 @@
             {{ form_end(form) }}
         </div>
 
-        <!-- Messages flash -->
-        {% for flash_message in app.session.flashbag.get('success') %}
-            <div class="alert alert-success">
-                ✅ {{ flash_message }}
+        {% if oeuvre.id %}
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="btn btn-primary">
+                    📖 Gérer les chapitres de cette œuvre
+                </a>
             </div>
-        {% endfor %}
-
-        {% for flash_message in app.session.flashbag.get('error') %}
-            <div class="alert alert-error">
-                ❌ {{ flash_message }}
-            </div>
-        {% endfor %}
+        {% endif %}
     </div>
 </div>
-{% endblock %}
+{% endblock %} 

@@ -7,6 +7,8 @@
 {% endblock %}
 
 {% block body %}
+
+
 <div class="admin-container">
     <div class="container">
         <div class="admin-header">
@@ -25,134 +27,131 @@
         <div class="admin-controls">
             <form method="GET" class="search-form">
                 <input type="text" name="search" value="{{ search }}" placeholder="Rechercher une œuvre..." class="search-input">
-                <button type="submit" class="btn btn-primary">🔍 Rechercher</button>
+                <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
                 {% if search %}
                     <a href="{{ path('admin_oeuvres') }}" class="btn btn-secondary">❌ Effacer</a>
                 {% endif %}
             </form>
             
-            <div class="admin-actions">
-                <a href="{{ path('admin_oeuvres_new') }}" class="btn btn-primary">
-                    ✨ Nouvelle œuvre
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
                 </a>
-                <a href="{{ path('admin_import_massive') }}" class="btn btn-accent">
-                    🏭 Import Massif
-                </a>
-                <a href="{{ path('admin_import_mangadx') }}" class="btn btn-purple">
-                    📥 Import MangaDx
+                <a href="{{ path('admin_oeuvre_new') }}" class="btn btn-primary">
+                    ➕ Ajouter une œuvre MangaDx
                 </a>
             </div>
         </div>
 
-        <!-- Tableau des œuvres -->
-        <div class="admin-table">
-            <div class="table-header">
-                <h2 class="table-title">Liste des Œuvres</h2>
-                <div class="table-actions">
-                    <span>{{ oeuvres|length }} résultat(s)</span>
-                </div>
-            </div>
-            
-            <div class="table-content">
+        <!-- Table des œuvres -->
+        {% if oeuvres %}
+            <div class="oeuvres-table">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Couverture</th>
                             <th>Titre</th>
                             <th>Auteur</th>
-                            <th>Statut</th>
+                            <th>Type</th>
+                            <th>ID MangaDx</th>
                             <th>Chapitres</th>
-                            <th>Date création</th>
+                            <th>Dernière modification</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for oeuvre in oeuvres %}
-                        <tr>
-                            <td>{{ oeuvre.id }}</td>
-                            <td>
-                                {% if oeuvre.couverture %}
-                                    <img src="{{ smart_image_url(oeuvre.couverture) }}" 
-                                         alt="{{ oeuvre.titre }}" 
-                                         style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;"
-                                         loading="lazy"
-                                         onerror="this.style.display='none';">
-                                {% else %}
-                                    <div style="width: 40px; height: 60px; background: var(--surface); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">📖</div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ oeuvre.titre }}</strong>
-                                {% if oeuvre.mangadxId %}
-                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                                        MangaDx: {{ oeuvre.mangadxId|slice(0, 8) }}...
-                                    </div>
-                                {% endif %}
-                            </td>
-                            <td>{{ oeuvre.auteur ? oeuvre.auteur.nom : 'Aucun auteur' }}</td>
-                            <td>
-                                <span class="status-badge status-{{ oeuvre.statut|lower }}">
-                                    {{ oeuvre.statut }}
-                                </span>
-                            </td>
-                            <td>{{ oeuvre.chapitres|length }}</td>
-                            <td>{{ oeuvre.createdAt|date('d/m/Y') }}</td>
-                            <td class="table-actions-cell">
-                                <a href="{{ path('app_oeuvre_show', {'id': oeuvre.id}) }}" 
-                                   class="btn-table btn-table-view" 
-                                   title="Voir l'œuvre">
-                                    👁️
-                                </a>
-                                <a href="{{ path('admin_oeuvres_edit', {'id': oeuvre.id}) }}" 
-                                   class="btn-table btn-table-edit" 
-                                   title="Modifier">
-                                    ✏️
-                                </a>
-                                <a href="{{ path('admin_chapitres_list', {'oeuvre': oeuvre.id}) }}" 
-                                   class="btn-table btn-table-view" 
-                                   title="Gérer les chapitres">
-                                    📚
-                                </a>
-                                <form method="post" 
-                                      action="{{ path('admin_oeuvres_delete', {'id': oeuvre.id}) }}" 
-                                      style="display: inline;"
-                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette œuvre ?')">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ oeuvre.id) }}">
-                                    <button type="submit" class="btn-table btn-table-delete" title="Supprimer">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                                {% if search %}
-                                    Aucune œuvre trouvée pour "{{ search }}"
-                                {% else %}
-                                    Aucune œuvre trouvée. <a href="{{ path('admin_oeuvres_new') }}">Créer la première œuvre</a>
-                                {% endif %}
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="oeuvre-title">{{ oeuvre.titre }}</div>
+                                </td>
+                                <td>
+                                    {% if oeuvre.auteur %}
+                                        {{ oeuvre.auteur.nom }}
+                                        {% if oeuvre.auteur.prenom %} {{ oeuvre.auteur.prenom }}{% endif %}
+                                    {% else %}
+                                        <em>Aucun auteur</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="type-badge">{{ oeuvre.type }}</span>
+                                </td>
+                                <td>
+                                    {% if oeuvre.mangadxId %}
+                                        <code style="font-size: 0.8rem; background: var(--bg-card); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                            {{ oeuvre.mangadxId|slice(0, 8) }}...
+                                        </code>
+                                    {% else %}
+                                        <em style="color: var(--text-muted);">Aucun ID</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ oeuvre.chapitres|length }} chapitre(s)
+                                </td>
+                                <td>
+                                    {{ oeuvre.updatedAt|date('d/m/Y H:i') }}
+                                </td>
+                                <td class="actions-cell">
+                                    <a href="{{ path('app_oeuvre_show', {id: oeuvre.id}) }}" class="btn btn-secondary btn-sm">
+                                        📖 Voir l'œuvre
+                                    </a>
+                                    <a href="{{ path('admin_oeuvre_edit', {id: oeuvre.id}) }}" class="btn btn-secondary btn-sm">
+                                        ✏️ Éditer
+                                    </a>
+                                    <form method="POST" action="{{ path('admin_oeuvre_delete', {id: oeuvre.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette œuvre ?')">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            🗑️ Supprimer
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        </div>
 
-        <!-- Pagination -->
-        {% if total > 20 %}
-            <div class="pagination-wrapper">
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
                 <div class="pagination">
-                    {% for page in 1..(total / 20)|round(0, 'ceil') %}
-                        {% set currentPage = (app.request.get('page', 1))|int %}
-                        <a href="{{ path('admin_oeuvres', {page: page, search: search}) }}" 
-                           class="pagination-link {% if page == currentPage %}active{% endif %}">
-                            {{ page }}
+                    {% if current_page > 1 %}
+                        <a href="{{ path('admin_oeuvres', {page: current_page - 1, search: search}) }}" class="pagination-btn">
+                            ← Précédent
                         </a>
-                    {% endfor %}
+                    {% else %}
+                        <span class="pagination-btn disabled">← Précédent</span>
+                    {% endif %}
+
+                    <span class="pagination-info">
+                        Page {{ current_page }} sur {{ total_pages }}
+                    </span>
+
+                    {% if current_page < total_pages %}
+                        <a href="{{ path('admin_oeuvres', {page: current_page + 1, search: search}) }}" class="pagination-btn">
+                            Suivant →
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn disabled">Suivant →</span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="oeuvres-table">
+                <div class="empty-state">
+                    <h3>{% if search %}Aucun résultat{% else %}Aucune œuvre{% endif %}</h3>
+                    <p>
+                        {% if search %}
+                            Aucune œuvre ne correspond à votre recherche "{{ search }}".
+                        {% else %}
+                            Commencez par ajouter votre première œuvre MangaDx !
+                        {% endif %}
+                    </p>
+                    {% if not search %}
+                        <a href="{{ path('admin_oeuvre_new') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                            ➕ Ajouter la première œuvre MangaDx
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}
+{% endblock %} 

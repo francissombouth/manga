@@ -9,58 +9,54 @@
 {% block body %}
 <div class="profile-container">
     <div class="profile-content">
-        <div class="welcome-message">
-            <span>🎉</span>
-            <span>Bienvenue sur votre profil, {{ user.nom }} !</span>
-        </div>
-
+        <!-- En-tête du profil -->
         <div class="profile-header">
             <div class="profile-avatar">
                 👤
             </div>
-            <h1 class="profile-name">{{ user.nom }}</h1>
-            <p class="profile-email">{{ user.email }}</p>
+            <h1 class="profile-name">{{ app.user.nom }}</h1>
+            <p class="profile-email">{{ app.user.email }}</p>
         </div>
 
+        <!-- Statistiques -->
         <div class="profile-stats">
             <div class="stat-card">
-                <div class="stat-number">{{ user.collections|length }}</div>
-                <div class="stat-label">Collections</div>
+                <div class="stat-icon">📚</div>
+                <div class="stat-number">{{ favorisCount }}</div>
+                <div class="stat-label">Favoris</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{{ user.statuts|length }}</div>
-                <div class="stat-label">Mangas suivis</div>
+                <div class="stat-icon">📖</div>
+                <div class="stat-number">{{ enCoursCount }}</div>
+                <div class="stat-label">En cours</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{{ user.createdAt|date('d/m/Y') }}</div>
-                <div class="stat-label">Membre depuis</div>
+                <div class="stat-icon">✅</div>
+                <div class="stat-number">{{ termineeCount }}</div>
+                <div class="stat-label">Terminées</div>
             </div>
         </div>
 
+        <!-- Actions rapides -->
         <div class="profile-actions">
-            <h2 style="color: var(--text-primary); margin-bottom: 1.5rem; text-align: center;">
-                🚀 Actions rapides
+            <h2 class="actions-title">
+                ⚡ Actions Rapides
             </h2>
-            
-            <div class="actions-grid">
-                <a href="{{ path('app_home') }}" class="action-btn">
-                    <span>🏠</span>
-                    <span>Retour à l'accueil</span>
-                </a>
-                
+            <div class="action-grid">
                 <a href="{{ path('app_oeuvre_list') }}" class="action-btn">
-                    <span>🔍</span>
-                    <span>Rechercher des mangas</span>
+                    <div class="action-icon">🔍</div>
+                    <div class="action-content">
+                        <h4>Explorer le Catalogue</h4>
+                        <p>Découvrir de nouveaux mangas</p>
+                    </div>
                 </a>
                 
-                <a href="{{ path('app_home') }}" class="action-btn">
-                    <span>📚</span>
-                    <span>Ma Collection</span>
-                </a>
-                
-                <a href="{{ path('app_logout') }}" class="action-btn logout">
-                    <span>🚪</span>
-                    <span>Se déconnecter</span>
+                <a href="{{ path('favoris') }}" class="action-btn">
+                    <div class="action-icon">❤️</div>
+                    <div class="action-content">
+                        <h4>Mes Favoris</h4>
+                        <p>Voir ma collection de favoris</p>
+                    </div>
                 </a>
             </div>
         </div>
