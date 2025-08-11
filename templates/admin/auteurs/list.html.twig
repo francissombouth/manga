@@ -7,19 +7,18 @@
 {% endblock %}
 
 {% block body %}
-
-
 <div class="admin-container">
-    <div class="admin-content">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <span>Gestion des Auteurs</span>
+        </div>
+
         <div class="admin-header">
             <h1 class="admin-title">👥 Gestion des Auteurs</h1>
-            
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-number">{{ total }}</div>
-                    <div class="stat-label">Auteurs</div>
-                </div>
-            </div>
+            <p style="color: var(--text-secondary); margin: 0;">{{ total }} auteur(s) au total</p>
         </div>
 
         <!-- Flash Messages -->
@@ -39,9 +38,14 @@
                 {% endif %}
             </form>
             
-            <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary">
-                ➕ Nouvel auteur
-            </a>
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
+                </a>
+                <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary">
+                    ➕ Nouvel auteur
+                </a>
+            </div>
         </div>
 
         <!-- Liste des auteurs -->
@@ -102,6 +106,7 @@
             </div>
         {% else %}
             <div class="empty-state">
+                <div class="icon">👥</div>
                 <h3>Aucun auteur trouvé</h3>
                 <p>{% if search %}Aucun auteur ne correspond à votre recherche.{% else %}Aucun auteur n'a encore été créé.{% endif %}</p>
                 <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary" style="margin-top: 1rem;">
@@ -114,19 +119,19 @@
         {% if total_pages > 1 %}
             <div class="pagination">
                 {% if current_page > 1 %}
-                    <a href="{{ path('admin_auteurs', {page: current_page - 1, search: search}) }}">← Précédent</a>
+                    <a href="{{ path('admin_auteurs', {page: current_page - 1, search: search}) }}" class="btn btn-secondary btn-sm">← Précédent</a>
                 {% endif %}
                 
                 {% for page in 1..total_pages %}
                     {% if page == current_page %}
                         <span class="current">{{ page }}</span>
                     {% else %}
-                        <a href="{{ path('admin_auteurs', {page: page, search: search}) }}">{{ page }}</a>
+                        <a href="{{ path('admin_auteurs', {page: page, search: search}) }}" class="btn btn-secondary btn-sm">{{ page }}</a>
                     {% endif %}
                 {% endfor %}
                 
                 {% if current_page < total_pages %}
-                    <a href="{{ path('admin_auteurs', {page: current_page + 1, search: search}) }}">Suivant →</a>
+                    <a href="{{ path('admin_auteurs', {page: current_page + 1, search: search}) }}" class="btn btn-secondary btn-sm">Suivant →</a>
                 {% endif %}
             </div>
         {% endif %}
