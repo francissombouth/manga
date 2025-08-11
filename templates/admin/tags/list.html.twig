@@ -3,6 +3,10 @@
 {% block title %}{{ title }} - Administration{% endblock %}
 
 {% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
+{% endblock %}
+
+{% comment %}
 <style>
 .admin-container {
     min-height: 100vh;
@@ -166,9 +170,7 @@
 .empty-state .icon {
     font-size: 4rem;
     margin-bottom: 1rem;
-}
-</style>
-{% endblock %}
+{% endcomment %}
 
 {% block body %}
 <div class="admin-container">

@@ -3,6 +3,10 @@
 {% block title %}Éditer les rôles de {{ user.nom }} - Administration{% endblock %}
 
 {% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
+{% endblock %}
+
+{% comment %}
 <style>
 .admin-container {
     background: var(--bg-primary);
@@ -171,9 +175,7 @@
 
 .warning-box i {
     margin-right: 0.5rem;
-}
-</style>
-{% endblock %}
+{% endcomment %}
 
 {% block body %}
 <div class="admin-container">

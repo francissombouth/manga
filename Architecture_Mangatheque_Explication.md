@@ -39,7 +39,6 @@ class Oeuvre {
     -couverture: string
     -resume: text
     -datePublication: DateTime
-    -isbn: string
     -mangadxId: string
     -statut: string
     -originalLanguage: text

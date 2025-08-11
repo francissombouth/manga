@@ -3,6 +3,10 @@
 {% block title %}Gestion des Auteurs - Administration{% endblock %}
 
 {% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
+{% endblock %}
+
+{% comment %}
 <style>
 .admin-container {
     min-height: 100vh;
@@ -279,9 +283,7 @@
     .auteur-actions {
         justify-content: center;
     }
-}
-</style>
-{% endblock %}
+{% endcomment %}
 
 {% block body %}
 

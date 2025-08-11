@@ -46,7 +46,6 @@ entity "oeuvre" {
   couverture : VARCHAR(255)
   resume : TEXT
   datePublication : DATE
-  isbn : VARCHAR(20)
   mangadxId : VARCHAR(255)
   statut : VARCHAR(50)
   originalLanguage : TEXT

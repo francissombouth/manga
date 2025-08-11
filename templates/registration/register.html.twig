@@ -3,6 +3,10 @@
 {% block title %}Inscription - MangaThèque{% endblock %}
 
 {% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/pages/auth.css') }}">
+{% endblock %}
+
+{% comment %}
 <style>
 /* Réutilisation des styles d'authentification */
 .auth-container {
@@ -246,9 +250,7 @@
         text-align: center;
         margin-bottom: 2rem;
     }
-}
-</style>
-{% endblock %}
+{% endcomment %}
 
 {% block body %}
 <div class="back-to-home">

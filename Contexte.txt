@@ -35,7 +35,6 @@
 - **couverture** : VARCHAR(255) NULLABLE (URL/chemin image)
 - **resume** : TEXT NULLABLE
 - **date_publication** : DATE NULLABLE
-- **isbn** : VARCHAR(20) NULLABLE
 - **created_at** : DATETIME
 - **updated_at** : DATETIME
 
