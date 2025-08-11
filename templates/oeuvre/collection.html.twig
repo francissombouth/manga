@@ -300,7 +300,7 @@ select[name="tag"] option:hover {
                         <div class="manga-card">
                                 <div class="manga-cover-container">
                                     {% if oeuvre.couverture %}
-                                        <img src="{{ oeuvre.couverture }}" 
+                                        <img src="{{ smart_image_url(oeuvre.couverture) }}" 
                                              alt="{{ oeuvre.titre }}" 
                                              class="manga-cover"
                                              loading="lazy"

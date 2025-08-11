@@ -50,7 +50,7 @@
                             <!-- Couverture du manga -->
                             <div class="manga-cover-container">
                                 {% if oeuvre.couverture %}
-                                    <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" class="manga-cover">
+                                    <img src="{{ smart_image_url(oeuvre.couverture) }}" alt="{{ oeuvre.titre }}" class="manga-cover">
                                 {% else %}
                                     <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
                                         📖
@@ -110,7 +110,7 @@
                         <!-- Couverture du manga -->
                         <div class="manga-cover-container">
                             {% if oeuvre.couverture %}
-                                <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" class="manga-cover">
+                                <img src="{{ smart_image_url(oeuvre.couverture) }}" alt="{{ oeuvre.titre }}" class="manga-cover">
                             {% else %}
                                 <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
                                     📖
