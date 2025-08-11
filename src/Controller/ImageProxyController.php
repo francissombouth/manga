@@ -36,18 +36,10 @@ class ImageProxyController extends AbstractController
         $url = urldecode($url);
         
         $this->logger->info('Proxy image demandé pour: ' . $url);
-        
-        // Debug: log des détails de l'URL
-        $parsedUrl = parse_url($url);
-        $host = $parsedUrl['host'] ?? '';
-        $this->logger->info('Proxy image debug: host extrait = ' . $host);
 
-        // Vérifier que l'URL provient bien de MangaDx
-        $isAuthorized = $this->isMangaDxUrl($url);
-        $this->logger->info('Proxy image debug: isAuthorized = ' . ($isAuthorized ? 'true' : 'false'));
-        
-        if (!$isAuthorized) {
-            $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url, 'host' => $host]);
+        // Vérifier que l'URL provient bien de domaines autorisés
+        if (!$this->isMangaDxUrl($url)) {
+            $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url]);
             return $this->createPlaceholderResponse();
         }
 
@@ -109,32 +101,14 @@ class ImageProxyController extends AbstractController
 
         $parsedUrl = parse_url($url);
         $host = $parsedUrl['host'] ?? '';
-        
-        $this->logger->info('Proxy validation debug', [
-            'url' => $url,
-            'host' => $host,
-            'allowed_domains' => $allowedDomains
-        ]);
 
         foreach ($allowedDomains as $domain) {
-            $test1 = str_ends_with($host, $domain);
-            $test2 = str_ends_with($host, '.' . $domain);
-            
-            $this->logger->info('Proxy validation test', [
-                'domain' => $domain,
-                'host' => $host,
-                'ends_with_domain' => $test1,
-                'ends_with_dot_domain' => $test2
-            ]);
-            
             // Vérifier si l'host se termine par le domaine (pour inclure les sous-domaines)
-            if ($test1 || $test2) {
-                $this->logger->info('Proxy validation: MATCH trouvé', ['domain' => $domain]);
+            if (str_ends_with($host, $domain) || str_ends_with($host, '.' . $domain)) {
                 return true;
             }
         }
 
-        $this->logger->warning('Proxy validation: AUCUN MATCH trouvé', ['host' => $host]);
         return false;
     }
 
