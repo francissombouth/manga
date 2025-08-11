@@ -55,7 +55,7 @@
                     <!-- Couverture -->
                     <div class="oeuvre-cover">
                         {% if oeuvre.couverture %}
-                            <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ smart_image_url(oeuvre.couverture) }}" alt="{{ oeuvre.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
                         {% else %}
                             <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--accent-purple), #a855f7); display: flex; align-items: center; justify-content: center; color: white; font-size: clamp(2rem, 8vw, 3rem);">
                                 {% if oeuvre.type == 'Manhwa' %}🇰🇷{% else %}📖{% endif %}
