@@ -112,12 +112,14 @@
     background: var(--gradient-card);
     border: 1px solid var(--border-secondary);
     border-radius: 20px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     margin-bottom: 2rem;
 }
 
 .table {
     width: 100%;
+    min-width: 1200px;
     border-collapse: collapse;
 }
 
@@ -166,12 +168,20 @@
 
 .actions-cell {
     white-space: nowrap;
+    min-width: 320px;
+    width: 320px;
 }
 
 .btn-sm {
     padding: 0.5rem 0.8rem;
     font-size: 0.85rem;
     margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.actions-cell .btn-sm:last-child {
+    margin-right: 0;
 }
 
 .pagination {
@@ -285,6 +295,7 @@
     
     .table {
         font-size: 0.9rem;
+        min-width: 900px;
     }
     
     .table th, .table td {
@@ -294,6 +305,12 @@
     .btn-sm {
         padding: 0.4rem 0.6rem;
         font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .actions-cell {
+        min-width: 280px;
+        width: 280px;
     }
 }
 </style>
@@ -356,9 +373,6 @@
                             <tr>
                                 <td>
                                     <div class="oeuvre-title">{{ oeuvre.titre }}</div>
-                                    {% if oeuvre.resume %}
-                                        <div class="oeuvre-meta">{{ oeuvre.resume|length > 80 ? oeuvre.resume|slice(0, 80) ~ '...' : oeuvre.resume }}</div>
-                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if oeuvre.auteur %}

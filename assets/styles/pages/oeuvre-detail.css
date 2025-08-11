@@ -41,6 +41,33 @@
     border-bottom: 2px solid var(--border-color);
 }
 
+/* Styles pour les boutons J'aime des commentaires */
+.like-btn {
+    background: none !important;
+    border: 2px solid #e11d48 !important;
+    color: #e11d48 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.like-btn:hover {
+    background: #e11d48 !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+}
+
+.like-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.2) !important;
+}
+
 /* Styles pour le bouton favori */
 .sidebar-btn-favorite {
     background: linear-gradient(135deg, #e11d48, #be185d);
