@@ -300,93 +300,80 @@ class AdminController extends AbstractController
             $limit = (int) $request->request->get('limit', 10);
             $category = $request->request->get('category', 'popular');
             $force = $request->request->get('force', false);
-            $dryRun = $request->request->get('dry_run', false);
 
             try {
                 // Utiliser directement le service d'import au lieu de shell_exec
                 $successes = 0;
                 $errors = 0;
                 
-                if (!$dryRun) {
-                    // Vider la base si l'option force est cochée
-                    if ($force) {
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
-                        $this->entityManager->flush();
-                        $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
-                    }
-                    
-                    // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
-                    $offset = 0;
-                    $batchSize = $limit * 2; // Récupérer plus d'œuvres pour compenser celles qui existent déjà
-                    
-                    while ($successes < $limit && $offset < 500) { // Limite de sécurité à 500 pour éviter les boucles infinies
-                        $oeuvresData = match($category) {
-                            'popular' => $this->mangaDxService->getPopularManga($batchSize, $offset),
-                            'latest' => $this->mangaDxService->getLatestManga($batchSize, $offset),
-                            'random' => $this->mangaDxService->getRandomManga($batchSize),
-                            default => $this->mangaDxService->getPopularManga($batchSize, $offset)
+                // Vider la base si l'option force est cochée
+                if ($force) {
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
+                    $this->entityManager->flush();
+                    $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
+                }
+                
+                // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
+                $offset = 0;
+                $batchSize = $limit * 2; // Récupérer plus d'œuvres pour compenser celles qui existent déjà
+                
+                while ($successes < $limit && $offset < 500) { // Limite de sécurité à 500 pour éviter les boucles infinies
+                    $oeuvresData = match($category) {
+                        'popular' => $this->mangaDxService->getPopularManga($batchSize, $offset),
+                        'latest' => $this->mangaDxService->getLatestManga($batchSize, $offset),
+                        'random' => $this->mangaDxService->getRandomManga($batchSize),
+                        default => $this->mangaDxService->getPopularManga($batchSize, $offset)
                     };
-                        
-                        if (empty($oeuvresData)) {
-                            break; // Plus d'œuvres disponibles
-                        }
                     
+                    if (empty($oeuvresData)) {
+                        break; // Plus d'œuvres disponibles
+                    }
+                
                     foreach ($oeuvresData as $oeuvreData) {
-                            if ($successes >= $limit) {
-                                break; // On a atteint le nombre voulu
-                            }
-                            
+                        if ($successes >= $limit) {
+                            break; // On a atteint le nombre voulu
+                        }
+                        
                         try {
                             $mangadxId = $oeuvreData['id'];
                             
-                                // Si force est activé, on importe tout sans vérifier l'existence
-                                if ($force) {
+                            // Si force est activé, on importe tout sans vérifier l'existence
+                            if ($force) {
+                                $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                                if ($oeuvre) {
+                                    $successes++;
+                                } else {
+                                    $errors++;
+                                }
+                            } else {
+                                // Vérifier si l'œuvre existe déjà
+                                $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
+                                if (!$existingOeuvre) {
+                                    // Importer l'œuvre complète
                                     $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
                                     if ($oeuvre) {
                                         $successes++;
                                     } else {
                                         $errors++;
                                     }
-                                } else {
-                            // Vérifier si l'œuvre existe déjà
-                            $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
-                            if (!$existingOeuvre) {
-                                // Importer l'œuvre complète
-                                $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
-                                if ($oeuvre) {
-                                    $successes++;
-                                } else {
-                                    $errors++;
-                                        }
                                 }
                             }
                         } catch (\Exception $e) {
                             $errors++;
-                            }
                         }
-                        
-                        $offset += $batchSize;
                     }
                     
-                    if ($successes > 0) {
-                        $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
-                    }
-                    if ($errors > 0) {
-                        $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
-                    }
-                } else {
-                    // Mode simulation - estimer le nombre d'œuvres qui seraient importées
-                    $currentCount = $this->oeuvreRepository->count([]);
-                    $simulationMessage = "Simulation : {$limit} nouvelles œuvres seraient importées depuis MangaDx ({$category})";
-                    if ($force) {
-                        $simulationMessage .= " - Base de données aurait été vidée avant import (actuellement {$currentCount} œuvres)";
-                    } else {
-                        $simulationMessage .= " (en plus des {$currentCount} œuvres existantes)";
-                    }
-                    $this->addFlash('info', $simulationMessage);
+                    $offset += $batchSize;
+                }
+                
+                if ($successes > 0) {
+                    $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
+                }
+                if ($errors > 0) {
+                    $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
                 }
 
             } catch (\Exception $e) {

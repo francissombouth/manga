@@ -84,65 +84,16 @@
                                         <small>Supprime toutes les œuvres existantes ! Irréversible.</small>
                                     </div>
                                 </div>
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="dry_run" name="dry_run" value="1">
-                                    <div class="checkbox-content">
-                                        <h6>🔍 Mode simulation</h6>
-                                        <small>Aperçu des données sans les sauvegarder</small>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                         
                         <div class="admin-actions">
-                            <button type="button" class="btn btn-secondary" onclick="startSimulation()">
-                                🔍 Simulation d'import
-                            </button>
                             <button type="button" class="btn btn-primary" onclick="startImport()">
                                 📥 Importer depuis MangaDx
                             </button>
                         </div>
                     </form>
-                </div>
-
-                <!-- Sidebar d'informations -->
-                <div class="admin-sidebar">
-                    <!-- Fonctionnalités -->
-                    <div class="admin-card">
-                        <h3 class="card-title">
-                            🎯 Qu'est-ce qui sera importé ?
-                        </h3>
-                        <div class="feature-list">
-                            <div class="feature-item">
-                                <span class="feature-icon">📚</span>
-                                <div class="feature-content">
-                                    <h6>Œuvres authentiques</h6>
-                                    <small>Vraies œuvres depuis MangaDx avec titres, descriptions et couvertures originales</small>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <span class="feature-icon">👨‍🎨</span>
-                                <div class="feature-content">
-                                    <h6>Auteurs officiels</h6>
-                                    <small>Vrais auteurs et artistes récupérés depuis la base MangaDx</small>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <span class="feature-icon">🎭</span>
-                                <div class="feature-content">
-                                    <h6>Genres authentiques</h6>
-                                    <small>Vrais genres officiels assignés par la communauté MangaDx</small>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <span class="feature-icon">📖</span>
-                                <div class="feature-content">
-                                    <h6>Chapitres réels</h6>
-                                    <small>Chapitres existants avec numérotation et pages réelles disponibles</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -166,13 +117,7 @@ function updateEstimates() {
     if (chaptersElement) chaptersElement.textContent = `~${chapters}`;
 }
 
-function startSimulation() {
-    document.getElementById('dry_run').checked = true;
-    document.getElementById('importForm').submit();
-}
-
 function startImport() {
-    document.getElementById('dry_run').checked = false;
     if (document.getElementById('force').checked) {
         if (!confirm('⚠️ ATTENTION ! Vous êtes sur le point de supprimer TOUTES les œuvres existantes. Cette action est irréversible. Êtes-vous sûr ?')) {
             return;

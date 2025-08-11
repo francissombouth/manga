@@ -38,7 +38,7 @@ class ImportMassiveDataCommand extends Command
         $this
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Nombre d\'œuvres à importer', 50)
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Vider la base avant import (DESTRUCTEUR)')
-            ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Mode simulation (aucune sauvegarde)')
+
             ->addOption('start-offset', 's', InputOption::VALUE_OPTIONAL, 'Décalage de départ pour la pagination', 0)
             ->addOption('category', 'c', InputOption::VALUE_OPTIONAL, 'Catégorie à importer (popular, latest, random)', 'popular')
             ->setHelp('Cette commande importe massivement des œuvres depuis MangaDx pour créer une base de données complète.
@@ -46,7 +46,7 @@ class ImportMassiveDataCommand extends Command
 Exemples :
 - Importer 50 mangas populaires : php bin/console app:import-massive-data
 - Importer 100 derniers mangas : php bin/console app:import-massive-data --limit=100 --category=latest
-- Mode simulation : php bin/console app:import-massive-data --dry-run
+
 - Vider et recréer : php bin/console app:import-massive-data --force --limit=200')
         ;
     }
@@ -57,7 +57,7 @@ Exemples :
         
         $limit = (int) $input->getOption('limit');
         $force = $input->getOption('force');
-        $dryRun = $input->getOption('dry-run');
+
         $startOffset = (int) $input->getOption('start-offset');
         $category = $input->getOption('category');
 
@@ -82,12 +82,12 @@ Exemples :
                 ['Limite', $limit],
                 ['Catégorie', $category],
                 ['Décalage', $startOffset],
-                ['Mode simulation', $dryRun ? '✅ Oui' : '❌ Non'],
+
                 ['Vider la base', $force ? '⚠️ Oui' : '❌ Non'],
             ]
         );
 
-        if ($force && !$dryRun) {
+        if ($force) {
             $io->warning('ATTENTION : L\'option --force va SUPPRIMER toutes les œuvres existantes !');
             if (!$io->confirm('Êtes-vous absolument sûr de vouloir continuer ?')) {
                 $io->note('Opération annulée');
@@ -107,7 +107,7 @@ Exemples :
         );
 
         // Vider la base si demandé
-        if ($force && !$dryRun) {
+        if ($force) {
             $io->section('🧹 Nettoyage de la base de données');
             $this->clearDatabase($io);
         }
@@ -151,28 +151,19 @@ Exemples :
                         continue;
                     }
 
-                    if (!$dryRun) {
-                        // Importer l'œuvre complète
-                        $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
-                        
-                        if ($oeuvre) {
-                            $successes++;
-                            $this->logger->info("Œuvre importée avec succès", [
-                                'title' => $oeuvre->getTitre(),
-                                'mangadx_id' => $mangadxId,
-                                'chapters_count' => count($oeuvre->getChapitres())
-                            ]);
-                        } else {
-                            $errors++;
-                            $errorMessages[] = "Échec import: {$title}";
-                        }
-                    } else {
-                        // Mode simulation
+                    // Importer l'œuvre complète
+                    $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                    
+                    if ($oeuvre) {
                         $successes++;
-                        $this->logger->info("Simulation import", [
-                            'title' => $title,
-                            'mangadx_id' => $mangadxId
+                        $this->logger->info("Œuvre importée avec succès", [
+                            'title' => $oeuvre->getTitre(),
+                            'mangadx_id' => $mangadxId,
+                            'chapters_count' => count($oeuvre->getChapitres())
                         ]);
+                    } else {
+                        $errors++;
+                        $errorMessages[] = "Échec import: {$title}";
                     }
 
                 } catch (\Exception $e) {
@@ -210,7 +201,7 @@ Exemples :
         $io->table(
             ['Résultat', 'Nombre', 'Détail'],
             [
-                ['✅ Succès', $successes, $dryRun ? 'Simulés' : 'Importés réellement'],
+                ['✅ Succès', $successes, 'Importés réellement'],
                 ['⏭️ Ignorés', $skipped, 'Œuvres déjà existantes'],
                 ['❌ Erreurs', $errors, 'Échecs d\'import'],
                 ['📚 Total œuvres', $statsApres['oeuvres'], "Avant: {$statsAvant['oeuvres']}"],
@@ -230,11 +221,7 @@ Exemples :
         }
 
         // Message final
-        if ($dryRun) {
-            $io->success("Simulation terminée ! {$successes} œuvres auraient été importées.");
-        } else {
-            $io->success("{$successes} œuvres importées avec succès depuis MangaDx !");
-        }
+        $io->success("{$successes} œuvres importées avec succès depuis MangaDx !");
 
         return Command::SUCCESS;
     }
