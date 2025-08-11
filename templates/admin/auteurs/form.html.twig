@@ -290,20 +290,6 @@
 
             {{ form_end(form) }}
         </div>
-
-        {% if auteur.id and auteur.oeuvres|length > 0 %}
-            <div style="text-align: center; margin-top: 2rem;">
-                <div style="background: var(--bg-card); border: 1px solid var(--border-secondary); border-radius: 15px; padding: 1.5rem;">
-                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">📚 Œuvres de cet auteur</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-                        Cet auteur a {{ auteur.oeuvres|length }} œuvre(s) dans la base de données.
-                    </p>
-                    <a href="{{ path('admin_oeuvres') }}?auteur={{ auteur.id }}" class="btn btn-secondary">
-                        👀 Voir les œuvres
-                    </a>
-                </div>
-            </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %} 

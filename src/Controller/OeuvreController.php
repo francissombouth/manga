@@ -196,7 +196,6 @@ class OeuvreController extends AbstractController
         $oeuvre->setResume($data['resume'] ?? null);
         $oeuvre->setCouverture($data['couverture'] ?? null);
         $oeuvre->setDatePublication($data['date_publication'] ? new \DateTime($data['date_publication']) : null);
-        $oeuvre->setIsbn($data['isbn'] ?? null);
 
         if (isset($data['auteur_id'])) {
             $auteur = $this->entityManager->getReference('App\Entity\Auteur', $data['auteur_id']);
@@ -246,9 +245,6 @@ class OeuvreController extends AbstractController
         }
         if (isset($data['date_publication'])) {
             $oeuvre->setDatePublication(new \DateTime($data['date_publication']));
-        }
-        if (isset($data['isbn'])) {
-            $oeuvre->setIsbn($data['isbn']);
         }
         if (isset($data['auteur_id'])) {
             $auteur = $this->entityManager->getReference('App\Entity\Auteur', $data['auteur_id']);

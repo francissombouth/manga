@@ -297,16 +297,8 @@
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    {{ form_label(form.isbn) }}
-                    {{ form_widget(form.isbn) }}
-                    {{ form_errors(form.isbn) }}
-                    <div class="form-help">ISBN de l'œuvre (optionnel)</div>
-                </div>
-
-                <div class="form-group">
-                    {{ form_label(form.tags, 'Genres') }}
+            <div class="form-group">
+                {{ form_label(form.tags, 'Genres') }}
                     {{ form_widget(form.tags) }}
                     {{ form_errors(form.tags) }}
                     <div class="form-help">Sélectionne un ou plusieurs genres pour cette œuvre. Tu peux en ajouter, modifier ou retirer.</div>

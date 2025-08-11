@@ -71,14 +71,7 @@ class OeuvreType extends AbstractType
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-input']
             ])
-            ->add('isbn', TextType::class, [
-                'label' => 'ISBN',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'ISBN (optionnel)',
-                    'class' => 'form-input'
-                ]
-            ])
+
             ->add('mangadxId', TextType::class, [
                 'label' => 'ID MangaDx',
                 'required' => false,

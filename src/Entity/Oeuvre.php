@@ -51,9 +51,7 @@ class Oeuvre
     #[Groups(['oeuvre:read'])]
     private ?\DateTimeInterface $datePublication = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['oeuvre:read'])]
-    private ?string $isbn = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['oeuvre:read'])]
@@ -198,16 +196,7 @@ class Oeuvre
         return $this;
     }
 
-    public function getIsbn(): ?string
-    {
-        return $this->isbn;
-    }
 
-    public function setIsbn(?string $isbn): static
-    {
-        $this->isbn = $isbn;
-        return $this;
-    }
 
     public function getChapitres(): Collection
     {
