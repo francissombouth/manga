@@ -575,4 +575,11 @@
 .feature-content small {
     color: var(--text-secondary);
     line-height: 1.4;
+}
+
+/* Responsive pour le formulaire d'œuvre - section ID MangaDx et Genres */
+@media (max-width: 768px) {
+    .admin-content [style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
 } 

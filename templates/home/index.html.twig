@@ -149,23 +149,7 @@
 
     <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">
-                TRENDING THIS WEEK
-            </h3>
-            <ul class="trending-list">
-                {% set trendingMangas = oeuvres|slice(0, 5) %}
-                {% for oeuvre in trendingMangas %}
-                    <li class="trending-item">
-                        <div class="trending-rank">{{ loop.index }}</div>
-                        <div class="trending-info">
-                            <div class="trending-title">{{ oeuvre.titre }}</div>
-                            <div class="trending-chapters">{{ oeuvre.chapitres|length }} chapters</div>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+
 
         <!-- Section des actions rapides -->
         <div class="sidebar-section">
