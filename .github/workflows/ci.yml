@@ -10,21 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: mangatheque_db
-          POSTGRES_USER: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
     steps:
     - uses: actions/checkout@v4
     
@@ -32,7 +17,7 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_pgsql, xdebug
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, xdebug
         tools: composer:v2
         coverage: xdebug
     
@@ -47,11 +32,14 @@ jobs:
     - name: Create test environment
       run: |
         echo "APP_ENV=test" > .env.test.local
-        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mangatheque_db?serverVersion=16&charset=utf8" >> .env.test.local
+        echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/test.db" >> .env.test.local
         echo "APP_SECRET=d9cd28f768dc8c4271d0ed2f52f51244" >> .env.test.local
         echo "MAILER_DSN=null://null" >> .env.test.local
         echo "SYMFONY_DEPRECATIONS_HELPER=weak" >> .env.test.local
         echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env.test.local
+    
+    - name: Create var directory
+      run: mkdir -p var
     
     - name: Create database
       run: |
