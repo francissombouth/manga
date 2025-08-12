@@ -39,7 +39,7 @@ class Oeuvre
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['oeuvre:read'])]
-    #[Assert\Url(protocols: ['http', 'https'], message: "L'URL de la couverture doit être une URL valide commençant par http:// ou https://")]
+    #[Assert\Url(protocols: ['http', 'https'], requireTld: true, message: "L'URL de la couverture doit être une URL valide commençant par http:// ou https://")]
     #[Assert\NotBlank(allowNull: true, message: "L'URL ne peut pas être une chaîne invalide")]
     private ?string $couverture = null;
 
