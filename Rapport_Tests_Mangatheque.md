@@ -56,7 +56,7 @@
 ```yaml
 Framework : PHPUnit 11.5.27
 PHP Version : 8.2.18
-Base de données : SQLite en mémoire
+Base de données : PostgreSQL 13 (CI/CD) / SQLite en mémoire (local)
 Configuration : phpunit.xml.dist
 Bootstrap : tests/bootstrap.php
 ```
@@ -805,6 +805,14 @@ jobs:
       run: |
         mkdir -p public/uploads/covers
         chmod 755 public/uploads/covers
+    
+    - name: Create test environment
+      run: |
+        echo "APP_ENV=test" > .env.test.local
+        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mangatheque_test" >> .env.test.local
+        echo "APP_SECRET=test-secret-key-for-testing-only" >> .env.test.local
+        echo "MAILER_DSN=null://null" >> .env.test.local
+        echo "LOG_CHANNEL=test" >> .env.test.local
     
     - name: Create database
       run: |

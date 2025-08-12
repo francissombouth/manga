@@ -43,6 +43,14 @@ jobs:
         mkdir -p public/uploads/covers
         chmod 755 public/uploads/covers
     
+    - name: Create test environment
+      run: |
+        echo "APP_ENV=test" > .env.test.local
+        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mangatheque_test" >> .env.test.local
+        echo "APP_SECRET=test-secret-key-for-testing-only" >> .env.test.local
+        echo "MAILER_DSN=null://null" >> .env.test.local
+        echo "LOG_CHANNEL=test" >> .env.test.local
+    
     - name: Create database
       run: |
         php bin/console doctrine:database:create --env=test --if-not-exists
