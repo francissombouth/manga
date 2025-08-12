@@ -42,7 +42,7 @@ class TestKernel extends KernelTestCase
         $tables = $schemaManager->listTableNames();
         
         foreach ($tables as $table) {
-            $connection->executeStatement('DROP TABLE IF EXISTS ' . $table . ' CASCADE');
+            $connection->executeStatement('DROP TABLE IF EXISTS ' . $table);
         }
         
         // Créer le schéma complet avec toutes les entités
@@ -59,15 +59,9 @@ class TestKernel extends KernelTestCase
 
     private function cleanupTestDatabase(): void
     {
-        // Pour PostgreSQL, on nettoie les tables au lieu de supprimer le fichier
-        $container = static::getContainer();
-        $entityManager = $container->get('doctrine')->getManager();
-        $connection = $entityManager->getConnection();
-        $schemaManager = $connection->createSchemaManager();
-        $tables = $schemaManager->listTableNames();
-        
-        foreach ($tables as $table) {
-            $connection->executeStatement('DROP TABLE IF EXISTS ' . $table . ' CASCADE');
+        $testDbPath = dirname(__DIR__).'/var/test.db';
+        if (file_exists($testDbPath)) {
+            unlink($testDbPath);
         }
     }
 } 
