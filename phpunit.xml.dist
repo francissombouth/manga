@@ -12,11 +12,11 @@
     <php>
         <env name="APP_ENV" value="test" />
         <env name="KERNEL_CLASS" value="App\Kernel" />
-        <env name="DATABASE_URL" value="postgresql://postgres:postgres@localhost:5432/mangatheque_test?serverVersion=16&charset=utf8" />
+        <env name="DATABASE_URL" value="postgresql://postgres:postgres@localhost:5432/mangatheque_db?serverVersion=16&charset=utf8" />
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak" />
         <env name="MAILER_DSN" value="null://null" />
-        <env name="MESSENGER_TRANSPORT_DSN" value="sync://" />
-        <env name="APP_SECRET" value="test-secret-key-for-testing-only" />
+        <env name="MESSENGER_TRANSPORT_DSN" value="doctrine://default?auto_setup=0" />
+        <env name="APP_SECRET" value="d9cd28f768dc8c4271d0ed2f52f51244" />
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
     </php>
