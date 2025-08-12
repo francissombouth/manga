@@ -12,10 +12,11 @@ jobs:
     
     services:
       postgres:
-        image: postgres:13
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: mangatheque_test
+          POSTGRES_USER: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -46,10 +47,10 @@ jobs:
     - name: Create test environment
       run: |
         echo "APP_ENV=test" > .env.test.local
-        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mangatheque_test" >> .env.test.local
+        echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mangatheque_test?serverVersion=16&charset=utf8" >> .env.test.local
         echo "APP_SECRET=test-secret-key-for-testing-only" >> .env.test.local
         echo "MAILER_DSN=null://null" >> .env.test.local
-        echo "LOG_CHANNEL=test" >> .env.test.local
+        echo "SYMFONY_DEPRECATIONS_HELPER=weak" >> .env.test.local
     
     - name: Create database
       run: |
