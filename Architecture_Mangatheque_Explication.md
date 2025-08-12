@@ -263,7 +263,7 @@ class Email {
 - **Load Balancing** : Nginx + PHP-FPM
 - **Base de données** : Read replicas pour les requêtes
 - **Cache** : Distribution avec Redis Cluster
-- **CDN** : Cloudflare pour les assets statiques
+- **CDN** : Render.com pour les assets statiques
 
 ### **Microservices Potentiels**
 - **Service d'import** : Séparé pour l'import MangaDex

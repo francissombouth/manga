@@ -126,6 +126,9 @@ class CoverServiceTest extends TestCase
             ->method('request')
             ->willReturnOnConsecutiveCalls($googleResponse, $imageResponse);
 
+        // Mock le paramètre pour éviter les problèmes de permission
+        $this->params->method('get')->willReturn('/tmp');
+
         $this->logger->expects($this->once())->method('error');
 
         $result = $this->coverService->searchAndDownloadCover('Test Book');

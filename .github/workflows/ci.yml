@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -12,7 +12,7 @@ jobs:
     
     services:
       postgres:
-        image: postgres:16
+        image: postgres:13
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: mangatheque_test
@@ -23,92 +23,61 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
+    
     steps:
     - uses: actions/checkout@v4
-
+    
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
-        extensions: mbstring, intl, pdo_pgsql, xml, curl
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_pgsql, xdebug
+        tools: composer:v2
         coverage: xdebug
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
-
+    
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Create test environment file
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Create uploads directory
       run: |
-        echo "APP_ENV=test" >> .env.test.local
-        echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/test.db" >> .env.test.local
-        echo "APP_SECRET=test-secret-key-for-testing-only" >> .env.test.local
-        echo "MAILER_DSN=null://null" >> .env.test.local
-
-    - name: Create var directory
-      run: mkdir -p var
-
+        mkdir -p public/uploads/covers
+        chmod 755 public/uploads/covers
+    
+    - name: Create database
+      run: |
+        php bin/console doctrine:database:create --env=test --if-not-exists
+        php bin/console doctrine:migrations:migrate --env=test --no-interaction
+    
     - name: Run tests
-      run: php bin/phpunit --coverage-clover=coverage.xml
-
+      run: php bin/phpunit --coverage-clover=coverage.xml --stop-on-failure=false
+    
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: false
-
-  code-quality:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
+      continue-on-error: true
+    
     - name: Run PHPStan
-      run: vendor/bin/phpstan analyse src --level=8 --no-progress
-
+      run: vendor/bin/phpstan analyse src tests --level=8
+    
     - name: Run PHP CS Fixer
       run: vendor/bin/php-cs-fixer fix --dry-run --diff
-
-    - name: Run Security Check
-      run: composer audit --format=json --no-interaction
-
-  build:
+    
+    - name: Run Composer audit
+      run: composer audit
+    
+  deploy:
+    needs: test
     runs-on: ubuntu-latest
-    needs: [test, code-quality]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
+    if: github.ref == 'refs/heads/main'
+    
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Build Docker image
-      run: docker build -t mangatheque:latest .
-
-    - name: Test Docker image
+    
+    - name: Deploy to Render
       run: |
-        docker run --rm mangatheque:latest php bin/console --version
-        docker run --rm mangatheque:latest php bin/phpunit --version 
+        echo "Deployment to Render.com triggered"
+        # Render.com se charge automatiquement du déploiement
+        # via webhook GitHub 

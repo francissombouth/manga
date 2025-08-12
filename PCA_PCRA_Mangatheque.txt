@@ -3,7 +3,7 @@ Plan de Continuité d’Activité (PCA/PCRA)
 Contexte 
 Mangathèque est une application web développée avec Symfony permettant aux 
 utilisateurs de consulter et gérer une bibliothèque de mangas en ligne. Le service est 
-hébergé sur Render.com avec une base PostgreSQL et utilise Cloudflare pour la distribution 
+hébergé sur Render.com avec une base PostgreSQL 
 des images. 
 Objectifs du PCA/PCRA 
 ● Assurer la continuité du service en cas d’incident 
@@ -16,8 +16,8 @@ Indicateurs cibles
 ● Objectif de disponibilité : 99 % (~7h d’arrêt/mois tolérés) 
 2. Architecture et composants 
 Principaux composants 
-● Utilisateurs → Cloudflare CDN → Render.com → PostgreSQL 
-● Stockage des images : Cloudflare R2 
+● Utilisateurs → Render.com → PostgreSQL 
+● Stockage des images : ImgBB 
 ● Code source : GitHub 
 Éléments critiques 
 Composant Importance Localisation Impact si perdu 
@@ -25,7 +25,7 @@ Code source Critique GitHub Impossible de
 corriger ou déployer 
 Base de données Critique Render PostgreSQL Perte de comptes et 
 données utilisateurs 
-Images uploadées Importante Cloudflare R2 Visuels manquants 
+Images uploadées Importante ImgBB Visuels manquants 
 Configuration Importante Variables Render Impossible de 
 redéployer 
  
@@ -64,7 +64,8 @@ Impacts estimés
 ● Stockage local et cloud personnel 
 ● Test mensuel de restauration 
 4.3 Images 
-● Stockage principal : Cloudflare R2 
+● Stockage principal : ImgBB (hébergement d'images) 
+● URLs directes stockées en base de données
 ● Synchronisation mensuelle vers Google Drive via rclone 
 4.4 Configuration 
 ● Export des variables d’environnement dans un fichier chiffré 
@@ -80,8 +81,9 @@ Perte base de données (1–3h)
 ● Restauration via backup Render 
 ● Vérification connexion et données 
 Perte images (1–4h) 
-● Restauration depuis Google Drive 
-● Purge du cache Cloudflare 
+● Vérification de l'accessibilité des URLs ImgBB
+● Restauration depuis Google Drive si nécessaire
+● Nettoyage du cache Render 
 ● Vérification affichage 
 Perte totale (4–8h) 
 ● Recréer l’infrastructure Render 
@@ -137,7 +139,7 @@ Incident technique en cours – Temps estimé de reprise : [XX]h
 9. Coûts et budget 
 Poste 
 Render.com 
-Cloudflare & GitHub 
+Render & GitHub 
 Montant 
 0–25€/mois 
 0€ 
@@ -149,7 +151,7 @@ Budget d’urgence
 Optimisations 
 ● VPS moins cher 
 ● AWS Free Tier pour backups 
-● Alternatives gratuites pour images 
+● Alternatives gratuites pour images (ImgBB déjà utilisé) 
 0€ 
 10. Améliorations prévues 
 Court terme 
