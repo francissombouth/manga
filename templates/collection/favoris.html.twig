@@ -201,7 +201,7 @@ function toggleFavorite(oeuvreId, button) {
         }
     })
     .catch(error => {
-        console.error('Erreur:', error);
+        
         showNotification('Erreur lors de la modification des favoris', 'error');
     });
 }
@@ -235,9 +235,9 @@ function removeFromFavorites(oeuvreId, button) {
             }
         })
         .catch(error => {
-            console.error('Erreur:', error);
+            
             showNotification('Erreur lors de la suppression', 'error');
-        });
+    });
     }
 }
 
@@ -297,7 +297,7 @@ function clearAllFavorites() {
                     }
                 })
                 .catch(error => {
-                    console.error('Erreur:', error);
+                    
                 });
             }, index * 100); // Délai progressif pour l'animation
         });

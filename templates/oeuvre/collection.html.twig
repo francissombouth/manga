@@ -240,12 +240,12 @@ function checkFavoriteStatus(oeuvreId) {
             updateFavoriteButton(oeuvreId, data.isFavorite);
         })
         .catch(error => {
-            console.error('Erreur lors de la vérification des favoris:', error);
+    
         });
 }
 
 function toggleFavorite(oeuvreId, button) {
-    console.log(`🔄 Toggle favori pour l'œuvre ${oeuvreId}`);
+    
     
     fetch(`/collections/toggle/${oeuvreId}`, {
         method: 'POST',
@@ -255,46 +255,45 @@ function toggleFavorite(oeuvreId, button) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('📡 Réponse API:', data);
+
         
         if (data.success) {
-            console.log(`✅ Succès: ${data.message}, isFavorite: ${data.isFavorite}`);
+
             updateFavoriteButton(oeuvreId, data.isFavorite);
             showNotification(data.message, 'success');
         } else {
-            console.log(`❌ Erreur: ${data.message}`);
+
             showNotification(data.message, 'error');
         }
     })
     .catch(error => {
-        console.error('❌ Erreur réseau:', error);
+
         showNotification('Erreur lors de la modification des favoris', 'error');
     });
 }
 
 function updateFavoriteButton(oeuvreId, isFavorite) {
-    console.log(`🔄 Mise à jour du bouton favori pour l'œuvre ${oeuvreId}, isFavorite: ${isFavorite}`);
+
     
     const button = document.querySelector(`[data-oeuvre-id="${oeuvreId}"]`);
     const icon = document.getElementById(`favorite-icon-${oeuvreId}`);
     
-    console.log('🔍 Bouton trouvé:', button);
-    console.log('🔍 Icône trouvée:', icon);
+    
     
     if (button && icon) {
         if (isFavorite) {
             button.classList.add('favorited');
             button.setAttribute('title', 'Retirer des favoris');
             icon.textContent = '❤️';
-            console.log('✅ Cœur mis en rouge (favori)');
+
         } else {
             button.classList.remove('favorited');
             button.setAttribute('title', 'Ajouter aux favoris');
             icon.textContent = '🤍';
-            console.log('✅ Cœur mis en blanc (non favori)');
+
         }
     } else {
-        console.error('❌ Bouton ou icône non trouvé pour l\'œuvre', oeuvreId);
+
     }
 }
 

@@ -23,12 +23,20 @@ class User {
   --
   +getId(): int
   +getEmail(): string
+  +setEmail(string): User
   +getRoles(): array
+  +setRoles(array): User
   +getPassword(): string
+  +setPassword(string): User
   +getNom(): string
+  +setNom(string): User
+  +getUserIdentifier(): string
+  +eraseCredentials(): void
   +isAdmin(): bool
   +addRole(string): User
   +removeRole(string): User
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class Oeuvre {
@@ -52,13 +60,32 @@ class Oeuvre {
   --
   +getId(): int
   +getTitre(): string
+  +setTitre(string): Oeuvre
   +getType(): string
+  +setType(string): Oeuvre
   +getResume(): string
+  +setResume(string): Oeuvre
   +getCouverture(): string
+  +setCouverture(string): Oeuvre
   +getImageUrl(): string
+  +getAuteur(): Auteur
+  +setAuteur(Auteur): Oeuvre
+  +getChapitres(): Collection
+  +addChapitre(Chapitre): Oeuvre
+  +removeChapitre(Chapitre): Oeuvre
   +getChapitresSorted(): array
   +getFirstChapter(): Chapitre
   +getLatestChapter(): Chapitre
+  +getDatePublication(): DateTime
+  +setDatePublication(DateTime): Oeuvre
+  +getMangadxId(): string
+  +setMangadxId(string): Oeuvre
+  +getStatut(): string
+  +setStatut(string): Oeuvre
+  +getYear(): int
+  +setYear(int): Oeuvre
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class Auteur {
@@ -74,9 +101,22 @@ class Auteur {
   --
   +getId(): int
   +getNom(): string
+  +setNom(string): Auteur
   +getPrenom(): string
+  +setPrenom(string): Auteur
   +getNomPlume(): string
+  +setNomPlume(string): Auteur
   +getBiographie(): string
+  +setBiographie(string): Auteur
+  +getDateNaissance(): DateTime
+  +setDateNaissance(DateTime): Auteur
+  +getNationalite(): string
+  +setNationalite(string): Auteur
+  +getOeuvres(): Collection
+  +addOeuvre(Oeuvre): Auteur
+  +removeOeuvre(Oeuvre): Auteur
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class Chapitre {
@@ -91,10 +131,21 @@ class Chapitre {
   --
   +getId(): int
   +getTitre(): string
+  +setTitre(string): Chapitre
   +getOrdre(): int
+  +setOrdre(int): Chapitre
+  +getResume(): string
+  +setResume(string): Chapitre
   +getPages(): array
+  +setPages(array): Chapitre
+  +getMangadxChapterId(): string
+  +setMangadxChapterId(string): Chapitre
+  +getOeuvre(): Oeuvre
+  +setOeuvre(Oeuvre): Chapitre
   +getNextChapitre(): Chapitre
   +getPreviousChapitre(): Chapitre
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class Tag {
@@ -105,7 +156,13 @@ class Tag {
   --
   +getId(): int
   +getNom(): string
+  +setNom(string): Tag
   +getMangadxId(): string
+  +setMangadxId(string): Tag
+  +getOeuvres(): Collection
+  +addOeuvre(Oeuvre): Tag
+  +removeOeuvre(Oeuvre): Tag
+  +getCreatedAt(): DateTimeImmutable
 }
 
 ' ===== ENTITÉS DE RELATION =====
@@ -118,7 +175,14 @@ class CollectionUser {
   --
   +getId(): int
   +getDateAjout(): DateTimeImmutable
+  +setDateAjout(DateTimeImmutable): CollectionUser
   +getNotePersonnelle(): string
+  +setNotePersonnelle(string): CollectionUser
+  +getUser(): User
+  +setUser(User): CollectionUser
+  +getOeuvre(): Oeuvre
+  +setOeuvre(Oeuvre): CollectionUser
+  +getCreatedAt(): DateTimeImmutable
 }
 
 class Statut {
@@ -129,21 +193,42 @@ class Statut {
   --
   +getId(): int
   +getNom(): string
+  +setNom(string): Statut
   +getUser(): User
+  +setUser(User): Statut
   +getOeuvre(): Oeuvre
+  +setOeuvre(Oeuvre): Statut
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class Commentaire {
   -id: int
   -contenu: text
   -createdAt: DateTimeImmutable
+  -updatedAt: DateTimeImmutable
   --
   +getId(): int
   +getContenu(): string
+  +setContenu(string): Commentaire
   +getLikesCount(): int
   +isLikedByUser(User): bool
   +isReponse(): bool
   +getReponsesCount(): int
+  +getAuteur(): User
+  +setAuteur(User): Commentaire
+  +getOeuvre(): Oeuvre
+  +setOeuvre(Oeuvre): Commentaire
+  +getParent(): Commentaire
+  +setParent(Commentaire): Commentaire
+  +getReponses(): Collection
+  +addReponse(Commentaire): Commentaire
+  +removeReponse(Commentaire): Commentaire
+  +getLikes(): Collection
+  +addLike(CommentaireLike): Commentaire
+  +removeLike(CommentaireLike): Commentaire
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 class CommentaireLike {
@@ -152,7 +237,10 @@ class CommentaireLike {
   --
   +getId(): int
   +getUser(): User
+  +setUser(User): CommentaireLike
   +getCommentaire(): Commentaire
+  +setCommentaire(Commentaire): CommentaireLike
+  +getCreatedAt(): DateTimeImmutable
 }
 
 class OeuvreNote {
@@ -163,8 +251,13 @@ class OeuvreNote {
   --
   +getId(): int
   +getNote(): int
+  +setNote(int): OeuvreNote
   +getUser(): User
+  +setUser(User): OeuvreNote
   +getOeuvre(): Oeuvre
+  +setOeuvre(Oeuvre): OeuvreNote
+  +getCreatedAt(): DateTimeImmutable
+  +getUpdatedAt(): DateTimeImmutable
 }
 
 ' ===== RELATIONS =====

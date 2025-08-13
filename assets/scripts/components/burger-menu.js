@@ -48,11 +48,11 @@ class BurgerMenu {
 
     validateElements() {
         if (!this.burgerMenu) {
-            console.error('❌ Élément burger-menu introuvable !');
+    
             return false;
         }
         if (!this.mobileNav) {
-            console.error('❌ Élément mobile-nav introuvable !');
+    
             return false;
         }
         return true;
@@ -190,7 +190,7 @@ class BurgerMenu {
         this.mobileNavLinks = null;
         this.isInitialized = false;
 
-        console.log('🧹 Menu burger détruit');
+
     }
 }
 

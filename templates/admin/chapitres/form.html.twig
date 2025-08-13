@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (existingPages === 0 && !hasExistingPagesInDB) {
             // Premier chargement d'un chapitre MangaDX sans pages en BDD
-            console.log('🤖 Première récupération automatique des pages MangaDX...');
+    
             fetchMangaDxPages();
         } else {
             const status = document.getElementById('fetch-status');
@@ -251,13 +251,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 manualBtn.style.display = 'inline-block';
                 manualBtn.addEventListener('click', function() {
                     if (confirm('⚠️ Voulez-vous vraiment re-synchroniser avec MangaDX ?\n\nCela remplacera toutes les pages actuelles par celles de MangaDX.')) {
-                        console.log('🔄 Re-synchronisation manuelle demandée');
+                
                         fetchMangaDxPages();
                     }
                 });
             }
             
-            console.log('ℹ️ Pages existantes détectées, pas de récupération automatique');
+    
         }
     }
 });
@@ -268,7 +268,7 @@ async function fetchMangaDxPages() {
     const mangadxChapterId = '{{ chapitre.mangadxChapterId }}';
     
     if (!mangadxChapterId) {
-        console.error('Aucun ID MangaDX trouvé pour ce chapitre');
+
         if (status) status.textContent = '❌ Aucun ID MangaDX';
         return;
     }
@@ -277,18 +277,17 @@ async function fetchMangaDxPages() {
     if (status) status.textContent = '🔄 Récupération des pages depuis MangaDX...';
     
     try {
-        console.log('🔍 Récupération des pages pour le chapitre MangaDX:', mangadxChapterId);
+
         
         const response = await fetch(`/mangadx/api/chapter/${mangadxChapterId}/pages`);
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Pages récupérées avec succès:', data.pages);
-            console.log('📊 Nombre de pages:', data.count);
+            
             
             // Log chaque URL individuellement
             data.pages.forEach((url, index) => {
-                console.log(`📄 Page ${index + 1}:`, url);
+
             });
             
             if (status) {
@@ -308,12 +307,12 @@ async function fetchMangaDxPages() {
             }
             
         } else {
-            console.error('❌ Erreur lors de la récupération:', data.error);
+    
             if (status) status.textContent = `❌ Erreur: ${data.error}`;
         }
         
     } catch (error) {
-        console.error('❌ Erreur réseau:', error);
+
         if (status) status.textContent = '❌ Erreur de connexion';
     }
 }
@@ -323,14 +322,14 @@ function injectPagesIntoForm(pages) {
     const collection = document.querySelector('.pages-collection');
     const list = collection.querySelector('.pages-list');
     
-    console.log('💉 Injection des pages dans le formulaire...');
+    
     
     // Vider les pages existantes
     list.innerHTML = '';
     
     // Ajouter chaque page
     pages.forEach((pageUrl, index) => {
-        console.log(`➕ Ajout de la page ${index + 1}:`, pageUrl);
+        
         
         const prototype = collection.dataset.prototype;
         const newForm = prototype.replace(/__name__/g, index);
@@ -362,7 +361,7 @@ function injectPagesIntoForm(pages) {
     // Mettre à jour l'index de la collection
     collection.dataset.index = pages.length;
     
-    console.log('✅ Injection terminée!', pages.length, 'pages ajoutées');
+    
     
     // Mettre à jour les numéros
     updatePageNumbers();

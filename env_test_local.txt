@@ -1,5 +1,0 @@
-APP_ENV=test
-DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
-APP_SECRET=test-secret-key-for-testing-only
-MAILER_DSN=null://null
-SYMFONY_DEPRECATIONS_HELPER=weak 

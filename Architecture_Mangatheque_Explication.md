@@ -1,17 +1,17 @@
 # Architecture MangaThèque - Explication des Choix
 
-## 🏗️ Vue d'ensemble de l'Architecture
+## Vue d'ensemble de l'Architecture
 
 ### **Philosophie de conception**
 L'architecture MangaThèque suit les principes **SOLID** et le pattern **Domain-Driven Design (DDD)** pour créer une application robuste, maintenable et évolutive.
 
 ---
 
-## 📊 Analyse du Diagramme UML
+## Analyse du Diagramme UML
 
 ### **1. Entités Principales (Core Domain)**
 
-#### **🎯 User (Utilisateur)**
+#### **User (Utilisateur)**
 ```php
 class User {
     -id: int
@@ -30,7 +30,7 @@ class User {
 - **Flexibilité** : `nom` séparé de `email` pour l'affichage
 - **Immutabilité** : `DateTimeImmutable` pour éviter les modifications accidentelles
 
-#### **🎯 Oeuvre (Entité Centrale)**
+#### **Oeuvre (Entité Centrale)**
 ```php
 class Oeuvre {
     -id: int
@@ -48,6 +48,8 @@ class Oeuvre {
     -lastVolume: text
     -lastChapter: text
     -year: int
+    -createdAt: DateTimeImmutable
+    -updatedAt: DateTimeImmutable
 }
 ```
 
@@ -57,8 +59,9 @@ class Oeuvre {
 - **Métadonnées riches** : `demographic`, `contentRating`, `alternativeTitles` pour une expérience complète
 - **Performance** : `lastVolume` et `lastChapter` pour éviter les requêtes coûteuses
 - **Internationalisation** : `originalLanguage` pour le contenu multilingue
+- **Audit** : `createdAt` et `updatedAt` pour traçabilité
 
-#### **🎯 Chapitre (Contenu)**
+#### **Chapitre (Contenu)**
 ```php
 class Chapitre {
     -id: int
@@ -67,6 +70,8 @@ class Chapitre {
     -resume: text
     -pages: json
     -mangadxChapterId: string
+    -createdAt: DateTimeImmutable
+    -updatedAt: DateTimeImmutable
 }
 ```
 
@@ -75,12 +80,13 @@ class Chapitre {
 - **Contenu** : `pages` en JSON pour stocker les URLs des images
 - **Synchronisation** : `mangadxChapterId` pour l'import automatique
 - **Flexibilité** : `resume` optionnel pour les descriptions
+- **Audit** : `createdAt` et `updatedAt` pour traçabilité
 
 ---
 
 ### **2. Entités de Relation (Supporting Domain)**
 
-#### **🎯 CollectionUser (Collection Personnelle)**
+#### **CollectionUser (Collection Personnelle)**
 ```php
 class CollectionUser {
     -id: int
@@ -95,7 +101,7 @@ class CollectionUser {
 - **Personnalisation** : `notePersonnelle` pour les commentaires privés
 - **Historique** : `dateAjout` pour le suivi des ajouts
 
-#### **🎯 Statut (Suivi de Lecture)**
+#### **Statut (Suivi de Lecture)**
 ```php
 class Statut {
     -id: int
@@ -109,23 +115,24 @@ class Statut {
 - **Flexibilité** : `nom` pour différents statuts (Lu, En cours, À lire, Abandonné)
 - **Temporalité** : `updatedAt` pour le suivi des changements de statut
 
-#### **🎯 Commentaire (Social)**
+#### **Commentaire (Social)**
 ```php
 class Commentaire {
     -id: int
     -contenu: text
     -createdAt: DateTimeImmutable
+    -updatedAt: DateTimeImmutable
 }
 ```
 
 **Choix architecturaux :**
 - **Hiérarchie** : Auto-référence pour les réponses (commentaires imbriqués)
 - **Social** : Système de likes via `CommentaireLike`
-- **Modération** : `createdAt` pour l'historique
+- **Modération** : `createdAt` et `updatedAt` pour l'historique et la traçabilité
 
 ---
 
-## 🔗 Relations et Contraintes
+## Relations et Contraintes
 
 ### **Relations Many-to-Many**
 ```plantuml
@@ -161,7 +168,7 @@ Oeuvre }o--o{ Tag : "tagué par"
 
 ---
 
-## 🎨 Patterns de Conception
+## Patterns de Conception
 
 ### **1. Repository Pattern**
 ```php
@@ -209,7 +216,7 @@ class Email {
 
 ---
 
-## 🚀 Choix Techniques
+## Choix Techniques
 
 ### **1. Base de Données : PostgreSQL**
 **Justification :**
@@ -218,12 +225,13 @@ class Email {
 - Support des transactions ACID
 - Extensions utiles (Full-text search, etc.)
 
-### **2. Framework : Symfony 6**
+### **2. Framework : Symfony 7.3**
 **Justification :**
 - Maturité et stabilité
 - Écosystème riche (Doctrine, Security, etc.)
 - Performance optimisée
 - Documentation excellente
+- Support long terme (LTS)
 
 ### **3. ORM : Doctrine**
 **Justification :**
@@ -241,7 +249,7 @@ class Email {
 
 ---
 
-## 🔒 Sécurité et Performance
+## Sécurité et Performance
 
 ### **Sécurité**
 - **Authentification** : Symfony Security avec JWT
@@ -257,7 +265,7 @@ class Email {
 
 ---
 
-## 📈 Évolutivité
+## Évolutivité
 
 ### **Scalabilité Horizontale**
 - **Load Balancing** : Nginx + PHP-FPM
@@ -273,7 +281,7 @@ class Email {
 
 ---
 
-## 🎯 Avantages de cette Architecture
+## Avantages de cette Architecture
 
 ### **✅ Maintenabilité**
 - Code modulaire et bien structuré
@@ -296,24 +304,3 @@ class Email {
 - Protection contre les attaques courantes
 
 ---
-
-## 🔮 Évolutions Futures
-
-### **Court terme**
-- Système de recommandations
-- Notifications en temps réel
-- Mode hors ligne (PWA)
-
-### **Moyen terme**
-- API GraphQL pour plus de flexibilité
-- Système de plugins
-- Intégration multi-sources
-
-### **Long terme**
-- Architecture microservices
-- IA pour les recommandations
-- Blockchain pour la propriété intellectuelle
-
----
-
-*Cette architecture garantit une base solide pour une application évolutive et maintenable, tout en conservant la simplicité d'utilisation et la performance.* 

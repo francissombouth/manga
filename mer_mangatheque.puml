@@ -113,6 +113,7 @@ entity "commentaire" {
   * oeuvre_id : INT (FK)
   parent_id : INT (FK)
   * createdAt : TIMESTAMP
+  * updatedAt : TIMESTAMP
 }
 
 entity "commentaire_like" {
@@ -182,12 +183,17 @@ oeuvre }o--|| auteur : "écrit par"
 note right of commentaire_like : "UNIQUE(user_id, commentaire_id)"
 note right of oeuvre_note : "UNIQUE(user_id, oeuvre_id)"
 note right of oeuvre_tag : "Clé composite (oeuvre_id, tag_id)"
+note right of collection_user : "UNIQUE(user_id, oeuvre_id)"
+note right of statut : "UNIQUE(user_id, oeuvre_id)"
 
 ' ===== INDEX SUGGESTIONS =====
 note bottom of user : "Index sur email"
-note bottom of oeuvre : "Index sur type, statut, mangadxId"
+note bottom of oeuvre : "Index sur type, statut, mangadxId, auteur_id"
 note bottom of chapitre : "Index sur oeuvre_id, ordre"
-note bottom of commentaire : "Index sur oeuvre_id, parent_id"
+note bottom of commentaire : "Index sur oeuvre_id, parent_id, auteur_id"
 note bottom of collection_user : "Index sur user_id, oeuvre_id"
+note bottom of statut : "Index sur user_id, oeuvre_id"
+note bottom of tag : "Index sur nom, mangadxId"
+note bottom of auteur : "Index sur nom"
 
 @enduml 

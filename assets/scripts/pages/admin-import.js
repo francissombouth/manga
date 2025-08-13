@@ -249,7 +249,7 @@ class AdminImportManager {
 
     handleImportError(error) {
         this.isImporting = false;
-        console.error('Erreur d\'import:', error);
+
         
         const errorMessage = error.message || 'Erreur inconnue lors de l\'import';
         this.updateProgress(0, `Erreur: ${errorMessage}`);

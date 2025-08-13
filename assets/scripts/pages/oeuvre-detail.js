@@ -33,7 +33,7 @@ function initAllFeatures() {
         checkFavoriteStatus();
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation:', error);
+
     }
 }
 
@@ -241,7 +241,7 @@ async function loadAverageRating() {
             }
         }
     } catch (error) {
-        console.log('⚠️ Erreur chargement moyenne (ignorée):', error);
+
     }
 }
 
@@ -306,21 +306,21 @@ async function submitCommentSafely() {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API commentaire:', data);
+    
         
         if (response.ok) {
             showNotification('Commentaire ajouté avec succès !', 'success');
             if (textarea) textarea.value = '';
             
             // Ajout dynamique du commentaire sans rechargement
-            console.log('[DEBUG] Ajout dynamique du commentaire');
+    
             addCommentToList(data.commentaire);
             updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout du commentaire', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitCommentSafely:', error);
+    
         showNotification('Erreur lors de l\'ajout du commentaire', 'error');
     } finally {
         // Réactiver le formulaire
@@ -379,7 +379,7 @@ async function handleLikeClick(e) {
                 }
         }
     } catch (error) {
-            console.error('Erreur like:', error);
+    
     }
 }
 
@@ -714,7 +714,7 @@ async function submitReply(commentaireId) {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API reply:', data);
+    
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
@@ -722,14 +722,14 @@ async function submitReply(commentaireId) {
             document.getElementById(`reply-form-${commentaireId}`).style.display = 'none';
             
             // Ajout dynamique de la réponse sans rechargement
-            console.log('[DEBUG] Ajout dynamique de la réponse');
+    
             addReplyToComment(commentaireId, data.commentaire);
             updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitReply:', error);
+    
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
@@ -762,7 +762,7 @@ async function submitReplyToReply(reponseId) {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API reply-to-reply:', data);
+    
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
@@ -770,14 +770,14 @@ async function submitReplyToReply(reponseId) {
             document.getElementById(`reply-to-reply-form-${reponseId}`).style.display = 'none';
             
             // Ajout dynamique de la réponse à la réponse sans rechargement
-            console.log('[DEBUG] Ajout dynamique de la réponse à la réponse');
+    
             addReplyToReply(reponseId, data.commentaire);
             updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitReplyToReply:', error);
+    
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
@@ -800,7 +800,7 @@ async function checkFavoriteStatus() {
             updateFavoriteButton(oeuvreId, data.isFavorite);
         }
     } catch (error) {
-            console.log('⚠️ Erreur vérification favoris (ignorée):', error);
+    
     }
 }
 

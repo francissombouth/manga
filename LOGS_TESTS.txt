@@ -1,0 +1,109 @@
+================================================================================
+                    LOGS DES TESTS - MANGATHÈQUE
+================================================================================
+Date d'exécution : 2025-08-02
+Environnement : Test (SQLite en mémoire)
+PHP Version : 8.2.18
+PHPUnit Version : 11.5.27
+================================================================================
+
+1. RÉSULTATS DES TESTS
+================================================================================
+
+Commande : php bin/phpunit --testdox
+
+PHPUnit 11.5.27 by Sebastian Bergmann and contributors.
+Runtime: PHP 8.2.18
+
+.........................................                         41 / 41 (100%)
+Time: 00:03.060, Memory: 56.00 MB
+
+Commentaire (App\Tests\Entity\Commentaire)
+ ✔ Validation
+ ✔ Relations
+
+Cover Service (App\Tests\Service\CoverService)
+ ✔ Search and download cover success
+ ✔ Search and download cover no results
+ ✔ Search and download cover no image links
+ ✔ Search and download cover http error
+ ✔ Search and download cover exception
+ ✔ Title matches exact
+ ✔ Title matches case insensitive
+ ✔ Title matches partial
+ ✔ Title matches similar
+ ✔ Title matches no match
+ ✔ Get image extension from mime type
+ ✔ Get image extension from url
+ ✔ Get image extension fallback
+ ✔ Generate filename
+ ✔ Generate filename with special chars
+ ✔ Generate filename with multiple underscores
+ ✔ Get placeholder url
+ ✔ Delete cover success
+ ✔ Delete cover file not exists
+ ✔ Search and download cover with different image sizes
+ ✔ Search and download cover with author
+
+Manga Dx Service (App\Tests\Service\MangaDxService)
+ ✔ Get popular manga
+ ✔ Get manga by id
+ ✔ Search manga
+ ✔ Get manga chapters
+
+Oeuvre (App\Tests\Entity\Oeuvre)
+ ✔ Validation
+ ✔ Relations
+
+Oeuvre Controller (App\Tests\Controller\OeuvreController)
+ ✔ Oeuvre list page
+ ✔ Oeuvre show page
+
+Oeuvre Repository (App\Tests\Repository\OeuvreRepository)
+ ✔ Find by type
+ ✔ Find by titre
+ ✔ Find all with relations
+
+Oeuvre Type (App\Tests\Form\OeuvreType)
+ ✔ Form creation
+ ✔ Form default data
+ ✔ Type choices
+ ✔ Form attributes
+
+Security Controller (App\Tests\Controller\SecurityController)
+ ✔ Login page
+ ✔ Logout
+ ✔ Registration page
+
+================================================================================
+2. WARNINGS ET ERREURS
+================================================================================
+
+Warnings PHPUnit (1) :
+1) Class App\Tests\Controller\AbstractControllerTest declared in 
+   C:\Users\red68\Downloads\Mangatek\manga\tests\Controller\AbstractControllerTest.php is abstract
+
+Note : Ce warning est normal - c'est une classe abstraite de base pour les tests.
+
+================================================================================
+3. MÉTRIQUES
+================================================================================
+Tests exécutés : 41/41 (100%)
+Assertions : 89
+Échecs : 0
+Warnings : 1 (mineur)
+Temps d'exécution : 3.060 secondes
+Mémoire utilisée : 56.00 MB
+
+================================================================================
+4. STATUT FINAL
+================================================================================
+✅ TOUS LES TESTS RÉUSSIS
+✅ Aucune erreur critique
+⚠️  Warning mineur (classe abstraite - normal)
+✅ Qualité excellente
+✅ Déploiement autorisé
+
+================================================================================
+FIN DES LOGS
+================================================================================

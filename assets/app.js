@@ -75,7 +75,7 @@ function initTabs() {
                     // loadCommentaires(); // Désactivé pour garder les réponses et boutons "Voir réponse"
                 }
             } else {
-                console.error('Impossible de trouver le contenu pour l\'onglet:', targetTab);
+        
             }
         });
     });
@@ -116,7 +116,7 @@ function forceShowCommentaires() {
         
         return true;
     }
-    console.error('Impossible de forcer l\'affichage - éléments manquants');
+    
     return false;
 }
 
@@ -124,7 +124,7 @@ async function loadCommentaires() {
     const oeuvreId = getOeuvreIdFromUrl();
     
     if (!oeuvreId) {
-        console.error('Impossible de récupérer l\'ID de l\'oeuvre depuis l\'URL');
+
         return;
     }
 
@@ -137,11 +137,11 @@ async function loadCommentaires() {
             updateCommentairesDisplay(data);
             updateCommentairesCount(data.total);
         } else {
-            console.error('Erreur API:', data);
+
             showNotification('Erreur lors du chargement des commentaires', 'error');
         }
     } catch (error) {
-        console.error('Erreur lors du chargement des commentaires:', error);
+
         showNotification('Impossible de charger les commentaires. La page sera rechargée.', 'error');
         
         // Si l'API ne fonctionne pas, on peut recharger la page
@@ -185,7 +185,7 @@ async function submitCommentaire() {
             showNotification(data.message || 'Erreur lors de l\'ajout du commentaire', 'error');
         }
     } catch (error) {
-        console.error('Erreur:', error);
+        
         showNotification('Erreur lors de l\'ajout du commentaire', 'error');
     }
 }
@@ -226,7 +226,7 @@ async function submitReply(commentaireId) {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
-        console.error('Erreur:', error);
+        
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
@@ -293,7 +293,7 @@ async function toggleLike(commentaireId) {
             showNotification('Erreur lors de l\'action sur le like', 'error');
         }
     } catch (error) {
-        console.error('Erreur like:', error);
+
         showNotification('Erreur lors de l\'action sur le like', 'error');
     }
 }
@@ -477,7 +477,7 @@ async function toggleFavorite(oeuvreId, button) {
             showNotification(data.message || 'Erreur lors de la modification des favoris', 'error');
         }
     } catch (error) {
-        console.error('Erreur lors de la modification des favoris:', error);
+
         showNotification('Erreur lors de la modification des favoris', 'error');
     }
 }
