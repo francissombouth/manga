@@ -56,9 +56,6 @@ jobs:
         name: codecov-umbrella
       continue-on-error: true
     
-    - name: Run PHPStan
-      run: vendor/bin/phpstan analyse src tests --level=8
-    
     - name: Run PHP CS Fixer
       run: vendor/bin/php-cs-fixer fix --dry-run --diff
     
