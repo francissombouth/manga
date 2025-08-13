@@ -22,7 +22,7 @@ jobs:
         coverage: xdebug
     
     - name: Install dependencies
-      run: composer update --prefer-dist --no-progress --no-interaction
+      run: composer install --prefer-dist --no-progress --no-interaction
     
     - name: Create uploads directory
       run: |
@@ -57,7 +57,7 @@ jobs:
       continue-on-error: true
     
     - name: Run PHP CS Fixer
-      run: vendor/bin/php-cs-fixer fix --dry-run --diff
+      run: vendor/bin/php-cs-fixer fix --diff
     
     - name: Run Composer audit
       run: composer audit
