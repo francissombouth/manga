@@ -57,9 +57,6 @@ jobs:
         name: codecov-umbrella
       continue-on-error: true
     
-    - name: Run PHP CS Fixer
-      run: vendor/bin/php-cs-fixer fix --diff
-    
     - name: Run Composer audit
       run: composer audit
     
