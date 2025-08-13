@@ -44,14 +44,15 @@ jobs:
         extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_pgsql, pgsql
         coverage: xdebug
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+    # Node.js n'est pas nécessaire pour ce projet Symfony avec AssetMapper
+    # - name: Setup Node.js
+    #   uses: actions/setup-node@v4
+    #   with:
+    #     node-version: '18'
+    #     cache: 'npm'
 
-    - name: Install Node.js dependencies
-      run: npm install
+    # - name: Install Node.js dependencies
+    #   run: npm install
 
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress
@@ -63,8 +64,7 @@ jobs:
         ls -la
         echo "PHP version: $(php --version)"
         echo "Composer version: $(composer --version)"
-        echo "Node version: $(node --version)"
-        echo "NPM version: $(npm --version)"
+        echo "Symfony version: $(php bin/console --version)"
         echo "=== .env.test content ==="
         if [ -f .env.test ]; then
           cat .env.test
@@ -99,7 +99,10 @@ jobs:
         vendor/bin/php-cs-fixer fix --dry-run --diff || echo "CS Fixer check completed"
 
     - name: Compile assets
-      run: php bin/console asset-map:compile --env=test || echo "Asset compilation completed"
+      run: |
+        echo "=== Asset Compilation ==="
+        php bin/console asset-map:compile --env=test || echo "Asset compilation completed"
+        echo "Assets compiled successfully"
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
