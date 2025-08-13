@@ -22,7 +22,7 @@ jobs:
         coverage: xdebug
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction
+      run: composer update --prefer-dist --no-progress --no-interaction
     
     - name: Create uploads directory
       run: |
