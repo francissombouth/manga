@@ -18,21 +18,26 @@ class ProfileController extends AbstractController
         
         try {
             // Charger explicitement les relations pour éviter les problèmes de lazy loading
-            $collectionsCount = $entityManager->getRepository('App\Entity\CollectionUser')
+            $favorisCount = $entityManager->getRepository('App\Entity\CollectionUser')
                 ->count(['user' => $user]);
                 
-            $statutsCount = $entityManager->getRepository('App\Entity\Statut')
-                ->count(['user' => $user]);
+            $enCoursCount = $entityManager->getRepository('App\Entity\Statut')
+                ->count(['user' => $user, 'nom' => 'En cours']);
+                
+            $termineeCount = $entityManager->getRepository('App\Entity\Statut')
+                ->count(['user' => $user, 'nom' => 'Terminée']);
         } catch (\Exception $e) {
             // En cas d'erreur, utiliser des valeurs par défaut
-            $collectionsCount = 0;
-            $statutsCount = 0;
+            $favorisCount = 0;
+            $enCoursCount = 0;
+            $termineeCount = 0;
         }
 
         return $this->render('profile/index.html.twig', [
             'user' => $user,
-            'collectionsCount' => $collectionsCount,
-            'statutsCount' => $statutsCount,
+            'favorisCount' => $favorisCount,
+            'enCoursCount' => $enCoursCount,
+            'termineeCount' => $termineeCount,
         ]);
     }
 } 
