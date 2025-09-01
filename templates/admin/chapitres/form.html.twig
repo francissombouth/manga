@@ -24,7 +24,7 @@
 
         <div class="admin-header">
             <h1 class="admin-title">
-                {% if chapitre.id %}✏️{% else %}➕{% endif %} {{ title }}
+                {{ title }}
             </h1>
             
             <div class="oeuvre-info">
@@ -80,7 +80,7 @@
             <!-- Aperçu des pages existantes -->
             {% if chapitre.pages and chapitre.pages|length > 0 %}
             <div class="form-group">
-                <label class="form-label">📖 Pages actuelles ({{ chapitre.pages|length }})</label>
+                <label class="form-label">Pages actuelles ({{ chapitre.pages|length }})</label>
                 <div style="background: var(--bg-card); border: 2px solid var(--border-secondary); border-radius: 12px; padding: 1rem;">
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                         {% for page in chapitre.pages %}
@@ -93,7 +93,6 @@
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                                      loading="lazy">
                                 <div style="display: none; flex-direction: column; align-items: center; color: var(--text-secondary); padding: 1rem;">
-                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🖼️</div>
                                     <span style="font-size: 0.9rem;">Image non disponible</span>
                                 </div>
                             </div>
@@ -107,7 +106,7 @@
             </div>
             {% endif %}
 
-            <div class="form-group">
+            <div class="form-group pages-section">
                 {{ form_label(form.pages) }}
                 <div class="pages-collection" data-prototype="{{ form_widget(form.pages.vars.prototype)|e('html_attr') }}" data-index="{{ form.pages|length }}">
                     <h4>Pages du chapitre</h4>
@@ -129,7 +128,7 @@
                                 {{ form_widget(pageForm) }}
                                 {{ form_errors(pageForm) }}
                                 <button type="button" class="page-remove-btn" onclick="removePage(this)">
-                                    🗑️ Supprimer
+                                    Supprimer
                                 </button>
                             </div>
                         {% endfor %}
@@ -137,15 +136,15 @@
                     
                     <div style="display: flex; gap: 1rem; align-items: center; margin-top: 1rem;">
                         <button type="button" class="add-page-btn" onclick="addPage()">
-                            ➕ Ajouter une page
+                            Ajouter une page
                         </button>
                         
                         {% if chapitre.mangadxChapterId %}
                         <button type="button" id="manual-fetch-btn" class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; display: none;">
-                            🔄 Re-synchroniser MangaDX
+                            Re-synchroniser MangaDX
                         </button>
                         <div id="fetch-status" style="color: var(--text-secondary); font-size: 0.9rem;">
-                            🔄 Récupération automatique des pages MangaDX...
+                            Récupération automatique des pages MangaDX...
                         </div>
                         {% endif %}
                     </div>
@@ -157,10 +156,10 @@
 
             <div class="form-actions">
                 <a href="{{ path('admin_oeuvre_chapitres', {id: oeuvre.id}) }}" class="btn btn-secondary">
-                    ❌ Annuler
+                    Annuler
                 </a>
                 <button type="submit" class="btn btn-primary">
-                    {% if chapitre.id %}💾 Mettre à jour{% else %}✨ Créer le chapitre{% endif %}
+                    {% if chapitre.id %}Mettre à jour{% else %}Créer le chapitre{% endif %}
                 </button>
             </div>
 
@@ -186,7 +185,7 @@ function addPage() {
         </div>
         ${newForm}
         <button type="button" class="page-remove-btn" onclick="removePage(this)">
-            🗑️ Supprimer
+            Supprimer
         </button>
     `;
     
@@ -240,9 +239,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (status) {
                 if (hasExistingPagesInDB) {
-                    status.textContent = `ℹ️ ${existingPages} page(s) - Modifiées manuellement`;
+                    status.textContent = `${existingPages} page(s) - Modifiées manuellement`;
                 } else if (existingPages > 0) {
-                    status.textContent = `ℹ️ ${existingPages} page(s) - En cours d'édition`;
+                    status.textContent = `${existingPages} page(s) - En cours d'édition`;
                 }
             }
             
@@ -250,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (manualBtn) {
                 manualBtn.style.display = 'inline-block';
                 manualBtn.addEventListener('click', function() {
-                    if (confirm('⚠️ Voulez-vous vraiment re-synchroniser avec MangaDX ?\n\nCela remplacera toutes les pages actuelles par celles de MangaDX.')) {
+                    if (confirm('Voulez-vous vraiment re-synchroniser avec MangaDX ?\n\nCela remplacera toutes les pages actuelles par celles de MangaDX.')) {
                 
                         fetchMangaDxPages();
                     }
@@ -269,12 +268,12 @@ async function fetchMangaDxPages() {
     
     if (!mangadxChapterId) {
 
-        if (status) status.textContent = '❌ Aucun ID MangaDX';
+        if (status) status.textContent = 'Aucun ID MangaDX';
         return;
     }
     
     // Afficher le statut de chargement
-    if (status) status.textContent = '🔄 Récupération des pages depuis MangaDX...';
+    if (status) status.textContent = 'Récupération des pages depuis MangaDX...';
     
     try {
 
@@ -292,7 +291,7 @@ async function fetchMangaDxPages() {
             
             if (status) {
                 const isManual = document.getElementById('manual-fetch-btn') && document.getElementById('manual-fetch-btn').style.display !== 'none';
-                status.textContent = `✅ ${data.count} page(s) récupérée(s) ${isManual ? 'manuellement' : 'automatiquement'}`;
+                status.textContent = `${data.count} page(s) récupérée(s) ${isManual ? 'manuellement' : 'automatiquement'}`;
             }
             
             // Injecter les URLs dans le formulaire
@@ -308,12 +307,12 @@ async function fetchMangaDxPages() {
             
         } else {
     
-            if (status) status.textContent = `❌ Erreur: ${data.error}`;
+            if (status) status.textContent = `Erreur: ${data.error}`;
         }
         
     } catch (error) {
 
-        if (status) status.textContent = '❌ Erreur de connexion';
+        if (status) status.textContent = 'Erreur de connexion';
     }
 }
 
@@ -345,7 +344,7 @@ function injectPagesIntoForm(pages) {
             </div>
             ${newForm}
             <button type="button" class="page-remove-btn" onclick="removePage(this)">
-                🗑️ Supprimer
+                Supprimer
             </button>
         `;
         
