@@ -162,14 +162,14 @@ class AdminController extends AbstractController
         
         $chapitres = $this->chapitreRepository->findByOeuvre($oeuvreId);
 
-        // Récupérer les pages dynamiquement pour chaque chapitre (comme le catalogue)
+        // Afficher les chapitres sans récupérer les pages dynamiquement pour éviter les timeouts
+        // Les pages seront récupérées uniquement à la demande via le bouton "Mettre à jour les pages"
         $chapitresAvecPages = [];
         foreach ($chapitres as $chapitre) {
-            $pages = $this->adminPagesService->getChapitrePages($chapitre);
             $chapitresAvecPages[] = [
                 'chapitre' => $chapitre,
-                'pages' => $pages,
-                'pages_count' => count($pages),
+                'pages' => $chapitre->getPages(), // Utiliser les pages stockées en base
+                'pages_count' => count($chapitre->getPages()),
                 'peut_recuperer_pages' => $chapitre->peutRecupererPagesDynamiques()
             ];
         }
@@ -187,23 +187,31 @@ class AdminController extends AbstractController
             $chapitres = $this->chapitreRepository->findBy(['oeuvre' => $oeuvre]);
             $updatedCount = 0;
             $errorCount = 0;
+            $totalChapitres = count($chapitres);
 
-            foreach ($chapitres as $chapitre) {
-                $mangadxChapterId = $chapitre->getMangadxChapterId();
-                if (!$mangadxChapterId || !empty($chapitre->getPages())) {
-                    continue; // Ignorer les chapitres sans ID MangaDx ou qui ont déjà des pages
-                }
+            // Traiter seulement les 5 premiers chapitres sans pages pour éviter les timeouts
+            $chapitresToProcess = array_slice(array_filter($chapitres, function($chapitre) {
+                return $chapitre->getMangadxChapterId() && empty($chapitre->getPages());
+            }), 0, 5);
 
+            if (empty($chapitresToProcess)) {
+                $this->addFlash('info', 'Tous les chapitres ont déjà leurs pages !');
+                return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvre->getId()]);
+            }
+
+            foreach ($chapitresToProcess as $chapitre) {
                 try {
+                    $mangadxChapterId = $chapitre->getMangadxChapterId();
                     $pages = $this->importService->getChapterPages($mangadxChapterId);
+                    
                     if (!empty($pages)) {
                         $chapitre->setPages($pages);
                         $this->entityManager->persist($chapitre);
                         $updatedCount++;
                     }
                     
-                    // Délai pour éviter le rate limiting
-                    sleep(1);
+                    // Délai réduit pour éviter le rate limiting mais accélérer le processus
+                    usleep(500000); // 0.5 seconde au lieu de 1 seconde
                 } catch (\Exception $e) {
                     $errorCount++;
                 }
@@ -212,11 +220,17 @@ class AdminController extends AbstractController
             $this->entityManager->flush();
 
             if ($updatedCount > 0) {
-                $this->addFlash('success', "✅ {$updatedCount} chapitre(s) mis à jour avec leurs pages !");
+                $this->addFlash('success', "✅ {$updatedCount} chapitre(s) mis à jour avec leurs pages ! ({$totalChapitres} chapitres au total)");
             }
             
             if ($errorCount > 0) {
                 $this->addFlash('warning', "⚠️ {$errorCount} chapitre(s) ont rencontré des erreurs.");
+            }
+
+            if (count($chapitresToProcess) < count(array_filter($chapitres, function($chapitre) {
+                return $chapitre->getMangadxChapterId() && empty($chapitre->getPages());
+            }))) {
+                $this->addFlash('info', '💡 Utilisez à nouveau le bouton pour traiter les chapitres restants.');
             }
 
         } catch (\Exception $e) {
