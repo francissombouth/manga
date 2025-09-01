@@ -664,10 +664,7 @@ img {
     color: white;
 }
 
-.sidebar-update-form {
-    display: block;
-    margin-top: 0.5rem;
-}
+
 
 .sidebar-btn:hover {
     transform: translateY(-1px);

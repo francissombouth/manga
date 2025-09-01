@@ -220,17 +220,17 @@ class AdminController extends AbstractController
             $this->entityManager->flush();
 
             if ($updatedCount > 0) {
-                $this->addFlash('success', "✅ {$updatedCount} chapitre(s) mis à jour avec leurs pages ! ({$totalChapitres} chapitres au total)");
+                $this->addFlash('success', "{$updatedCount} chapitre(s) mis à jour avec leurs pages ! ({$totalChapitres} chapitres au total)");
             }
             
             if ($errorCount > 0) {
-                $this->addFlash('warning', "⚠️ {$errorCount} chapitre(s) ont rencontré des erreurs.");
+                $this->addFlash('warning', "{$errorCount} chapitre(s) ont rencontré des erreurs.");
             }
 
             if (count($chapitresToProcess) < count(array_filter($chapitres, function($chapitre) {
                 return $chapitre->getMangadxChapterId() && empty($chapitre->getPages());
             }))) {
-                $this->addFlash('info', '💡 Utilisez à nouveau le bouton pour traiter les chapitres restants.');
+                $this->addFlash('info', 'Utilisez à nouveau le bouton pour traiter les chapitres restants.');
             }
 
         } catch (\Exception $e) {
@@ -380,7 +380,7 @@ class AdminController extends AbstractController
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
                     $this->entityManager->flush();
-                    $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
+                    $this->addFlash('warning', 'Base de données vidée avant import.');
                 }
                 
                 // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
@@ -437,10 +437,10 @@ class AdminController extends AbstractController
                 }
                 
                 if ($successes > 0) {
-                    $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
+                    $this->addFlash('success', "{$successes} œuvres importées avec succès depuis MangaDx !");
                 }
                 if ($errors > 0) {
-                    $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
+                    $this->addFlash('warning', "{$errors} œuvres n'ont pas pu être importées.");
                 }
 
             } catch (\Exception $e) {
