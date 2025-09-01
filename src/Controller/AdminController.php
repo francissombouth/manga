@@ -68,7 +68,7 @@ class AdminController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
-        $search = $request->query->get('search', '');
+        $search = (string) $request->query->get('search', '');
 
         if ($search) {
             $oeuvres = $this->oeuvreRepository->findByTitre($search);
@@ -155,7 +155,12 @@ class AdminController extends AbstractController
     #[Route('/oeuvres/{id}/chapitres', name: 'admin_oeuvre_chapitres')]
     public function oeuvreChapitres(Oeuvre $oeuvre): Response
     {
-        $chapitres = $this->chapitreRepository->findByOeuvre($oeuvre->getId());
+        $oeuvreId = $oeuvre->getId();
+        if ($oeuvreId === null) {
+            throw new \InvalidArgumentException('L\'œuvre n\'a pas d\'ID valide');
+        }
+        
+        $chapitres = $this->chapitreRepository->findByOeuvre($oeuvreId);
 
         // Récupérer les pages dynamiquement pour chaque chapitre (comme le catalogue)
         $chapitresAvecPages = [];
@@ -183,7 +188,7 @@ class AdminController extends AbstractController
         
         // Définir l'ordre automatiquement
         $lastChapitre = $this->chapitreRepository->findOneBy(['oeuvre' => $oeuvre], ['ordre' => 'DESC']);
-        $chapitre->setOrdre($lastChapitre ? $lastChapitre->getOrdre() + 1 : 1);
+        $chapitre->setOrdre($lastChapitre instanceof \App\Entity\Chapitre ? $lastChapitre->getOrdre() + 1 : 1);
 
         $form = $this->createForm(ChapitreType::class, $chapitre);
         $form->handleRequest($request);
@@ -212,7 +217,13 @@ class AdminController extends AbstractController
             $chapitre->setUpdatedAt(new \DateTimeImmutable());
             $this->chapitreRepository->save($chapitre, true);
             $this->addFlash('success', 'Le chapitre a été modifié avec succès !');
-            return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $chapitre->getOeuvre()->getId()]);
+            
+            $oeuvre = $chapitre->getOeuvre();
+            if ($oeuvre === null) {
+                throw new \InvalidArgumentException('Le chapitre n\'a pas d\'œuvre associée');
+            }
+            
+            return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvre->getId()]);
         }
 
         return $this->render('admin/chapitres/form.html.twig', [
@@ -226,7 +237,12 @@ class AdminController extends AbstractController
     #[Route('/chapitres/{id}/delete', name: 'admin_chapitre_delete', methods: ['POST'])]
     public function deleteChapitre(Chapitre $chapitre): Response
     {
-        $oeuvreId = $chapitre->getOeuvre()->getId();
+        $oeuvre = $chapitre->getOeuvre();
+        if ($oeuvre === null) {
+            throw new \InvalidArgumentException('Le chapitre n\'a pas d\'œuvre associée');
+        }
+        
+        $oeuvreId = $oeuvre->getId();
         $this->chapitreRepository->remove($chapitre, true);
         $this->addFlash('success', 'Le chapitre a été supprimé avec succès !');
         return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvreId]);
@@ -236,7 +252,7 @@ class AdminController extends AbstractController
     public function importMangaDx(Request $request, MangaDxImportService $importService): Response
     {
         if ($request->isMethod('POST')) {
-            $mangadxId = $request->request->get('mangadx_id');
+            $mangadxId = (string) $request->request->get('mangadx_id', '');
             
             if ($mangadxId) {
                 try {
@@ -249,7 +265,12 @@ class AdminController extends AbstractController
                             count($oeuvre->getChapitres())
                         ));
                         
-                        return $this->redirectToRoute('admin_oeuvre_edit', ['id' => $oeuvre->getId()]);
+                        $oeuvreId = $oeuvre->getId();
+                        if ($oeuvreId === null) {
+                            throw new \InvalidArgumentException('L\'œuvre importée n\'a pas d\'ID valide');
+                        }
+                        
+                        return $this->redirectToRoute('admin_oeuvre_edit', ['id' => $oeuvreId]);
                     }
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Erreur lors de l\'import : ' . $e->getMessage());
@@ -260,7 +281,7 @@ class AdminController extends AbstractController
             
             // Redirection après traitement du formulaire pour éviter l'erreur Turbo
             return $this->redirectToRoute('admin_import_mangadx');
-                }
+        }
 
         // Fournir les statistiques pour le template
         $totalOeuvres = $this->oeuvreRepository->count([]);
@@ -279,93 +300,80 @@ class AdminController extends AbstractController
             $limit = (int) $request->request->get('limit', 10);
             $category = $request->request->get('category', 'popular');
             $force = $request->request->get('force', false);
-            $dryRun = $request->request->get('dry_run', false);
 
             try {
                 // Utiliser directement le service d'import au lieu de shell_exec
                 $successes = 0;
                 $errors = 0;
                 
-                if (!$dryRun) {
-                    // Vider la base si l'option force est cochée
-                    if ($force) {
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
-                        $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
-                        $this->entityManager->flush();
-                        $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
-                    }
-                    
-                    // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
-                    $offset = 0;
-                    $batchSize = $limit * 2; // Récupérer plus d'œuvres pour compenser celles qui existent déjà
-                    
-                    while ($successes < $limit && $offset < 500) { // Limite de sécurité à 500 pour éviter les boucles infinies
-                        $oeuvresData = match($category) {
-                            'popular' => $this->mangaDxService->getPopularManga($batchSize, $offset),
-                            'latest' => $this->mangaDxService->getLatestManga($batchSize, $offset),
-                            'random' => $this->mangaDxService->getRandomManga($batchSize),
-                            default => $this->mangaDxService->getPopularManga($batchSize, $offset)
+                // Vider la base si l'option force est cochée
+                if ($force) {
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
+                    $this->entityManager->flush();
+                    $this->addFlash('warning', '🗑️ Base de données vidée avant import.');
+                }
+                
+                // Pour garantir le nombre exact d'œuvres, on peut récupérer plus d'œuvres de l'API
+                $offset = 0;
+                $batchSize = $limit * 2; // Récupérer plus d'œuvres pour compenser celles qui existent déjà
+                
+                while ($successes < $limit && $offset < 500) { // Limite de sécurité à 500 pour éviter les boucles infinies
+                    $oeuvresData = match($category) {
+                        'popular' => $this->mangaDxService->getPopularManga($batchSize, $offset),
+                        'latest' => $this->mangaDxService->getLatestManga($batchSize, $offset),
+                        'random' => $this->mangaDxService->getRandomManga($batchSize),
+                        default => $this->mangaDxService->getPopularManga($batchSize, $offset)
                     };
-                        
-                        if (empty($oeuvresData)) {
-                            break; // Plus d'œuvres disponibles
-                        }
                     
+                    if (empty($oeuvresData)) {
+                        break; // Plus d'œuvres disponibles
+                    }
+                
                     foreach ($oeuvresData as $oeuvreData) {
-                            if ($successes >= $limit) {
-                                break; // On a atteint le nombre voulu
-                            }
-                            
+                        if ($successes >= $limit) {
+                            break; // On a atteint le nombre voulu
+                        }
+                        
                         try {
                             $mangadxId = $oeuvreData['id'];
                             
-                                // Si force est activé, on importe tout sans vérifier l'existence
-                                if ($force) {
+                            // Si force est activé, on importe tout sans vérifier l'existence
+                            if ($force) {
+                                $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
+                                if ($oeuvre) {
+                                    $successes++;
+                                } else {
+                                    $errors++;
+                                }
+                            } else {
+                                // Vérifier si l'œuvre existe déjà
+                                $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
+                                if (!$existingOeuvre) {
+                                    // Importer l'œuvre complète
                                     $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
                                     if ($oeuvre) {
                                         $successes++;
                                     } else {
                                         $errors++;
                                     }
-                                } else {
-                            // Vérifier si l'œuvre existe déjà
-                            $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
-                            if (!$existingOeuvre) {
-                                // Importer l'œuvre complète
-                                $oeuvre = $this->importService->importOrUpdateOeuvre($mangadxId);
-                                if ($oeuvre) {
-                                    $successes++;
-                                } else {
-                                    $errors++;
-                                        }
                                 }
                             }
                         } catch (\Exception $e) {
                             $errors++;
-                            }
                         }
-                        
-                        $offset += $batchSize;
                     }
                     
-                    if ($successes > 0) {
-                        $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
-                    }
-                    if ($errors > 0) {
-                        $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
-                    }
-                } else {
-                    // Mode simulation - estimer le nombre d'œuvres qui seraient importées
-                    $currentCount = $this->oeuvreRepository->count([]);
-                    $simulationMessage = "Simulation : {$limit} nouvelles œuvres seraient importées depuis MangaDx ({$category})";
-                    if ($force) {
-                        $simulationMessage .= " - Base de données aurait été vidée avant import (actuellement {$currentCount} œuvres)";
-                    } else {
-                        $simulationMessage .= " (en plus des {$currentCount} œuvres existantes)";
-                    }
-                    $this->addFlash('info', $simulationMessage);
+                    $offset += $batchSize;
+                }
+                
+                if ($successes > 0) {
+                    $this->addFlash('success', "✅ {$successes} œuvres importées avec succès depuis MangaDx !");
+                }
+                if ($errors > 0) {
+                    $this->addFlash('warning', "⚠️ {$errors} œuvres n'ont pas pu être importées.");
                 }
 
             } catch (\Exception $e) {
@@ -387,7 +395,7 @@ class AdminController extends AbstractController
     {
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
-        $search = $request->query->get('search', '');
+        $search = (string) $request->query->get('search', '');
 
         if ($search) {
             $auteurs = $this->auteurRepository->findByNom($search);

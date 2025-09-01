@@ -34,11 +34,11 @@
                 <div class="manga-card">
                         <div class="manga-cover-container">
                             {% if oeuvre.couverture %}
-                                <img src="{{ path('image_proxy') }}?url={{ oeuvre.couverture|url_encode }}" 
+                                <img src="{{ smart_image_url(oeuvre.couverture) }}" 
                                      alt="{{ oeuvre.titre }}" 
                                      class="manga-cover"
                                      loading="lazy"
-                                     onerror="this.src='{{ path('image_proxy') }}';">
+                                     onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=&quot;manga-cover&quot; style=&quot;background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;&quot;>📖</div>';">
                             {% else %}
                                 <div class="manga-cover" style="background: linear-gradient(45deg, #374151, #4b5563); display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 3rem;">
                                     📖
@@ -201,7 +201,7 @@ function toggleFavorite(oeuvreId, button) {
         }
     })
     .catch(error => {
-        console.error('Erreur:', error);
+        
         showNotification('Erreur lors de la modification des favoris', 'error');
     });
 }
@@ -235,9 +235,9 @@ function removeFromFavorites(oeuvreId, button) {
             }
         })
         .catch(error => {
-            console.error('Erreur:', error);
+            
             showNotification('Erreur lors de la suppression', 'error');
-        });
+    });
     }
 }
 
@@ -297,7 +297,7 @@ function clearAllFavorites() {
                     }
                 })
                 .catch(error => {
-                    console.error('Erreur:', error);
+                    
                 });
             }, index * 100); // Délai progressif pour l'animation
         });

@@ -68,7 +68,6 @@ Thumbs.db
 /composer.phar
 
 # NPM/Yarn
-package-lock.json
 yarn.lock
 
 # Environment files
@@ -121,3 +120,8 @@ frontend/node_modules/
 # Images de test
 test-images/
 sample-covers/
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###

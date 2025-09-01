@@ -3,171 +3,7 @@
 {% block title %}{{ title }} - Administration{% endblock %}
 
 {% block stylesheets %}
-<style>
-.admin-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 2rem 0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.admin-header {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.admin-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.content-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.admin-table th,
-.admin-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border-secondary);
-}
-
-.admin-table th {
-    background: var(--bg-card);
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.admin-table tr:hover {
-    background: var(--bg-card);
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.btn-primary {
-    background: var(--gradient-primary);
-    color: white;
-}
-
-.btn-secondary {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 1px solid var(--border-secondary);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    text-decoration: none;
-}
-
-.actions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.alert {
-    padding: 1rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-}
-
-.alert-success {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #6ee7b7;
-}
-
-.alert-error {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
-}
-
-.breadcrumb {
-    margin-bottom: 2rem;
-}
-
-.breadcrumb a {
-    color: var(--accent-primary);
-    text-decoration: none;
-}
-
-.breadcrumb a:hover {
-    text-decoration: underline;
-}
-
-.breadcrumb span {
-    color: var(--text-muted);
-    margin: 0 0.5rem;
-}
-
-.tag-count {
-    background: var(--accent-primary);
-    color: white;
-    padding: 0.2rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-secondary);
-}
-
-.empty-state .icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -191,15 +27,21 @@
             {% endfor %}
         {% endfor %}
 
-        <div class="content-card">
-            <div class="actions-header">
-                <h2>Liste des Genres</h2>
-                <a href="{{ path('admin_tag_new') }}" class="btn btn-primary">
-                    <span>➕</span>
-                    <span>Ajouter un genre</span>
+        <!-- Contrôles -->
+        <div class="admin-controls">
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
                 </a>
             </div>
+            
+            <a href="{{ path('admin_tag_new') }}" class="btn btn-primary">
+                ➕ Ajouter un genre
+            </a>
+        </div>
 
+        <!-- Contenu -->
+        <div class="content-card">
             {% if tags %}
                 <div class="table-container">
                     <table class="admin-table">
@@ -235,15 +77,13 @@
                                     </td>
                                     <td>
                                         <div style="display: flex; gap: 0.5rem;">
-                                            <a href="{{ path('admin_tag_edit', {id: tag.id}) }}" class="btn btn-secondary">
-                                                <span>✏️</span>
-                                                <span>Éditer</span>
+                                            <a href="{{ path('admin_tag_edit', {id: tag.id}) }}" class="btn btn-secondary btn-sm">
+                                                ✏️ Éditer
                                             </a>
                                             {% if tag.oeuvres|length == 0 %}
                                                 <form method="post" action="{{ path('admin_tag_delete', {id: tag.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce genre ?')">
-                                                    <button type="submit" class="btn btn-danger">
-                                                        <span>🗑️</span>
-                                                        <span>Supprimer</span>
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        🗑️ Supprimer
                                                     </button>
                                                 </form>
                                             {% endif %}
@@ -260,8 +100,7 @@
                     <h3>Aucun genre trouvé</h3>
                     <p>Commencez par ajouter des genres ou synchronisez avec MangaDex.</p>
                     <a href="{{ path('admin_tag_new') }}" class="btn btn-primary" style="margin-top: 1rem;">
-                        <span>➕</span>
-                        <span>Ajouter le premier genre</span>
+                        ➕ Ajouter le premier genre
                     </a>
                 </div>
             {% endif %}

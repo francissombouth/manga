@@ -5,30 +5,7 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('styles/oeuvre-responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('styles/pages/oeuvre-detail.css') }}">
-    <style>
-    /* Style pour le bouton de favoris */
-    .sidebar-btn-favorite {
-        transition: all 0.3s ease;
-    }
-    
-    .sidebar-btn-favorite.favorited {
-        background: linear-gradient(135deg, #e11d48, #be185d) !important;
-        color: white !important;
-        border-color: #e11d48 !important;
-    }
-    
-    .sidebar-btn-favorite.favorited:hover {
-        background: linear-gradient(135deg, #be185d, #9f1239) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
-    }
-    
-    .sidebar-btn-favorite:not(.favorited):hover {
-        background: rgba(225, 29, 72, 0.1) !important;
-        border-color: #e11d48 !important;
-        color: #e11d48 !important;
-    }
-    </style>
+
 {% endblock %}
 
 {% block body %}
@@ -55,7 +32,7 @@
                     <!-- Couverture -->
                     <div class="oeuvre-cover">
                         {% if oeuvre.couverture %}
-                            <img src="{{ oeuvre.couverture }}" alt="{{ oeuvre.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ smart_image_url(oeuvre.couverture) }}" alt="{{ oeuvre.titre }}" style="width: 100%; height: 100%; object-fit: cover;">
                         {% else %}
                             <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--accent-purple), #a855f7); display: flex; align-items: center; justify-content: center; color: white; font-size: clamp(2rem, 8vw, 3rem);">
                                 {% if oeuvre.type == 'Manhwa' %}🇰🇷{% else %}📖{% endif %}

@@ -1,0 +1,394 @@
+EXPLICATIONS DES CHOIX UML - MANGATHÈQUE
+==========================================
+
+PHILOSOPHIE DE CONCEPTION
+=========================
+
+
+ANALYSE DÉTAILLÉE DES ENTITÉS
+==============================
+
+1. USER (UTILISATEUR)
+---------------------
+
+Attributs :
+- id: int (Identifiant unique)
+- email: string (Adresse email)
+- roles: array (Rôles utilisateur)
+- password: string (Mot de passe hashé)
+- nom: string (Nom d'affichage)
+- createdAt: DateTimeImmutable (Date de création)
+- updatedAt: DateTimeImmutable (Date de modification)
+
+Choix architecturaux :
+- roles en array : Support de multiples rôles (ROLE_USER, ROLE_ADMIN, ROLE_MODERATOR)
+- nom séparé de email : Affichage personnalisé indépendant de l'email
+- DateTimeImmutable : Immutabilité pour éviter les modifications accidentelles
+- Audit trail : createdAt et updatedAt pour traçabilité complète
+
+Justification métier :
+- Un utilisateur peut avoir plusieurs rôles simultanément
+- Le nom d'affichage peut être différent de l'email
+- L'historique des modifications est crucial pour la modération
+
+2. OEUVRE (ENTITÉ CENTRALE)
+---------------------------
+
+Attributs :
+- id: int (Identifiant unique)
+- titre: string (Titre principal)
+- type: string (Type d'œuvre)
+- couverture: string (URL de la couverture)
+- resume: text (Résumé)
+- datePublication: DateTime (Date de publication)
+- mangadxId: string (ID MangaDx)
+- statut: string (Statut de l'œuvre)
+- originalLanguage: text (Langue originale)
+- demographic: text (Démographie cible)
+- contentRating: text (Classification)
+- alternativeTitles: json (Titres alternatifs)
+- lastVolume: text (Dernier volume)
+- lastChapter: text (Dernier chapitre)
+- year: int (Année de publication)
+
+Choix architecturaux :
+- type: string : Flexibilité pour mangas, animes, light novels, manhwa, etc.
+- mangadxId: string : Intégration native avec l'API MangaDex
+- alternativeTitles: json : Support des titres alternatifs multilingues
+- demographic et contentRating : Métadonnées enrichies pour le filtrage
+- lastVolume et lastChapter : Performance - évite les requêtes coûteuses
+
+Justification métier :
+- Une œuvre peut avoir plusieurs titres (japonais, anglais, français)
+- Les métadonnées permettent un filtrage précis
+- L'intégration MangaDex facilite l'import automatique
+
+3. CHAPITRE (CONTENU)
+---------------------
+
+Attributs :
+- id: int (Identifiant unique)
+- titre: string (Titre du chapitre)
+- ordre: int (Ordre chronologique)
+- resume: text (Résumé du chapitre)
+- pages: json (URLs des pages)
+- mangadxChapterId: string (ID chapitre MangaDex)
+
+Choix architecturaux :
+- ordre: int : Tri chronologique strict des chapitres
+- pages: json : Stockage flexible des URLs d'images
+- mangadxChapterId : Synchronisation avec MangaDex
+- resume optionnel : Descriptions détaillées possibles
+
+Justification métier :
+- L'ordre des chapitres est crucial pour la lecture
+- Les pages peuvent varier en nombre et format
+- L'import automatique nécessite un identifiant externe
+
+4. AUTEUR
+---------
+
+Attributs :
+- id: int (Identifiant unique)
+- nom: string (Nom de l'auteur)
+- prenom: string (Prénom de l'auteur)
+- nomPlume: string (Nom de plume)
+- biographie: text (Biographie)
+- dateNaissance: DateTime (Date de naissance)
+- nationalite: string (Nationalité)
+
+Choix architecturaux :
+- Séparation nom/prénom : Flexibilité d'affichage
+- nomPlume : Support des pseudonymes
+- Métadonnées enrichies : Biographie, nationalité
+
+5. TAG
+------
+
+Attributs :
+- id: int (Identifiant unique)
+- nom: string (Nom du tag)
+- mangadxId: string (ID tag MangaDex)
+
+Choix architecturaux :
+- mangadxId : Synchronisation avec MangaDex
+- Simplicité : Entité légère pour performance
+
+6. COMMENTAIRE
+--------------
+
+Attributs :
+- id: int (Identifiant unique)
+- contenu: text (Contenu du commentaire)
+- createdAt: DateTimeImmutable (Date de création)
+
+Choix architecturaux :
+- Auto-référence : Support des réponses hiérarchiques
+- DateTimeImmutable : Immutabilité pour audit
+
+7. COLLECTIONUSER (COLLECTION UTILISATEUR)
+------------------------------------------
+
+Attributs :
+- id: int (Identifiant unique)
+- dateAjout: DateTimeImmutable (Date d'ajout)
+- notePersonnelle: text (Note privée)
+- createdAt: DateTimeImmutable (Date de création)
+
+Choix architecturaux :
+- Entité de liaison : Relation many-to-many avec métadonnées
+- notePersonnelle : Personnalisation par utilisateur
+- dateAjout : Historique des ajouts
+
+8. STATUT
+---------
+
+Attributs :
+- id: int (Identifiant unique)
+- nom: string (Nom du statut)
+- createdAt: DateTimeImmutable (Date de création)
+- updatedAt: DateTimeImmutable (Date de modification)
+
+Choix architecturaux :
+- Entité de support : Valeurs de référence
+- Flexibilité : Ajout de nouveaux statuts sans modification de code
+
+RELATIONS ET CARDINALITÉS
+=========================
+
+1. RELATIONS MANY-TO-MANY AVEC ENTITÉ DE LIAISON
+------------------------------------------------
+
+User ↔ CollectionUser ↔ Oeuvre
+- User ||--o{ CollectionUser : "possède"
+- Oeuvre ||--o{ CollectionUser : "dans collection"
+
+Choix : Entité de liaison CollectionUser au lieu d'une relation directe
+
+Justification :
+- Métadonnées de relation : dateAjout, notePersonnelle
+- Historique : Suivi des ajouts à la collection
+- Personnalisation : Notes privées par utilisateur
+- Performance : Requêtes optimisées avec index
+
+Alternative rejetée : Table de liaison simple
+- Pas de métadonnées de relation
+- Pas d'historique des ajouts
+- Pas de notes personnelles
+
+2. RELATIONS ONE-TO-MANY
+------------------------
+
+Oeuvre ↔ Chapitre (Composition)
+- Oeuvre ||--o{ Chapitre : "contient"
+
+Choix : Composition (diamant plein)
+
+Justification :
+- Cycle de vie : Les chapitres n'existent pas sans œuvre
+- Cohérence : Suppression en cascade automatique
+- Domaine métier : Un chapitre appartient toujours à une œuvre
+
+Auteur ↔ Oeuvre
+- Auteur ||--o{ Oeuvre : "écrit"
+
+Choix : One-to-Many (un auteur, plusieurs œuvres)
+
+Justification :
+- Simplicité : Un auteur principal par œuvre
+- Performance : Requêtes simples
+- Domaine métier : La plupart des œuvres ont un auteur principal
+
+3. AUTO-RÉFÉRENCE
+-----------------
+
+Commentaire ↔ Commentaire
+- Commentaire }o--o| Commentaire : "répond à"
+
+Choix : Auto-référence pour les réponses
+
+Justification :
+- Hiérarchie : Commentaires imbriqués illimités
+- Flexibilité : Structure arborescente naturelle
+- Performance : Requêtes récursives optimisées
+
+4. RELATIONS MANY-TO-MANY DIRECTES
+----------------------------------
+
+Oeuvre ↔ Tag
+- Oeuvre }o--o{ Tag : "tagué par"
+
+Choix : Relation many-to-many directe
+
+Justification :
+- Simplicité : Pas de métadonnées supplémentaires nécessaires
+- Performance : Requêtes directes optimisées
+- Flexibilité : Tags réutilisables entre œuvres
+
+PATTERNS DE CONCEPTION
+======================
+
+1. ENTITÉ DE LIAISON (JUNCTION ENTITY)
+--------------------------------------
+
+CollectionUser : Entité de liaison pour relations many-to-many avec métadonnées
+
+Avantages :
+- Métadonnées de relation
+- Historique complet
+- Personnalisation par utilisateur
+- Requêtes optimisées
+
+2. ENTITÉ DE SUPPORT (SUPPORTING ENTITY)
+----------------------------------------
+
+Statut : Entité de support pour les valeurs de référence
+
+Justification :
+- Flexibilité : Ajout de nouveaux statuts sans modification de code
+- Traçabilité : Historique des changements de statut
+- Validation : Contraintes d'intégrité référentielle
+
+3. ENTITÉ SOCIALE (SOCIAL ENTITY)
+---------------------------------
+
+Commentaire : Entité sociale avec auto-référence
+
+Avantages :
+- Commentaires hiérarchiques
+- Système de likes séparé
+- Modération facilitée
+
+CONTRAINTES ET INTÉGRITÉ
+========================
+
+1. CONTRAINTES DE DOMAINE
+-------------------------
+
+- ordre dans Chapitre : Unique par œuvre, séquentiel
+- email dans User : Unique, format valide
+- mangadxId : Unique, format spécifique
+- pages dans Chapitre : Array JSON valide
+
+2. CONTRAINTES DE RÉFÉRENCE
+---------------------------
+
+- Cascade Delete : Oeuvre → Chapitres
+- Cascade Update : User → CollectionUser
+- Restrict Delete : Oeuvre → Commentaires
+
+3. CONTRAINTES TEMPORELLES
+--------------------------
+
+- createdAt : Toujours défini à la création
+- updatedAt : Mis à jour automatiquement
+- dateAjout : Date d'ajout à la collection
+
+ÉVOLUTIVITÉ ET EXTENSIBILITÉ
+============================
+
+1. SUPPORT DES MÉTADONNÉES FLEXIBLES
+------------------------------------
+
+alternativeTitles en JSON :
+{
+  "alternativeTitles": {
+    "ja": "原題",
+    "en": "English Title",
+    "fr": "Titre Français"
+  }
+}
+
+Choix : JSON pour les métadonnées variables
+
+Avantages :
+- Extensibilité sans modification de schéma
+- Support multilingue
+- Performance PostgreSQL native
+
+2. INTÉGRATION API EXTERNE
+--------------------------
+
+- mangadxId : Synchronisation MangaDex
+- mangadxChapterId : Import automatique
+- Extensibilité : Support d'autres APIs (MyAnimeList, etc.)
+
+3. SYSTÈME DE TAGS ÉVOLUTIF
+---------------------------
+
+- Tags dynamiques : Ajout sans modification de code
+- Catégorisation multiple : Un œuvre peut avoir plusieurs tags
+- Recherche avancée : Filtrage par combinaison de tags
+
+PERFORMANCE ET OPTIMISATION
+===========================
+
+1. INDEXATION STRATÉGIQUE
+-------------------------
+
+- mangadxId : Index unique pour synchronisation
+- ordre dans Chapitre : Index pour tri chronologique
+- email dans User : Index unique pour authentification
+
+2. REQUÊTES OPTIMISÉES
+----------------------
+
+- Lazy Loading : Relations chargées à la demande
+- Eager Loading : Collections pré-chargées
+- Pagination : Limitation des résultats
+
+3. CACHE STRATÉGIQUE
+--------------------
+
+- Métadonnées : Cache des tags et statuts
+- Collections : Cache des collections populaires
+- Recherche : Cache des résultats de recherche
+
+AVANTAGES DE CETTE MODÉLISATION
+================================
+
+COHÉRENCE MÉTIER
+----------------
+- Modèle fidèle au domaine de la gestion de mangas
+- Relations logiques et intuitives
+- Support des workflows utilisateur
+
+PERFORMANCE
+-----------
+- Requêtes optimisées
+- Index stratégiques
+- Cache intelligent
+
+MAINTENABILITÉ
+--------------
+- Séparation claire des responsabilités
+- Code modulaire et testable
+- Documentation UML claire
+
+ÉVOLUTIVITÉ
+-----------
+- Support des nouvelles fonctionnalités
+- Intégration d'APIs externes
+- Métadonnées extensibles
+
+ÉVOLUTIONS FUTURES
+==================
+
+COURT TERME
+-----------
+- Système de recommandations basé sur les tags
+- Notifications en temps réel
+- Mode hors ligne (PWA)
+
+MOYEN TERME
+-----------
+- Support des light novels et visual novels
+- Intégration multi-sources (MyAnimeList, AniDB)
+- Système de plugins
+
+LONG TERME
+----------
+- IA pour les recommandations
+- Blockchain pour la propriété intellectuelle
+- Architecture microservices
+

@@ -27,12 +27,12 @@ class CommentaireLikeController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $commentaire = $this->commentaireRepository->find($commentaireId);
-            if (!$commentaire) {
+            if (!$commentaire || !$commentaire instanceof \App\Entity\Commentaire) {
                 return $this->json(['message' => 'Commentaire non trouvé'], Response::HTTP_NOT_FOUND);
             }
 
@@ -80,7 +80,7 @@ class CommentaireLikeController extends AbstractController
     {
         try {
             $commentaire = $this->commentaireRepository->find($commentaireId);
-            if (!$commentaire) {
+            if (!$commentaire || !$commentaire instanceof \App\Entity\Commentaire) {
                 return $this->json(['message' => 'Commentaire non trouvé'], Response::HTTP_NOT_FOUND);
             }
 
@@ -88,7 +88,7 @@ class CommentaireLikeController extends AbstractController
             $isLiked = false;
 
             $user = $this->getUser();
-            if ($user) {
+            if ($user && $user instanceof \App\Entity\User) {
                 $existingLike = $this->likeRepository->findByUserAndCommentaire($user, $commentaire);
                 $isLiked = $existingLike !== null;
             }

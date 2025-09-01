@@ -1,5 +1,4 @@
 framework:
     test: true
     session:
-        storage_factory_id: session.storage.factory.mock_file
-    csrf_protection: false 
+        storage_factory_id: session.storage.factory.mock_file 

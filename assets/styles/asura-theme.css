@@ -572,57 +572,7 @@ img {
     gap: var(--space-xs);
 }
 
-.trending-list {
-    list-style: none;
-}
 
-.trending-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: var(--radius-sm);
-    transition: background-color 0.3s ease;
-    margin-bottom: 0.25rem;
-}
-
-.trending-item:hover {
-    background-color: var(--bg-card-hover);
-}
-
-.trending-rank {
-    background-color: var(--accent-purple);
-    color: white;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    flex-shrink: 0;
-}
-
-.trending-info {
-    flex: 1;
-}
-
-.trending-title {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 0.2rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.trending-chapters {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-}
 
 /* Sections de sidebar compactes */
 .sidebar-section {
@@ -1150,7 +1100,7 @@ img {
     }
 
     .container {
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
     }
 }
@@ -1158,7 +1108,7 @@ img {
 /* Specific Components Responsive Styles */
 @media (max-width: 768px) {
     .manga-cover-container {
-        height: 200px;
+        height: 300px;
     }
 
     .manga-title {

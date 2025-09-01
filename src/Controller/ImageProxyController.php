@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -21,10 +22,10 @@ class ImageProxyController extends AbstractController
     }
 
     #[Route('/proxy/image', name: 'image_proxy', methods: ['GET'])]
-    public function proxyImage(): Response
+    public function proxyImage(Request $request): Response
     {
-        // Récupérer l'URL depuis les paramètres de requête
-        $url = $_GET['url'] ?? null;
+        // Récupérer l'URL depuis les paramètres de requête avec l'objet Request
+        $url = $request->query->get('url');
         
         if (!$url) {
             $this->logger->warning('Proxy image: URL manquante');
@@ -36,7 +37,7 @@ class ImageProxyController extends AbstractController
         
         $this->logger->info('Proxy image demandé pour: ' . $url);
 
-        // Vérifier que l'URL provient bien de MangaDx
+        // Vérifier que l'URL provient bien de domaines autorisés
         if (!$this->isMangaDxUrl($url)) {
             $this->logger->warning('Proxy image: URL non autorisée', ['url' => $url]);
             return $this->createPlaceholderResponse();
@@ -91,7 +92,11 @@ class ImageProxyController extends AbstractController
             'api.mangadx.org',
             'api.mangadex.org',
             'mangadx.network',
-            'mangadex.network'
+            'mangadex.network',
+            'letsenhance.io',
+            'static.letsenhance.io',
+            'ibb.co',
+            'i.ibb.co'
         ];
 
         $parsedUrl = parse_url($url);

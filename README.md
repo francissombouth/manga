@@ -6,8 +6,10 @@
 [![Symfony Version](https://img.shields.io/badge/symfony-6.4+-green?logo=symfony)](https://symfony.com)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-Une application web moderne pour gérer votre collection de mangas, développée avec Symfony 6.4 et Docker.
+Une application web moderne pour gérer votre collection de mangas, développée avec Symfony 7.3 et Docker.
 
+## 🌐 Application en ligne
+https://manga-1-9wga.onrender.com/oeuvres
 ## 🚀 Fonctionnalités
 
 - 📚 **Gestion de collection** : Ajoutez, modifiez et organisez vos mangas
@@ -19,14 +21,15 @@ Une application web moderne pour gérer votre collection de mangas, développée
 
 ## 🛠️ Technologies
 
-- **Backend** : Symfony 6.4, PHP 8.2, Doctrine ORM
+- **Backend** : Symfony 7.3 , PHP 8.2, Doctrine ORM
 - **Frontend** : Twig, JavaScript ES6+, AssetMapper
 - **Base de données** : PostgreSQL
 - **Conteneurisation** : Docker & Docker Compose
 - **CI/CD** : GitHub Actions
 - **Tests** : PHPUnit, PHPStan, PHP CS Fixer
 
-## 📦 Installation
+## 💻 Développement local
+> ⚠️ Cette section est destinée aux développeurs souhaitant contribuer ou tester en local.
 
 ### Prérequis
 - Docker et Docker Compose
@@ -93,7 +96,7 @@ Le projet utilise GitHub Actions pour :
 - ✅ Tests automatiques
 - 🔍 Analyse de code
 - 🐳 Construction d'image Docker
-- 🚀 Déploiement automatique
+- 🚀 Déploiement automatique sur Render.com
 
 ## 📁 Structure du projet
 
@@ -111,14 +114,21 @@ manga/
 └── .github/workflows/     # CI/CD GitHub Actions
 ```
 
-## 🔧 Configuration
+## 🔧 Configuration technique
+> Informations techniques pour comprendre l'architecture
 
 ### Variables d'environnement
 Copiez `.env` vers `.env.local` et configurez :
 ```env
 DATABASE_URL="postgresql://user:pass@localhost:5432/manga"
 APP_SECRET="your-secret-key"
+# Ajouter ici vos clés API (MangaDx, etc.)
 ```
+
+### Clés API requises
+Pour le bon fonctionnement de l'application, vous aurez besoin des clés API suivantes :
+
+- **MangaDx API** : Obtenez votre clé sur [https://api.mangadex.org/](https://api.mangadex.org/)
 
 ### Base de données
 ```bash
@@ -131,25 +141,3 @@ php bin/console doctrine:migrations:migrate
 # Charger des données de test
 php bin/console doctrine:fixtures:load
 ```
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit les changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrir une Pull Request
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-## 👨‍💻 Auteur
-
-**Votre Nom** - [GitHub](https://github.com/votre-username)
-
-Projet développé dans le cadre du titre RNCP 39583 "Développeur d'Applications" chez Ynov.
-
----
-
-⭐ Si ce projet vous plaît, n'hésitez pas à le star sur GitHub ! 

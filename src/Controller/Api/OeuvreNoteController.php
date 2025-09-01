@@ -27,19 +27,19 @@ class OeuvreNoteController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $oeuvre = $this->oeuvreRepository->find($oeuvreId);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
             $data = json_decode($request->getContent(), true);
             
             if (!$data || !isset($data['note'])) {
-                return $this->json(['message' => 'Note manquante'], Response::HTTP_BAD_REQUEST);
+                return $this->json(['message' => 'Note requise'], Response::HTTP_BAD_REQUEST);
             }
 
             $noteValue = (int)$data['note'];
@@ -94,7 +94,7 @@ class OeuvreNoteController extends AbstractController
     {
         try {
             $oeuvre = $this->oeuvreRepository->find($oeuvreId);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
@@ -103,7 +103,7 @@ class OeuvreNoteController extends AbstractController
             $userNote = null;
 
             $user = $this->getUser();
-            if ($user) {
+            if ($user && $user instanceof \App\Entity\User) {
                 $userNoteEntity = $this->noteRepository->findByUserAndOeuvre($user, $oeuvre);
                 $userNote = $userNoteEntity ? $userNoteEntity->getNote() : null;
             }
@@ -127,12 +127,12 @@ class OeuvreNoteController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $oeuvre = $this->oeuvreRepository->find($oeuvreId);
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 

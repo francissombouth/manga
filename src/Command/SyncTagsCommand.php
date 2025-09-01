@@ -101,7 +101,7 @@ class SyncTagsCommand extends Command
                 ['Genres disponibles', $totalTags],
                 ['Œuvres totales', $totalOeuvres],
                 ['Œuvres avec genres', $oeuvresWithTags],
-                ['Couverture', $totalOeuvres > 0 ? round(($oeuvresWithTags / $totalOeuvres) * 100, 1) . '%' : '0%']
+                ['Couverture', $totalOeuvres > 0 ? round((float) $oeuvresWithTags / (float) $totalOeuvres * 100, 1) . '%' : '0%']
             ]
         );
 
@@ -154,14 +154,15 @@ class SyncTagsCommand extends Command
 
     private function associateGenresBasedOnMetadata(SymfonyStyle $io): int
     {
+        /** @var \App\Entity\Oeuvre[] $oeuvres */
         $oeuvres = $this->oeuvreRepository->findAll();
+        
         $associated = 0;
-
         $progressBar = $io->createProgressBar(count($oeuvres));
         $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% | 📚 %message%');
 
         foreach ($oeuvres as $oeuvre) {
-            $progressBar->setMessage($oeuvre->getTitre());
+            $progressBar->setMessage($oeuvre->getTitre() ?? 'Sans titre');
             
             $genresAssociated = $this->associateGenresForOeuvre($oeuvre);
             if ($genresAssociated > 0) {
@@ -194,7 +195,7 @@ class SyncTagsCommand extends Command
         // Association basée sur le demographic
         if ($demographic) {
             $tag = $this->tagRepository->findOneBy(['nom' => ucfirst($demographic)]);
-            if ($tag) {
+            if ($tag instanceof \App\Entity\Tag) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }
@@ -216,7 +217,7 @@ class SyncTagsCommand extends Command
             foreach ($words as $word) {
                 if (str_contains($title, $word) || str_contains($resume, $word)) {
                     $tag = $this->tagRepository->findOneBy(['nom' => $genre]);
-                    if ($tag && !$oeuvre->getTags()->contains($tag)) {
+                    if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                         $oeuvre->addTag($tag);
                         $genresAssociated++;
                         break; // Un seul mot-clé suffit pour ce genre
@@ -228,7 +229,7 @@ class SyncTagsCommand extends Command
         // Association basée sur le content rating
         if ($contentRating === 'suggestive' || $contentRating === 'erotica') {
             $tag = $this->tagRepository->findOneBy(['nom' => 'Ecchi']);
-            if ($tag && !$oeuvre->getTags()->contains($tag)) {
+            if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }
@@ -237,7 +238,7 @@ class SyncTagsCommand extends Command
         // Ajouter au moins "Tranche de vie" si aucun genre trouvé
         if ($genresAssociated === 0) {
             $tag = $this->tagRepository->findOneBy(['nom' => 'Tranche de vie']);
-            if ($tag) {
+            if ($tag instanceof \App\Entity\Tag) {
                 $oeuvre->addTag($tag);
                 $genresAssociated++;
             }
@@ -272,11 +273,20 @@ class SyncTagsCommand extends Command
         $errors = 0;
 
         foreach ($oeuvres as $oeuvre) {
-            $progressBar->setMessage($oeuvre->getTitre());
+            if (!$oeuvre instanceof \App\Entity\Oeuvre) {
+                continue;
+            }
+            
+            $progressBar->setMessage($oeuvre->getTitre() ?? 'Sans titre');
             
             try {
                 // Récupérer les données depuis MangaDx
-                $response = $this->httpClient->request('GET', 'https://api.mangadex.org/manga/' . $oeuvre->getMangadxId(), [
+                $mangadxId = $oeuvre->getMangadxId();
+                if (!$mangadxId) {
+                    continue;
+                }
+                
+                $response = $this->httpClient->request('GET', 'https://api.mangadex.org/manga/' . $mangadxId, [
                     'headers' => ['User-Agent' => 'MangaTheque/1.0 (Educational Project)']
                 ]);
 
@@ -308,13 +318,13 @@ class SyncTagsCommand extends Command
                                     $tag->setNom($tagName);
                                     $tag->setMangadxId($mangadxId);
                                     $this->entityManager->persist($tag);
-                                } else if (!$tag->getMangadxId()) {
+                                } else if ($tag instanceof \App\Entity\Tag && !$tag->getMangadxId()) {
                                     $tag->setMangadxId($mangadxId);
                                 }
                             }
                             
                             // Associer le tag à l'œuvre
-                            if (!$oeuvre->getTags()->contains($tag)) {
+                            if ($tag instanceof \App\Entity\Tag && !$oeuvre->getTags()->contains($tag)) {
                                 $oeuvre->addTag($tag);
                                 $tagsAdded++;
                             }

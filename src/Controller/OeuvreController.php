@@ -111,13 +111,16 @@ class OeuvreController extends AbstractController
         // Vérifier les favoris pour l'utilisateur connecté
         $oeuvreIsFavorite = [];
         $user = $this->getUser();
-        if ($user) {
+        if ($user && $user instanceof \App\Entity\User) {
             foreach ($oeuvres as $oeuvre) {
                 $favoriteCollection = $this->collectionUserRepository->findOneBy([
                     'user' => $user,
                     'oeuvre' => $oeuvre
                 ]);
-                $oeuvreIsFavorite[$oeuvre->getId()] = $favoriteCollection !== null;
+                $oeuvreId = $oeuvre->getId();
+                if ($oeuvreId) {
+                    $oeuvreIsFavorite[$oeuvreId] = $favoriteCollection !== null;
+                }
             }
         }
 
@@ -138,8 +141,8 @@ class OeuvreController extends AbstractController
     {
         $oeuvre = $this->oeuvreRepository->find($id);
 
-        if (!$oeuvre) {
-            if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', ''), 'application/json')) {
+        if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
+            if ($request->isXmlHttpRequest() || str_contains($request->headers->get('Accept', '') ?? '', 'application/json')) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
             throw $this->createNotFoundException('Œuvre non trouvée');
@@ -157,7 +160,7 @@ class OeuvreController extends AbstractController
         $userNote = null;
         $isFavorite = false;
         
-        if ($user) {
+        if ($user && $user instanceof \App\Entity\User) {
             $userNoteEntity = $this->noteRepository->findByUserAndOeuvre($user, $oeuvre);
             $userNote = $userNoteEntity ? $userNoteEntity->getNote() : null;
             
@@ -193,7 +196,6 @@ class OeuvreController extends AbstractController
         $oeuvre->setResume($data['resume'] ?? null);
         $oeuvre->setCouverture($data['couverture'] ?? null);
         $oeuvre->setDatePublication($data['date_publication'] ? new \DateTime($data['date_publication']) : null);
-        $oeuvre->setIsbn($data['isbn'] ?? null);
 
         if (isset($data['auteur_id'])) {
             $auteur = $this->entityManager->getReference('App\Entity\Auteur', $data['auteur_id']);
@@ -223,7 +225,7 @@ class OeuvreController extends AbstractController
     {
         $oeuvre = $this->oeuvreRepository->find($id);
 
-        if (!$oeuvre) {
+        if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
             return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
         }
 
@@ -243,9 +245,6 @@ class OeuvreController extends AbstractController
         }
         if (isset($data['date_publication'])) {
             $oeuvre->setDatePublication(new \DateTime($data['date_publication']));
-        }
-        if (isset($data['isbn'])) {
-            $oeuvre->setIsbn($data['isbn']);
         }
         if (isset($data['auteur_id'])) {
             $auteur = $this->entityManager->getReference('App\Entity\Auteur', $data['auteur_id']);
@@ -276,7 +275,7 @@ class OeuvreController extends AbstractController
     {
         $oeuvre = $this->oeuvreRepository->find($id);
 
-        if (!$oeuvre) {
+        if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
             return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
         }
 

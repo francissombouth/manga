@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true"
-         verbose="true"
->
+         processIsolation="false"
+         stopOnFailure="false"
+         cacheDirectory=".phpunit.cache">
+    
     <php>
-        <env name="APP_ENV" value="test" />
-        <env name="KERNEL_CLASS" value="App\Kernel" />
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
     </php>
+    
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+        <testsuite name="Unit Tests">
+            <directory>tests/Entity</directory>
+            <directory>tests/Service</directory>
+            <directory>tests/Form</directory>
+            <directory>tests/Repository</directory>
+        </testsuite>
+        <testsuite name="Integration Tests">
+            <directory>tests/Controller</directory>
         </testsuite>
     </testsuites>
+    
+    <coverage>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage>
 </phpunit> 

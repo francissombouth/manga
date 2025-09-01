@@ -33,7 +33,7 @@ function initAllFeatures() {
         checkFavoriteStatus();
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation:', error);
+
     }
 }
 
@@ -241,7 +241,7 @@ async function loadAverageRating() {
             }
         }
     } catch (error) {
-        console.log('⚠️ Erreur chargement moyenne (ignorée):', error);
+
     }
 }
 
@@ -306,20 +306,21 @@ async function submitCommentSafely() {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API commentaire:', data);
+    
         
         if (response.ok) {
             showNotification('Commentaire ajouté avec succès !', 'success');
             if (textarea) textarea.value = '';
-                setTimeout(() => {
-                    console.log('[DEBUG] Reload page après ajout commentaire');
-                    window.location.reload();
-                }, 1000);
+            
+            // Ajout dynamique du commentaire sans rechargement
+    
+            addCommentToList(data.commentaire);
+            updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout du commentaire', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitCommentSafely:', error);
+    
         showNotification('Erreur lors de l\'ajout du commentaire', 'error');
     } finally {
         // Réactiver le formulaire
@@ -378,7 +379,7 @@ async function handleLikeClick(e) {
                 }
         }
     } catch (error) {
-            console.error('Erreur like:', error);
+    
     }
 }
 
@@ -481,6 +482,217 @@ function toggleRepliesToReplies(commentaireId) {
     }
 }
 
+// ================== FONCTIONS D'AJOUT DYNAMIQUE DE COMMENTAIRES ==================
+
+function addCommentToList(commentaire) {
+    const commentairesList = document.getElementById('commentaires-list');
+    if (!commentairesList) return;
+    
+    // Vérifier s'il y a un état vide et le supprimer
+    const emptyState = commentairesList.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    // Créer le HTML du nouveau commentaire
+    const commentaireHtml = createCommentaireHTML(commentaire);
+    
+    // Ajouter au début de la liste
+    commentairesList.insertAdjacentHTML('afterbegin', commentaireHtml);
+    
+    // Réinitialiser les événements sur le nouveau commentaire
+    initInteractionButtons();
+}
+
+function addReplyToComment(commentaireId, reponse) {
+    const repliesContainer = document.getElementById(`replies-${commentaireId}`);
+    if (!repliesContainer) return;
+    
+    // Créer le HTML de la nouvelle réponse
+    const reponseHtml = createReponseHTML(reponse, 30); // 30px de marge
+    
+    // Ajouter à la fin des réponses
+    repliesContainer.insertAdjacentHTML('beforeend', reponseHtml);
+    
+    // S'assurer que les réponses sont visibles
+    repliesContainer.style.display = 'block';
+    
+    // Mettre à jour le bouton toggle
+    const toggleBtn = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
+    if (toggleBtn) {
+        const currentCount = repliesContainer.children.length;
+        const toggleText = toggleBtn.querySelector('.toggle-text');
+        if (toggleText) {
+            toggleText.textContent = `Masquer ${currentCount} réponse${currentCount > 1 ? 's' : ''}`;
+        }
+        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.textContent = '▲';
+        }
+    }
+    
+    // Réinitialiser les événements
+    initInteractionButtons();
+}
+
+function addReplyToReply(reponseId, reponseToReponse) {
+    const repliesToRepliesContainer = document.getElementById(`replies-to-replies-${reponseId}`);
+    if (!repliesToRepliesContainer) return;
+    
+    // Créer le HTML de la nouvelle réponse à la réponse
+    const reponseHtml = createReponseToReponseHTML(reponseToReponse);
+    
+    // Ajouter à la fin
+    repliesToRepliesContainer.insertAdjacentHTML('beforeend', reponseHtml);
+    
+    // S'assurer que les réponses sont visibles
+    repliesToRepliesContainer.style.display = 'block';
+    
+    // Mettre à jour le bouton toggle
+    const toggleBtn = document.querySelector(`[data-commentaire-id="${reponseId}"].toggle-replies-to-replies-btn`);
+    if (toggleBtn) {
+        const currentCount = repliesToRepliesContainer.children.length;
+        const toggleText = toggleBtn.querySelector('.toggle-text');
+        if (toggleText) {
+            toggleText.textContent = `Masquer ${currentCount} réponse${currentCount > 1 ? 's' : ''} à cette réponse`;
+        }
+        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.textContent = '▲';
+        }
+    }
+    
+    // Réinitialiser les événements
+    initInteractionButtons();
+}
+
+function createCommentaireHTML(commentaire) {
+    return `
+        <div style="background: var(--surface); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                        ${commentaire.auteur.initial}
+                    </div>
+                    <div>
+                        <h4 style="color: var(--text-primary); margin: 0; font-size: 1.1rem;">${commentaire.auteur.username}</h4>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">${commentaire.createdAt}</span>
+                    </div>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">${commentaire.contenu}</p>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="like-btn" data-commentaire-id="${commentaire.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="like-icon">🤍</span>
+                    <span class="like-count">${commentaire.likes.count}</span> J'aime
+                </button>
+                <button class="reply-btn" data-commentaire-id="${commentaire.id}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                    💬 Répondre
+                </button>
+            </div>
+
+            <!-- Formulaire de réponse -->
+            <div id="reply-form-${commentaire.id}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px;">
+                <textarea id="reply-content-${commentaire.id}" placeholder="Écrivez votre réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                    <button onclick="submitReply(${commentaire.id})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        Publier
+                    </button>
+                    <button onclick="cancelReply(${commentaire.id})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conteneur pour les réponses -->
+            <div id="replies-${commentaire.id}" style="display: none;"></div>
+        </div>
+    `;
+}
+
+function createReponseHTML(reponse, marginLeft = 30) {
+    return `
+        <div class="reponse-item" style="background: rgba(139, 92, 246, 0.05); border-radius: 15px; padding: 2rem; border: 1px solid var(--border-color); margin: 1rem 0 1rem ${marginLeft}px; border-left: 3px solid var(--accent-purple);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="background: var(--accent-purple); color: white; padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                        ${reponse.auteur.initial}
+                    </div>
+                    <div>
+                        <h4 style="color: var(--text-primary); margin: 0; font-size: 1rem;">${reponse.auteur.username}</h4>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">${reponse.createdAt}</span>
+                    </div>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; font-size: 1rem;">${reponse.contenu}</p>
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <button class="like-btn" data-commentaire-id="${reponse.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="like-icon">🤍</span>
+                    <span class="like-count">${reponse.likes.count}</span> J'aime
+                </button>
+                <button class="reply-to-reply-btn" data-commentaire-id="${reponse.id}" style="background: none; border: 2px solid var(--accent-purple); color: var(--accent-purple); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;">
+                    💬 Répondre
+                </button>
+            </div>
+
+            <!-- Formulaire de réponse à une réponse -->
+            <div id="reply-to-reply-form-${reponse.id}" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 10px; border-left: 3px solid var(--accent-purple);">
+                <textarea id="reply-to-reply-content-${reponse.id}" placeholder="Répondre à cette réponse..." style="width: 100%; padding: 0.8rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary); resize: vertical; font-family: inherit; min-height: 80px; box-sizing: border-box;"></textarea>
+                <div style="margin-top: 0.8rem; display: flex; gap: 0.8rem;">
+                    <button onclick="submitReplyToReply(${reponse.id})" style="background: var(--accent-purple); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        Publier
+                    </button>
+                    <button onclick="cancelReplyToReply(${reponse.id})" style="background: var(--border-color); color: var(--text-primary); padding: 0.6rem 1.2rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conteneur pour les réponses aux réponses -->
+            <div id="replies-to-replies-${reponse.id}" style="display: none;"></div>
+        </div>
+    `;
+}
+
+function createReponseToReponseHTML(reponseToReponse) {
+    return `
+        <div style="background: rgba(139, 92, 246, 0.03); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--border-color); margin: 0.8rem 0 0.8rem 20px; border-left: 3px solid #fbbf24;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.8rem;">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <div style="background: #fbbf24; color: white; padding: 0.4rem; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem;">
+                        ${reponseToReponse.auteur.initial}
+                    </div>
+                    <div>
+                        <h5 style="color: var(--text-primary); margin: 0; font-size: 0.9rem;">${reponseToReponse.auteur.username}</h5>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem;">${reponseToReponse.createdAt}</span>
+                    </div>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.8rem; font-size: 0.9rem;">${reponseToReponse.contenu}</p>
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <button class="like-btn" data-commentaire-id="${reponseToReponse.id}" style="background: none; border: 2px solid #e11d48; color: #e11d48; padding: 0.4rem 0.8rem; border-radius: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem;">
+                    <span class="like-icon">🤍</span>
+                    <span class="like-count">${reponseToReponse.likes.count}</span> J'aime
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function updateCommentairesCount() {
+    // Mettre à jour le compteur dans l'onglet
+    const tabBtn = document.querySelector('[data-tab="commentaires"]');
+    if (tabBtn) {
+        const currentText = tabBtn.textContent;
+        const match = currentText.match(/\((\d+)\)/);
+        if (match) {
+            const currentCount = parseInt(match[1]);
+            const newCount = currentCount + 1;
+            tabBtn.textContent = currentText.replace(/\(\d+\)/, `(${newCount})`);
+        }
+    }
+}
+
 // ================== FONCTIONS APPELÉES PAR LE TEMPLATE ==================
 async function submitReply(commentaireId) {
     const textarea = document.getElementById(`reply-content-${commentaireId}`);
@@ -502,21 +714,22 @@ async function submitReply(commentaireId) {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API reply:', data);
+    
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
             textarea.value = '';
             document.getElementById(`reply-form-${commentaireId}`).style.display = 'none';
-                setTimeout(() => {
-                    console.log('[DEBUG] Reload page après ajout réponse');
-                    window.location.reload();
-                }, 1000);
+            
+            // Ajout dynamique de la réponse sans rechargement
+    
+            addReplyToComment(commentaireId, data.commentaire);
+            updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitReply:', error);
+    
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
@@ -549,21 +762,22 @@ async function submitReplyToReply(reponseId) {
         });
         
         const data = await response.json();
-            console.log('[DEBUG] Réponse API reply-to-reply:', data);
+    
         
         if (response.ok) {
             showNotification('Réponse ajoutée avec succès !', 'success');
             textarea.value = '';
             document.getElementById(`reply-to-reply-form-${reponseId}`).style.display = 'none';
-                setTimeout(() => {
-                    console.log('[DEBUG] Reload page après ajout réponse à réponse');
-                    window.location.reload();
-                }, 1000);
+            
+            // Ajout dynamique de la réponse à la réponse sans rechargement
+    
+            addReplyToReply(reponseId, data.commentaire);
+            updateCommentairesCount();
         } else {
             showNotification(data.message || 'Erreur lors de l\'ajout de la réponse', 'error');
         }
     } catch (error) {
-            console.error('[DEBUG] Erreur submitReplyToReply:', error);
+    
         showNotification('Erreur lors de l\'ajout de la réponse', 'error');
     }
 }
@@ -586,7 +800,7 @@ async function checkFavoriteStatus() {
             updateFavoriteButton(oeuvreId, data.isFavorite);
         }
     } catch (error) {
-            console.log('⚠️ Erreur vérification favoris (ignorée):', error);
+    
     }
 }
 

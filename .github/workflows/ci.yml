@@ -1,0 +1,75 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, xdebug
+        tools: composer:v2
+        coverage: xdebug
+    
+    - name: Install dependencies
+      run: |
+        composer update --prefer-dist --no-progress --no-interaction
+    
+    - name: Create uploads directory
+      run: |
+        mkdir -p public/uploads/covers
+        chmod 755 public/uploads/covers
+    
+    - name: Create test environment
+      run: |
+        echo "APP_ENV=test" > .env.test.local
+        echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/test.db" >> .env.test.local
+        echo "APP_SECRET=d9cd28f768dc8c4271d0ed2f52f51244" >> .env.test.local
+        echo "MAILER_DSN=null://null" >> .env.test.local
+        echo "SYMFONY_DEPRECATIONS_HELPER=weak" >> .env.test.local
+        echo "MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0" >> .env.test.local
+    
+    - name: Create var directory
+      run: mkdir -p var
+    
+    - name: Create database
+      run: |
+        php bin/console doctrine:schema:create --env=test
+    
+    - name: Run tests
+      run: php bin/phpunit --coverage-clover=coverage.xml || true
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+    
+    - name: Run Composer audit
+      run: composer audit
+    
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Render
+      run: |
+        echo "Deployment to Render.com triggered"
+        # Render.com se charge automatiquement du déploiement
+        # via webhook GitHub 

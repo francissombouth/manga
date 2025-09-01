@@ -3,300 +3,22 @@
 {% block title %}Gestion des Auteurs - Administration{% endblock %}
 
 {% block stylesheets %}
-<style>
-.admin-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 2rem 0;
-}
-
-.admin-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.admin-header {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.admin-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.stat-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--accent-primary);
-}
-
-.stat-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.3rem;
-}
-
-.admin-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.search-form {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.search-input {
-    padding: 0.8rem 1rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 10px;
-    color: var(--text-primary);
-    font-size: 1rem;
-    min-width: 250px;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.5rem;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.btn-primary {
-    background: var(--gradient-primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-}
-
-.btn-secondary {
-    background: var(--bg-card);
-    color: var(--text-primary);
-    border: 2px solid var(--border-secondary);
-}
-
-.btn-secondary:hover {
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-}
-
-.auteurs-grid {
-    display: grid;
-    gap: 1.5rem;
-}
-
-.auteur-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 15px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.auteur-card:hover {
-    border-color: var(--accent-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-}
-
-.auteur-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-}
-
-.auteur-info h3 {
-    color: var(--text-primary);
-    margin: 0 0 0.5rem 0;
-    font-size: 1.3rem;
-    font-weight: 600;
-}
-
-.auteur-meta {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.auteur-bio {
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-.auteur-stats {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    background: var(--bg-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-.auteur-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 2rem;
-}
-
-.pagination a, .pagination span {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-secondary);
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text-primary);
-    background: var(--bg-card);
-    transition: all 0.3s ease;
-}
-
-.pagination a:hover {
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-}
-
-.pagination .current {
-    background: var(--gradient-primary);
-    color: white;
-    border-color: var(--accent-primary);
-}
-
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--text-secondary);
-}
-
-.empty-state h3 {
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-@media (max-width: 768px) {
-    .admin-content {
-        padding: 0 1rem;
-    }
-    
-    .admin-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .search-form {
-        flex-direction: column;
-    }
-    
-    .search-input {
-        min-width: auto;
-    }
-    
-    .auteur-header {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .auteur-actions {
-        justify-content: center;
-    }
-}
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
 {% endblock %}
 
 {% block body %}
-
-
 <div class="admin-container">
-    <div class="admin-content">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ path('admin_dashboard') }}">Administration</a>
+            <span>></span>
+            <span>Gestion des Auteurs</span>
+        </div>
+
         <div class="admin-header">
             <h1 class="admin-title">👥 Gestion des Auteurs</h1>
-            
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-number">{{ total }}</div>
-                    <div class="stat-label">Auteurs</div>
-                </div>
-            </div>
+            <p style="color: var(--text-secondary); margin: 0;">{{ total }} auteur(s) au total</p>
         </div>
 
         <!-- Flash Messages -->
@@ -308,17 +30,25 @@
 
         <!-- Contrôles -->
         <div class="admin-controls">
-            <form method="GET" class="search-form">
-                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un auteur..." class="search-input">
-                <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
-                {% if search %}
-                    <a href="{{ path('admin_auteurs') }}" class="btn btn-secondary">❌ Effacer</a>
-                {% endif %}
-            </form>
+            <div>
+                <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                    ⬅️ Retour au dashboard
+                </a>
+            </div>
             
-            <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary">
-                ➕ Nouvel auteur
-            </a>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <form method="GET" class="search-form">
+                    <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un auteur..." class="search-input">
+                    <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
+                    {% if search %}
+                        <a href="{{ path('admin_auteurs') }}" class="btn btn-secondary">❌ Effacer</a>
+                    {% endif %}
+                </form>
+                
+                <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary">
+                    ➕ Nouvel auteur
+                </a>
+            </div>
         </div>
 
         <!-- Liste des auteurs -->
@@ -379,6 +109,7 @@
             </div>
         {% else %}
             <div class="empty-state">
+                <div class="icon">👥</div>
                 <h3>Aucun auteur trouvé</h3>
                 <p>{% if search %}Aucun auteur ne correspond à votre recherche.{% else %}Aucun auteur n'a encore été créé.{% endif %}</p>
                 <a href="{{ path('admin_auteur_new') }}" class="btn btn-primary" style="margin-top: 1rem;">
@@ -391,19 +122,19 @@
         {% if total_pages > 1 %}
             <div class="pagination">
                 {% if current_page > 1 %}
-                    <a href="{{ path('admin_auteurs', {page: current_page - 1, search: search}) }}">← Précédent</a>
+                    <a href="{{ path('admin_auteurs', {page: current_page - 1, search: search}) }}" class="btn btn-secondary btn-sm">← Précédent</a>
                 {% endif %}
                 
                 {% for page in 1..total_pages %}
                     {% if page == current_page %}
                         <span class="current">{{ page }}</span>
                     {% else %}
-                        <a href="{{ path('admin_auteurs', {page: page, search: search}) }}">{{ page }}</a>
+                        <a href="{{ path('admin_auteurs', {page: page, search: search}) }}" class="btn btn-secondary btn-sm">{{ page }}</a>
                     {% endif %}
                 {% endfor %}
                 
                 {% if current_page < total_pages %}
-                    <a href="{{ path('admin_auteurs', {page: current_page + 1, search: search}) }}">Suivant →</a>
+                    <a href="{{ path('admin_auteurs', {page: current_page + 1, search: search}) }}" class="btn btn-secondary btn-sm">Suivant →</a>
                 {% endif %}
             </div>
         {% endif %}

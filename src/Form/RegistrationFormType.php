@@ -27,14 +27,14 @@ class RegistrationFormType extends AbstractType
                     'class' => 'form-input'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez entrer un nom d\'utilisateur',
-                    ]),
-                    new Length([
-                        'min' => 2,
-                        'minMessage' => 'Votre nom doit faire au moins {{ limit }} caractères',
-                        'max' => 255,
-                    ]),
+                    new NotBlank(
+                        message: 'Veuillez entrer un nom d\'utilisateur',
+                    ),
+                    new Length(
+                        min: 2,
+                        minMessage: 'Votre nom doit faire au moins {{ limit }} caractères',
+                        max: 255,
+                    ),
                 ],
             ])
             ->add('email', EmailType::class, [
@@ -44,9 +44,9 @@ class RegistrationFormType extends AbstractType
                     'class' => 'form-input'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez entrer une adresse email',
-                    ]),
+                    new NotBlank(
+                        message: 'Veuillez entrer une adresse email',
+                    ),
                 ],
             ])
             ->add('plainPassword', RepeatedType::class, [
@@ -69,23 +69,23 @@ class RegistrationFormType extends AbstractType
                 'mapped' => false,
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez entrer un mot de passe',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Votre mot de passe doit faire au moins {{ limit }} caractères',
-                        'max' => 4096,
-                    ]),
+                    new NotBlank(
+                        message: 'Veuillez entrer un mot de passe',
+                    ),
+                    new Length(
+                        min: 6,
+                        minMessage: 'Votre mot de passe doit faire au moins {{ limit }} caractères',
+                        max: 4096,
+                    ),
                 ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'label' => 'J\'accepte les conditions d\'utilisation',
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => 'Vous devez accepter nos conditions.',
-                    ]),
+                    new IsTrue(
+                        message: 'Vous devez accepter nos conditions.',
+                    ),
                 ],
                 'attr' => [
                     'class' => 'form-checkbox'

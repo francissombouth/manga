@@ -3,243 +3,63 @@
 {% block title %}Mon Profil - MangaThèque{% endblock %}
 
 {% block stylesheets %}
-<style>
-.profile-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding-top: 2rem;
-}
-
-.profile-content {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.profile-header {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.profile-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.profile-avatar {
-    width: 100px;
-    height: 100px;
-    background: var(--gradient-primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    margin: 0 auto 1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.profile-name {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 2;
-}
-
-.profile-email {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.profile-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-glow);
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent-primary);
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.profile-actions {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-}
-
-.actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.action-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 1rem 1.5rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 12px;
-    color: var(--text-primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.action-btn:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: white;
-    text-decoration: none;
-    transform: translateY(-2px);
-}
-
-.action-btn.logout {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
-}
-
-.action-btn.logout:hover {
-    background: #ef4444;
-    border-color: #ef4444;
-    color: white;
-}
-
-.welcome-message {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 2rem;
-    color: #6ee7b7;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .profile-content {
-        padding: 1rem;
-    }
-    
-    .profile-header {
-        padding: 1.5rem;
-    }
-    
-    .actions-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/pages/profile.css') }}">
 {% endblock %}
 
 {% block body %}
-
-
 <div class="profile-container">
     <div class="profile-content">
-        <div class="welcome-message">
-            <span>🎉</span>
-            <span>Bienvenue sur votre profil, {{ user.nom }} !</span>
-        </div>
-
+        <!-- En-tête du profil -->
         <div class="profile-header">
             <div class="profile-avatar">
                 👤
             </div>
-            <h1 class="profile-name">{{ user.nom }}</h1>
-            <p class="profile-email">{{ user.email }}</p>
+            <h1 class="profile-name">{{ app.user.nom }}</h1>
+            <p class="profile-email">{{ app.user.email }}</p>
         </div>
 
+        <!-- Statistiques -->
         <div class="profile-stats">
             <div class="stat-card">
-                <div class="stat-number">{{ user.collections|length }}</div>
-                <div class="stat-label">Collections</div>
+                <div class="stat-icon">📚</div>
+                <div class="stat-number">{{ favorisCount }}</div>
+                <div class="stat-label">Favoris</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{{ user.statuts|length }}</div>
-                <div class="stat-label">Mangas suivis</div>
+                <div class="stat-icon">📖</div>
+                <div class="stat-number">{{ enCoursCount }}</div>
+                <div class="stat-label">En cours</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">{{ user.createdAt|date('d/m/Y') }}</div>
-                <div class="stat-label">Membre depuis</div>
+                <div class="stat-icon">✅</div>
+                <div class="stat-number">{{ termineeCount }}</div>
+                <div class="stat-label">Terminées</div>
             </div>
         </div>
 
+        <!-- Actions rapides -->
         <div class="profile-actions">
-            <h2 style="color: var(--text-primary); margin-bottom: 1.5rem; text-align: center;">
-                🚀 Actions rapides
+            <h2 class="actions-title">
+                ⚡ Actions Rapides
             </h2>
-            
-            <div class="actions-grid">
-                <a href="{{ path('app_home') }}" class="action-btn">
-                    <span>🏠</span>
-                    <span>Retour à l'accueil</span>
-                </a>
-                
+            <div class="action-grid">
                 <a href="{{ path('app_oeuvre_list') }}" class="action-btn">
-                    <span>🔍</span>
-                    <span>Rechercher des mangas</span>
+                    <div class="action-icon">🔍</div>
+                    <div class="action-content">
+                        <h4>Explorer le Catalogue</h4>
+                        <p>Découvrir de nouveaux mangas</p>
+                    </div>
                 </a>
                 
-                <a href="{{ path('app_home') }}" class="action-btn">
-                    <span>📚</span>
-                    <span>Ma Collection</span>
-                </a>
-                
-                <a href="{{ path('app_logout') }}" class="action-btn logout">
-                    <span>🚪</span>
-                    <span>Se déconnecter</span>
+                <a href="{{ path('app_favoris') }}" class="action-btn">
+                    <div class="action-icon">❤️</div>
+                    <div class="action-content">
+                        <h4>Mes Favoris</h4>
+                        <p>Voir ma collection de favoris</p>
+                    </div>
                 </a>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}

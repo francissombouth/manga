@@ -3,569 +3,98 @@
 {% block title %}Génération de Données Massives - Administration{% endblock %}
 
 {% block stylesheets %}
-<style>
-.admin-container {
-    min-height: 100vh;
-    background: var(--bg-primary);
-    padding: 2rem 0;
-}
-
-.admin-header {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.admin-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.admin-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.admin-subtitle {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    position: relative;
-    z-index: 2;
-}
-
-.back-btn {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    color: var(--text-primary);
-    padding: 0.8rem 1.5rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    z-index: 3;
-}
-
-.back-btn:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: white;
-    text-decoration: none;
-    transform: translateY(-2px);
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.generator-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 20px;
-    padding: 2.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.generator-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.card-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    color: var(--text-primary);
-    font-weight: 600;
-    margin-bottom: 0.8rem;
-    font-size: 1.1rem;
-}
-
-.form-select {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 12px;
-    color: var(--text-primary);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.form-select:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.form-help {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
-
-.checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.checkbox-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    padding: 1rem;
-    background: var(--bg-card);
-    border: 2px solid var(--border-secondary);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.checkbox-item:hover {
-    border-color: var(--accent-primary);
-    background: rgba(16, 185, 129, 0.05);
-}
-
-.checkbox-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--accent-primary);
-    margin-top: 2px;
-}
-
-.checkbox-content h6 {
-    color: var(--text-primary);
-    font-weight: 600;
-    margin: 0 0 0.3rem 0;
-}
-
-.checkbox-content small {
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-.danger-checkbox h6 {
-    color: #ef4444 !important;
-}
-
-.danger-checkbox small {
-    color: #ef4444 !important;
-}
-
-.button-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.btn {
-    padding: 1.2rem 2rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    text-decoration: none;
-}
-
-.btn-preview {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-}
-
-.btn-preview:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-}
-
-.btn-generate {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-}
-
-.btn-generate:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-}
-
-.info-card {
-    background: var(--gradient-card);
-    border: 1px solid var(--border-secondary);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.info-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--bg-card);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-.feature-item:hover {
-    background: rgba(16, 185, 129, 0.05);
-}
-
-.feature-icon {
-    background: var(--accent-primary);
-    color: white;
-    width: 35px;
-    height: 35px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.feature-content h6 {
-    color: var(--text-primary);
-    font-weight: 600;
-    margin: 0 0 0.3rem 0;
-}
-
-.feature-content small {
-    color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-.stats-card {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    border-radius: 16px;
-    padding: 2rem;
-    text-align: center;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-}
-
-.stat-item {
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-.stat-item h4 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    margin: 0 0 0.3rem 0;
-}
-
-.stat-item small {
-    opacity: 0.9;
-    font-size: 0.9rem;
-}
-
-.use-cases-card {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.1));
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.use-cases-title {
-    color: #3b82f6;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.use-cases-list {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin: 0;
-    padding-left: 1.2rem;
-}
-
-.use-cases-list li {
-    margin-bottom: 0.5rem;
-}
-
-.use-cases-list strong {
-    color: var(--text-primary);
-}
-
-.alert {
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    border: 1px solid;
-}
-
-.alert-success {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: rgba(16, 185, 129, 0.3);
-    color: #10b981;
-}
-
-.alert-danger {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
-}
-
-.alert-info {
-    background: rgba(59, 130, 246, 0.1);
-    border-color: rgba(59, 130, 246, 0.3);
-    color: #3b82f6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-@media (max-width: 768px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .button-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .admin-header {
-        padding: 1.5rem;
-    }
-    
-    .back-btn {
-        position: static;
-        margin-bottom: 1rem;
-        display: inline-block;
-    }
-    
-    .admin-title {
-        font-size: 2rem;
-    }
-}
-</style>
+    <link rel="stylesheet" href="{{ asset('styles/pages/admin.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="admin-container">
     <div class="container">
         <!-- Header -->
-        <div class="admin-header">
+        <div class="admin-header import-massive">
             <a href="{{ path('admin_oeuvres') }}" class="back-btn">
-                ← Retour aux œuvres
+                ⬅️ Retour aux œuvres
             </a>
             <h1 class="admin-title">
                 🏭 Import Massif depuis MangaDx
             </h1>
             <p class="admin-subtitle">Importez de vraies œuvres depuis MangaDx pour alimenter rapidement votre base de données</p>
-                    </div>
+        </div>
 
         <!-- Flash Messages -->
         {% for type, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ type == 'error' ? 'danger' : type }}">
+                <div class="status-message {{ type == 'error' ? 'error' : type }}">
+                    {% if type == 'success' %}✅{% elseif type == 'error' %}❌{% elseif type == 'warning' %}⚠️{% else %}ℹ️{% endif %}
                     {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% endfor %}
 
         <!-- Contenu principal -->
-        <div class="content-grid">
-            <!-- Formulaire de génération -->
-            <div class="generator-card">
-                <h2 class="card-title">
-                    📥 Importateur MangaDx
-                </h2>
-                
-                                    <form method="post" id="importForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="limit" class="form-label">
-                                Nombre d'œuvres à importer
-                            </label>
-                            <select class="form-select" id="limit" name="limit">
-                                <option value="5">5 œuvres (Test rapide)</option>
-                                <option value="10" selected>10 œuvres (Recommandé)</option>
-                                <option value="20">20 œuvres (Base moyenne)</option>
-                                <option value="50">50 œuvres (Grosse base)</option>
-                                <option value="100">100 œuvres (Énorme !)</option>
-                            </select>
-                            <div class="form-help">
-                                Œuvres récupérées depuis l'API MangaDx avec leurs chapitres réels
+        <div class="admin-content">
+            <div class="admin-grid">
+                <!-- Formulaire de génération -->
+                <div class="admin-card">
+                    <h2 class="card-title">
+                        📥 Importateur MangaDx
+                    </h2>
+                    
+                    <form method="post" id="importForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="limit" class="form-label">
+                                    Nombre d'œuvres à importer
+                                </label>
+                                <select class="form-select" id="limit" name="limit">
+                                    <option value="5">5 œuvres (Test rapide)</option>
+                                    <option value="10" selected>10 œuvres (Recommandé)</option>
+                                    <option value="20">20 œuvres (Base moyenne)</option>
+                                    <option value="50">50 œuvres (Grosse base)</option>
+                                    <option value="100">100 œuvres (Énorme !)</option>
+                                </select>
+                                <div class="form-help">
+                                    Œuvres récupérées depuis l'API MangaDx avec leurs chapitres réels
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="category" class="form-label">
+                                    Catégorie d'œuvres
+                                </label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="popular" selected>🎯 Populaires (Les plus suivies)</option>
+                                    <option value="latest">🆕 Récentes (Nouvelles sorties)</option>
+                                    <option value="random">🎲 Aléatoires (Découvertes)</option>
+                                </select>
+                                <div class="form-help">
+                                    Type d'œuvres à importer depuis MangaDx
+                                </div>
                             </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="category" class="form-label">
-                                Catégorie d'œuvres
+                            <label class="form-label">
+                                Options avancées
                             </label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="popular" selected>🎯 Populaires (Les plus suivies)</option>
-                                <option value="latest">🆕 Récentes (Nouvelles sorties)</option>
-                                <option value="random">🎲 Aléatoires (Découvertes)</option>
-                            </select>
-                            <div class="form-help">
-                                Type d'œuvres à importer depuis MangaDx
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">
-                            Options avancées
-                        </label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item danger-checkbox">
-                                <input type="checkbox" id="force" name="force" value="1">
-                                <div class="checkbox-content">
-                                    <h6>⚠️ Vider la base avant import</h6>
-                                    <small>Supprime toutes les œuvres existantes ! Irréversible.</small>
-                                </div>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="dry_run" name="dry_run" value="1">
-                                <div class="checkbox-content">
-                                    <h6>🔍 Mode simulation</h6>
-                                    <small>Aperçu des données sans les sauvegarder</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="button-grid">
-                        <button type="button" class="btn btn-preview" onclick="startSimulation()">
-                            🔍 Simulation d'import
-                                            </button>
-                        <button type="button" class="btn btn-generate" onclick="startImport()">
-                            📥 Importer depuis MangaDx
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-
-            <!-- Sidebar d'informations -->
-            <div>
-                <!-- Fonctionnalités -->
-                <div class="info-card">
-                    <h3 class="info-title">
-                        🎯 Qu'est-ce qui sera importé ?
-                    </h3>
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <span class="feature-icon">📚</span>
-                            <div class="feature-content">
-                                <h6>Œuvres authentiques</h6>
-                                <small>Vraies œuvres depuis MangaDx avec titres, descriptions et couvertures originales</small>
-                            </div>
-                                </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">👨‍🎨</span>
-                            <div class="feature-content">
-                                <h6>Auteurs officiels</h6>
-                                <small>Vrais auteurs et artistes récupérés depuis la base MangaDx</small>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">🎭</span>
-                            <div class="feature-content">
-                                                            <h6>Genres authentiques</h6>
-                            <small>Vrais genres officiels assignés par la communauté MangaDx</small>
-                            </div>
-                                </div>
-                        <div class="feature-item">
-                            <span class="feature-icon">📖</span>
-                            <div class="feature-content">
-                                <h6>Chapitres réels</h6>
-                                <small>Chapitres existants avec numérotation et pages réelles disponibles</small>
-                                        </div>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item danger-checkbox">
+                                    <input type="checkbox" id="force" name="force" value="1">
+                                    <div class="checkbox-content">
+                                        <h6>⚠️ Vider la base avant import</h6>
+                                        <small>Supprime toutes les œuvres existantes ! Irréversible.</small>
                                     </div>
                                 </div>
+
                             </div>
+                        </div>
+                        
+                        <div class="admin-actions">
+                            <button type="button" class="btn btn-primary" onclick="startImport()">
+                                📥 Importer depuis MangaDx
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -583,24 +112,18 @@ function updateEstimates() {
     const sizeMB = Math.round(limit * 0.5); // ~0.5MB par œuvre
     const timeMinutes = Math.ceil(limit / 30); // ~30 œuvres par minute
     
-    timeElement.textContent = `~${timeMinutes} minute${timeMinutes > 1 ? 's' : ''}`;
-    sizeElement.textContent = `~${sizeMB} MB`;
-    chaptersElement.textContent = `~${chapters}`;
-}
-
-function startSimulation() {
-    document.getElementById('dry_run').checked = true;
-    document.getElementById('importForm').submit();
+    if (timeElement) timeElement.textContent = `~${timeMinutes} minute${timeMinutes > 1 ? 's' : ''}`;
+    if (sizeElement) sizeElement.textContent = `~${sizeMB} MB`;
+    if (chaptersElement) chaptersElement.textContent = `~${chapters}`;
 }
 
 function startImport() {
-    document.getElementById('dry_run').checked = false;
     if (document.getElementById('force').checked) {
         if (!confirm('⚠️ ATTENTION ! Vous êtes sur le point de supprimer TOUTES les œuvres existantes. Cette action est irréversible. Êtes-vous sûr ?')) {
             return;
         }
     }
-        document.getElementById('importForm').submit();
+    document.getElementById('importForm').submit();
 }
 
 // Mettre à jour les estimations au changement de limit
@@ -609,4 +132,4 @@ document.getElementById('limit').addEventListener('change', updateEstimates);
 // Initialisation
 updateEstimates();
 </script>
-{% endblock %} 
+{% endblock %}

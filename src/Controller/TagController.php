@@ -19,8 +19,6 @@ class TagController extends AbstractController
 {
     public function __construct(
         private TagRepository $tagRepository,
-        private EntityManagerInterface $entityManager,
-        private SerializerInterface $serializer,
         private ValidatorInterface $validator
     ) {
     }
@@ -30,7 +28,7 @@ class TagController extends AbstractController
     {
         $page = $request->query->getInt('page', 1);
         $limit = $request->query->getInt('limit', 10);
-        $search = $request->query->get('search', '');
+        $search = (string) $request->query->get('search', '');
 
         $tags = $this->tagRepository->findByNom($search);
         $total = count($tags);
@@ -50,7 +48,7 @@ class TagController extends AbstractController
     {
         $tag = $this->tagRepository->find($id);
 
-        if (!$tag) {
+        if (!$tag || !$tag instanceof \App\Entity\Tag) {
             return $this->json(['message' => 'Tag non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -64,7 +62,7 @@ class TagController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $tag = new Tag();
-        $tag->setNom($data['nom']);
+        $tag->setNom($data['nom'] ?? '');
 
         $errors = $this->validator->validate($tag);
         if (count($errors) > 0) {
@@ -82,7 +80,7 @@ class TagController extends AbstractController
     {
         $tag = $this->tagRepository->find($id);
 
-        if (!$tag) {
+        if (!$tag || !$tag instanceof \App\Entity\Tag) {
             return $this->json(['message' => 'Tag non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
@@ -108,7 +106,7 @@ class TagController extends AbstractController
     {
         $tag = $this->tagRepository->find($id);
 
-        if (!$tag) {
+        if (!$tag || !$tag instanceof \App\Entity\Tag) {
             return $this->json(['message' => 'Tag non trouvé'], Response::HTTP_NOT_FOUND);
         }
 

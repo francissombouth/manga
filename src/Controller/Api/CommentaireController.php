@@ -25,8 +25,7 @@ class CommentaireController extends AbstractController
         private OeuvreRepository $oeuvreRepository,
         private OeuvreNoteRepository $noteRepository,
         private CommentaireLikeRepository $likeRepository,
-        private CommentaireRepository $commentaireRepository,
-        private SerializerInterface $serializer
+        private CommentaireRepository $commentaireRepository
     ) {
     }
 
@@ -37,6 +36,10 @@ class CommentaireController extends AbstractController
         
         if (!$oeuvre) {
             return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$oeuvre instanceof \App\Entity\Oeuvre) {
+            return $this->json(['message' => 'Type d\'œuvre invalide'], Response::HTTP_BAD_REQUEST);
         }
 
         // Récupérer seulement les commentaires principaux (sans parent)
@@ -50,7 +53,7 @@ class CommentaireController extends AbstractController
         $user = $this->getUser();
         $commentairesData = [];
         foreach ($commentaires as $commentaire) {
-            $commentairesData[] = $this->formatCommentaire($commentaire, $user);
+            $commentairesData[] = $this->formatCommentaire($commentaire, $user instanceof \App\Entity\User ? $user : null);
         }
 
         return $this->json([
@@ -63,7 +66,10 @@ class CommentaireController extends AbstractController
         ]);
     }
 
-    private function formatCommentaire(Commentaire $commentaire, ?User $user): array
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatCommentaire(Commentaire $commentaire, ?\App\Entity\User $user): array
     {
         $likesCount = $this->likeRepository->countByCommentaire($commentaire);
         $isLikedByUser = false;
@@ -79,13 +85,16 @@ class CommentaireController extends AbstractController
             $reponses[] = $this->formatCommentaire($reponse, $user);
         }
 
+        $createdAt = $commentaire->getCreatedAt();
+        $auteur = $commentaire->getAuteur();
+
         return [
             'id' => $commentaire->getId(),
             'contenu' => $commentaire->getContenu(),
-            'createdAt' => $commentaire->getCreatedAt()->format('d/m/Y à H:i'),
+            'createdAt' => $createdAt ? $createdAt->format('d/m/Y à H:i') : 'Date inconnue',
             'auteur' => [
-                'username' => $commentaire->getAuteur()->getNom(),
-                'initial' => strtoupper(substr($commentaire->getAuteur()->getNom(), 0, 1))
+                'username' => $auteur ? $auteur->getNom() : 'Utilisateur inconnu',
+                'initial' => $auteur && $auteur->getNom() ? strtoupper(substr($auteur->getNom(), 0, 1)) : '?'
             ],
             'likes' => [
                 'count' => $likesCount,
@@ -104,13 +113,13 @@ class CommentaireController extends AbstractController
         try {
             // Vérifier l'authentification
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $oeuvre = $this->oeuvreRepository->find($id);
             
-            if (!$oeuvre) {
+            if (!$oeuvre || !$oeuvre instanceof \App\Entity\Oeuvre) {
                 return $this->json(['message' => 'Œuvre non trouvée'], Response::HTTP_NOT_FOUND);
             }
 
@@ -135,7 +144,7 @@ class CommentaireController extends AbstractController
             // Vérifier s'il s'agit d'une réponse
             if (isset($data['parentId']) && $data['parentId']) {
                 $parentCommentaire = $this->entityManager->getRepository(Commentaire::class)->find($data['parentId']);
-                if ($parentCommentaire && $parentCommentaire->getOeuvre() === $oeuvre) {
+                if ($parentCommentaire instanceof \App\Entity\Commentaire && $parentCommentaire->getOeuvre() === $oeuvre) {
                     $commentaire->setParent($parentCommentaire);
                 }
             }
@@ -165,13 +174,13 @@ class CommentaireController extends AbstractController
         try {
             // Vérifier l'authentification
             $user = $this->getUser();
-            if (!$user) {
+            if (!$user || !$user instanceof \App\Entity\User) {
                 return $this->json(['message' => 'Authentification requise'], Response::HTTP_UNAUTHORIZED);
             }
 
             $parentCommentaire = $this->commentaireRepository->find($commentaireId);
             
-            if (!$parentCommentaire) {
+            if (!$parentCommentaire || !$parentCommentaire instanceof \App\Entity\Commentaire) {
                 return $this->json(['message' => 'Commentaire parent non trouvé'], Response::HTTP_NOT_FOUND);
             }
 
@@ -199,15 +208,16 @@ class CommentaireController extends AbstractController
 
             return $this->json([
                 'message' => 'Réponse ajoutée avec succès',
-                'reponse' => $this->formatCommentaire($reponse, $user)
+                'commentaire' => $this->formatCommentaire($reponse, $user)
             ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
+            // Log l'erreur pour le débogage
             error_log('Erreur API réponse commentaire: ' . $e->getMessage());
             
             return $this->json([
                 'message' => 'Erreur interne du serveur',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage() // Temporaire pour le débogage
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

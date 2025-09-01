@@ -48,15 +48,11 @@ class BurgerMenu {
 
     validateElements() {
         if (!this.burgerMenu) {
-            console.error('❌ Élément burger-menu introuvable !');
+    
             return false;
         }
         if (!this.mobileNav) {
-            console.error('❌ Élément mobile-nav introuvable !');
-            return false;
-        }
-        if (!this.mobileOverlay) {
-            console.error('❌ Élément mobile-overlay introuvable !');
+    
             return false;
         }
         return true;
@@ -71,8 +67,8 @@ class BurgerMenu {
             this.mobileNavClose.addEventListener('click', (e) => this.handleCloseClick(e));
         }
 
-        // Fermer en cliquant sur l'overlay
-        this.mobileOverlay.addEventListener('click', (e) => this.handleOverlayClick(e));
+        // Fermer en cliquant sur l'overlay (désactivé)
+        // this.mobileOverlay.addEventListener('click', (e) => this.handleOverlayClick(e));
 
         // Fermer en cliquant sur un lien
         this.mobileNavLinks.forEach(link => {
@@ -120,11 +116,11 @@ class BurgerMenu {
     openMobileMenu() {
         this.burgerMenu.classList.add('active');
         this.mobileNav.classList.add('active');
-        this.mobileOverlay.style.display = 'block';
+        // this.mobileOverlay.style.display = 'block'; // Désactivé
         
         // Forcer un reflow pour l'animation
-        this.mobileOverlay.offsetHeight;
-        this.mobileOverlay.classList.add('active');
+        // this.mobileOverlay.offsetHeight; // Désactivé
+        // this.mobileOverlay.classList.add('active'); // Désactivé
         
         // Empêcher le scroll du body
         document.body.style.overflow = 'hidden';
@@ -136,11 +132,11 @@ class BurgerMenu {
     closeMobileMenu() {
         this.burgerMenu.classList.remove('active');
         this.mobileNav.classList.remove('active');
-        this.mobileOverlay.classList.remove('active');
+        // this.mobileOverlay.classList.remove('active'); // Désactivé
         
-        setTimeout(() => {
-            this.mobileOverlay.style.display = 'none';
-        }, 300);
+        // setTimeout(() => {
+        //     this.mobileOverlay.style.display = 'none';
+        // }, 300); // Désactivé
         
         // Rétablir le scroll du body
         document.body.style.overflow = '';
@@ -180,7 +176,7 @@ class BurgerMenu {
         // Supprimer tous les event listeners
         this.burgerMenu?.removeEventListener('click', this.handleBurgerClick);
         this.mobileNavClose?.removeEventListener('click', this.handleCloseClick);
-        this.mobileOverlay?.removeEventListener('click', this.handleOverlayClick);
+        // this.mobileOverlay?.removeEventListener('click', this.handleOverlayClick); // Désactivé
         
         this.mobileNavLinks.forEach(link => {
             link.removeEventListener('click', this.handleLinkClick);
@@ -189,12 +185,12 @@ class BurgerMenu {
         // Nettoyer les références
         this.burgerMenu = null;
         this.mobileNav = null;
-        this.mobileOverlay = null;
+        // this.mobileOverlay = null; // Désactivé
         this.mobileNavClose = null;
         this.mobileNavLinks = null;
         this.isInitialized = false;
 
-        console.log('🧹 Menu burger détruit');
+
     }
 }
 

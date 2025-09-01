@@ -1,5 +1,28 @@
 /* Styles pour la page de détail d'une œuvre */
 
+/* Style pour le bouton de favoris */
+.sidebar-btn-favorite {
+    transition: all 0.3s ease;
+}
+
+.sidebar-btn-favorite.favorited {
+    background: linear-gradient(135deg, #e11d48, #be185d) !important;
+    color: white !important;
+    border-color: #e11d48 !important;
+}
+
+.sidebar-btn-favorite.favorited:hover {
+    background: linear-gradient(135deg, #be185d, #9f1239) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+}
+
+.sidebar-btn-favorite:not(.favorited):hover {
+    background: rgba(225, 29, 72, 0.1) !important;
+    border-color: #e11d48 !important;
+    color: #e11d48 !important;
+}
+
 /* Styles pour les onglets */
 .tab-btn {
     background: rgba(139, 92, 246, 0.1);
@@ -39,6 +62,33 @@
     gap: 0.5rem;
     margin-bottom: 0;
     border-bottom: 2px solid var(--border-color);
+}
+
+/* Styles pour les boutons J'aime des commentaires */
+.like-btn {
+    background: none !important;
+    border: 2px solid #e11d48 !important;
+    color: #e11d48 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.like-btn:hover {
+    background: #e11d48 !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+}
+
+.like-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 6px rgba(225, 29, 72, 0.2) !important;
 }
 
 /* Styles pour le bouton favori */
