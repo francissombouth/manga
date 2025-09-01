@@ -31,7 +31,7 @@ class MangaDxImportService
     /**
      * Importe une œuvre depuis MangaDx par son ID
      */
-    public function importOeuvre(string $mangadxId): ?Oeuvre
+    public function importOeuvre(string $mangadxId, bool $importPages = false): ?Oeuvre
     {
         // Vérifier si l'œuvre existe déjà
         $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
@@ -50,7 +50,7 @@ class MangaDxImportService
             $oeuvre = $this->createOeuvreFromData($mangaData, $mangadxId);
             
             // Récupérer et créer les chapitres
-            $this->importChapitres($oeuvre, $mangadxId);
+            $this->importChapitres($oeuvre, $mangadxId, $importPages);
 
             $this->entityManager->flush();
 
@@ -391,7 +391,7 @@ class MangaDxImportService
     /**
      * Importe les chapitres d'une œuvre
      */
-    private function importChapitres(Oeuvre $oeuvre, string $mangadxId): void
+    private function importChapitres(Oeuvre $oeuvre, string $mangadxId, bool $importPages = false): void
     {
         try {
             // Récupérer la liste des chapitres
@@ -446,22 +446,28 @@ class MangaDxImportService
                 $chapitre->setResume("Chapitre importé depuis MangaDx");
                 $chapitre->setMangadxChapterId($chapterInfo['id']);
                 
-                // Récupérer les pages du chapitre depuis MangaDx
-                try {
-                    $pages = $this->getChapterPages($chapterInfo['id']);
-                    $chapitre->setPages($pages);
-                    $this->logger->info("Pages récupérées pour le chapitre {$chapterInfo['title']}: " . count($pages) . " pages");
-                } catch (\Exception $e) {
-                    $this->logger->warning("Impossible de récupérer les pages pour le chapitre {$chapterInfo['title']}: " . $e->getMessage());
+                // Récupérer les pages du chapitre depuis MangaDx (optionnel)
+                if ($importPages) {
+                    try {
+                        $pages = $this->getChapterPages($chapterInfo['id']);
+                        $chapitre->setPages($pages);
+                        $this->logger->info("Pages récupérées pour le chapitre {$chapterInfo['title']}: " . count($pages) . " pages");
+                        
+                        // Délai pour éviter le rate limiting
+                        sleep(1);
+                    } catch (\Exception $e) {
+                        $this->logger->warning("Impossible de récupérer les pages pour le chapitre {$chapterInfo['title']}: " . $e->getMessage());
+                        $chapitre->setPages([]);
+                    }
+                } else {
+                    // Ne pas récupérer les pages lors de l'import pour éviter le timeout
+                    // Les pages seront récupérées dynamiquement quand nécessaire
                     $chapitre->setPages([]);
                 }
                 
                 $this->logger->info("Chapitre {$chapterInfo['title']} importé avec mangadxChapterId: {$chapterInfo['id']}");
                 
                 $this->entityManager->persist($chapitre);
-                
-                // Délai pour éviter le rate limiting de l'API MangaDx
-                sleep(1);
             }
 
         } catch (\Exception $e) {
@@ -625,14 +631,14 @@ class MangaDxImportService
     /**
      * Importe ou met à jour une œuvre (méthode combinée)
      */
-    public function importOrUpdateOeuvre(string $mangadxId): ?Oeuvre
+    public function importOrUpdateOeuvre(string $mangadxId, bool $importPages = false): ?Oeuvre
     {
         $existingOeuvre = $this->oeuvreRepository->findOneBy(['mangadxId' => $mangadxId]);
         
         if ($existingOeuvre) {
             return $this->updateOeuvre($mangadxId);
         } else {
-            return $this->importOeuvre($mangadxId);
+            return $this->importOeuvre($mangadxId, $importPages);
         }
     }
 
