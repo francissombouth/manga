@@ -659,6 +659,16 @@ img {
     color: white;
 }
 
+.sidebar-btn-update {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.sidebar-update-form {
+    display: block;
+    margin-top: 0.5rem;
+}
+
 .sidebar-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
