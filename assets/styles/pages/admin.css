@@ -1313,7 +1313,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* Marge supplémentaire pour la section des pages */
-.pages-section {
-    margin-bottom: 2rem;
+.chapitre-pages {
+    margin-bottom: 1rem;
 } 
