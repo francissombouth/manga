@@ -308,7 +308,14 @@ class AdminController extends AbstractController
                 
                 // Vider la base si l'option force est cochée
                 if ($force) {
+                    // Supprimer dans l'ordre correct pour respecter les contraintes de clé étrangère
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\OeuvreNote')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\CommentaireLike')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Commentaire')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\CollectionUser')->execute();
+                    $this->entityManager->createQuery('DELETE FROM App\Entity\Statut')->execute();
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Chapitre')->execute();
+                    $this->entityManager->getConnection()->executeStatement('DELETE FROM oeuvre_tag');
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Oeuvre')->execute();
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Auteur')->execute();
                     $this->entityManager->createQuery('DELETE FROM App\Entity\Tag')->execute();
