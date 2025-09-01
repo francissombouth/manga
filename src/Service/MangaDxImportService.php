@@ -446,13 +446,22 @@ class MangaDxImportService
                 $chapitre->setResume("Chapitre importé depuis MangaDx");
                 $chapitre->setMangadxChapterId($chapterInfo['id']);
                 
-                // Ne pas récupérer les pages lors de l'import pour éviter le rate limiting
-                // Les pages seront récupérées dynamiquement quand nécessaire
-                $chapitre->setPages([]);
+                // Récupérer les pages du chapitre depuis MangaDx
+                try {
+                    $pages = $this->getChapterPages($chapterInfo['id']);
+                    $chapitre->setPages($pages);
+                    $this->logger->info("Pages récupérées pour le chapitre {$chapterInfo['title']}: " . count($pages) . " pages");
+                } catch (\Exception $e) {
+                    $this->logger->warning("Impossible de récupérer les pages pour le chapitre {$chapterInfo['title']}: " . $e->getMessage());
+                    $chapitre->setPages([]);
+                }
                 
                 $this->logger->info("Chapitre {$chapterInfo['title']} importé avec mangadxChapterId: {$chapterInfo['id']}");
                 
                 $this->entityManager->persist($chapitre);
+                
+                // Délai pour éviter le rate limiting de l'API MangaDx
+                sleep(1);
             }
 
         } catch (\Exception $e) {
@@ -630,7 +639,7 @@ class MangaDxImportService
     /**
      * Récupère les URLs des pages d'un chapitre depuis l'API MangaDx
      */
-    private function getChapterPages(string $chapterId): array
+    public function getChapterPages(string $chapterId): array
     {
         $maxRetries = 3;
         $baseDelay = 1;
