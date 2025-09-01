@@ -180,6 +180,52 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/oeuvres/{id}/chapitres/update-pages', name: 'admin_oeuvre_update_pages', methods: ['POST'])]
+    public function updateChapitrePages(Oeuvre $oeuvre): Response
+    {
+        try {
+            $chapitres = $this->chapitreRepository->findBy(['oeuvre' => $oeuvre]);
+            $updatedCount = 0;
+            $errorCount = 0;
+
+            foreach ($chapitres as $chapitre) {
+                $mangadxChapterId = $chapitre->getMangadxChapterId();
+                if (!$mangadxChapterId || !empty($chapitre->getPages())) {
+                    continue; // Ignorer les chapitres sans ID MangaDx ou qui ont déjà des pages
+                }
+
+                try {
+                    $pages = $this->importService->getChapterPages($mangadxChapterId);
+                    if (!empty($pages)) {
+                        $chapitre->setPages($pages);
+                        $this->entityManager->persist($chapitre);
+                        $updatedCount++;
+                    }
+                    
+                    // Délai pour éviter le rate limiting
+                    sleep(1);
+                } catch (\Exception $e) {
+                    $errorCount++;
+                }
+            }
+
+            $this->entityManager->flush();
+
+            if ($updatedCount > 0) {
+                $this->addFlash('success', "✅ {$updatedCount} chapitre(s) mis à jour avec leurs pages !");
+            }
+            
+            if ($errorCount > 0) {
+                $this->addFlash('warning', "⚠️ {$errorCount} chapitre(s) ont rencontré des erreurs.");
+            }
+
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la mise à jour des pages : ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('admin_oeuvre_chapitres', ['id' => $oeuvre->getId()]);
+    }
+
     #[Route('/oeuvres/{id}/chapitres/new', name: 'admin_chapitre_new')]
     public function newChapitre(Oeuvre $oeuvre, Request $request): Response
     {

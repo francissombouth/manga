@@ -51,9 +51,16 @@
                 </a>
             </div>
             
-            <a href="{{ path('admin_chapitre_new', {id: oeuvre.id}) }}" class="btn btn-primary">
-                ➕ Nouveau chapitre
-            </a>
+            <div>
+                <a href="{{ path('admin_chapitre_new', {id: oeuvre.id}) }}" class="btn btn-primary">
+                    ➕ Nouveau chapitre
+                </a>
+                <form method="POST" action="{{ path('admin_oeuvre_update_pages', {id: oeuvre.id}) }}" style="display: inline-block;">
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Voulez-vous mettre à jour les pages de tous les chapitres de cette œuvre ? Cette opération peut prendre du temps.')">
+                        🔄 Mettre à jour les pages
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- Liste des chapitres -->
