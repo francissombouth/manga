@@ -35,6 +35,11 @@
     transition: all 0.3s ease;
 }
 
+/* Classe pour masquer les éléments */
+.hidden {
+    display: none !important;
+}
+
 .tab-btn.active {
     background: var(--accent-purple);
     color: white;

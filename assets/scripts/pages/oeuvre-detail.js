@@ -441,13 +441,26 @@ function toggleReplies(commentaireId) {
         console.log(`Éléments trouvés: replies=${!!replies}, button=${!!button}`);
     
         if (replies && button) {
-            // Vérifier si les réponses sont visibles en utilisant getComputedStyle
-            const computedStyle = window.getComputedStyle(replies);
-            const isVisible = computedStyle.display !== 'none';
+            // Utiliser une classe CSS au lieu de style.display pour éviter les conflits
+            const isVisible = !replies.classList.contains('hidden');
             
-            console.log(`État actuel: isVisible=${isVisible}, computedStyle.display=${computedStyle.display}`);
+            console.log(`État actuel: isVisible=${isVisible}, classe hidden=${replies.classList.contains('hidden')}`);
             
-            replies.style.display = isVisible ? 'none' : 'block';
+            if (isVisible) {
+                replies.classList.add('hidden');
+                replies.style.display = 'none';
+            } else {
+                replies.classList.remove('hidden');
+                replies.style.display = 'block';
+                
+                // Utiliser setTimeout pour s'assurer que le changement persiste
+                setTimeout(() => {
+                    if (replies.style.display !== 'block') {
+                        replies.style.display = 'block';
+                        replies.classList.remove('hidden');
+                    }
+                }, 10);
+            }
         
             const icon = button.querySelector('.toggle-icon');
             const text = button.querySelector('.toggle-text');
@@ -462,7 +475,7 @@ function toggleReplies(commentaireId) {
                     'Masquer les réponses';
             }
             
-            console.log(`Nouvel état: replies.style.display=${replies.style.display}`);
+            console.log(`Nouvel état: replies.style.display=${replies.style.display}, classe hidden=${replies.classList.contains('hidden')}`);
         } else {
             console.warn(`Éléments manquants pour toggleReplies: commentaireId=${commentaireId}, replies=${!!replies}, button=${!!button}`);
         }
@@ -473,11 +486,16 @@ function toggleRepliesToReplies(commentaireId) {
         const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
     
         if (replies && button) {
-            // Vérifier si les réponses sont visibles en utilisant getComputedStyle
-            const computedStyle = window.getComputedStyle(replies);
-            const isVisible = computedStyle.display !== 'none';
+            // Utiliser une classe CSS au lieu de style.display pour éviter les conflits
+            const isVisible = !replies.classList.contains('hidden');
             
-            replies.style.display = isVisible ? 'none' : 'block';
+            if (isVisible) {
+                replies.classList.add('hidden');
+                replies.style.display = 'none';
+            } else {
+                replies.classList.remove('hidden');
+                replies.style.display = 'block';
+            }
         
             const icon = button.querySelector('.toggle-icon');
             const text = button.querySelector('.toggle-text');
