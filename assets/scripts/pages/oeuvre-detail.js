@@ -398,24 +398,19 @@ function initReplyButtonsSimple() {
 }
 
 function initToggleButtonsSimple() {
-    console.log('initToggleButtonsSimple appelé');
-    const toggleButtons = document.querySelectorAll('.toggle-replies-btn, .toggle-replies-to-replies-btn');
+        const toggleButtons = document.querySelectorAll('.toggle-replies-btn, .toggle-replies-to-replies-btn');
     
-    console.log('toggleButtons trouvés:', toggleButtons.length);
+        console.log(`Initialisation des boutons toggle: ${toggleButtons.length} boutons trouvés`);
     
-    toggleButtons.forEach((button, index) => {
-        console.log(`Button ${index}:`, button);
-        console.log(`Button ${index} data-commentaire-id:`, button.getAttribute('data-commentaire-id'));
-        
-        button.addEventListener('click', (e) => {
+    toggleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Click sur toggle button, commentaireId:', button.getAttribute('data-commentaire-id'));
+                const commentaireId = button.getAttribute('data-commentaire-id');
+                console.log(`Clic sur bouton toggle: commentaireId=${commentaireId}`);
             
-            const commentaireId = button.getAttribute('data-commentaire-id');
-            
-            if (button.classList.contains('toggle-replies-to-replies-btn')) {
-                toggleRepliesToReplies(commentaireId);
-            } else {
+                if (button.classList.contains('toggle-replies-to-replies-btn')) {
+                    toggleRepliesToReplies(commentaireId);
+                } else {
                 toggleReplies(commentaireId);
             }
         });
@@ -439,60 +434,67 @@ function showReplyToReplyForm(commentaireId) {
 }
 
 function toggleReplies(commentaireId) {
-    console.log('toggleReplies appelé avec ID:', commentaireId);
-    const replies = document.getElementById(`replies-${commentaireId}`);
-    const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
+        console.log(`toggleReplies appelé avec commentaireId=${commentaireId}`);
+        const replies = document.getElementById(`replies-${commentaireId}`);
+        const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
     
-    console.log('replies element:', replies);
-    console.log('button element:', button);
+        console.log(`Éléments trouvés: replies=${!!replies}, button=${!!button}`);
     
-    if (replies && button) {
-        const isVisible = replies.style.display !== 'none';
-        console.log('isVisible:', isVisible);
-        
-        replies.style.display = isVisible ? 'none' : 'block';
-        
-        const icon = button.querySelector('.toggle-icon');
-        const text = button.querySelector('.toggle-text');
-        
-        if (icon) {
-            icon.textContent = isVisible ? '▼' : '▲';
-        }
-        if (text) {
-            const count = replies.children.length;
-            text.textContent = isVisible ? 
-                `Voir ${count} réponse${count > 1 ? 's' : ''}` : 
-                'Masquer les réponses';
-        }
-    } else {
-        console.error('replies ou button non trouvé');
-    }
-}
-
-function toggleRepliesToReplies(commentaireId) {
-        const replies = document.getElementById(`replies-to-replies-${commentaireId}`);
-        const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
-    
-        
         if (replies && button) {
-            const isVisible = replies.style.display !== 'none';
+            // Vérifier si les réponses sont visibles en utilisant getComputedStyle
+            const computedStyle = window.getComputedStyle(replies);
+            const isVisible = computedStyle.display !== 'none';
+            
+            console.log(`État actuel: isVisible=${isVisible}, computedStyle.display=${computedStyle.display}`);
             
             replies.style.display = isVisible ? 'none' : 'block';
         
             const icon = button.querySelector('.toggle-icon');
             const text = button.querySelector('.toggle-text');
         
-                    if (icon) {
-            icon.textContent = isVisible ? '▼' : '▲';
-        }
-        if (text) {
-            const count = replies.children.length;
-            text.textContent = isVisible ? 
-                `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
-                'Masquer les réponses';
+            if (icon) {
+                icon.textContent = isVisible ? '▼' : '▲';
+            }
+            if (text) {
+                const count = replies.children.length;
+                text.textContent = isVisible ? 
+                    `Voir ${count} réponse${count > 1 ? 's' : ''}` : 
+                    'Masquer les réponses';
+            }
+            
+            console.log(`Nouvel état: replies.style.display=${replies.style.display}`);
+        } else {
+            console.warn(`Éléments manquants pour toggleReplies: commentaireId=${commentaireId}, replies=${!!replies}, button=${!!button}`);
         }
     }
-}
+
+function toggleRepliesToReplies(commentaireId) {
+        const replies = document.getElementById(`replies-to-replies-${commentaireId}`);
+        const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-to-replies-btn`);
+    
+        if (replies && button) {
+            // Vérifier si les réponses sont visibles en utilisant getComputedStyle
+            const computedStyle = window.getComputedStyle(replies);
+            const isVisible = computedStyle.display !== 'none';
+            
+            replies.style.display = isVisible ? 'none' : 'block';
+        
+            const icon = button.querySelector('.toggle-icon');
+            const text = button.querySelector('.toggle-text');
+        
+            if (icon) {
+                icon.textContent = isVisible ? '▼' : '▲';
+            }
+            if (text) {
+                const count = replies.children.length;
+                text.textContent = isVisible ? 
+                    `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
+                    'Masquer les réponses';
+            }
+        } else {
+            console.warn(`Éléments manquants pour toggleRepliesToReplies: commentaireId=${commentaireId}, replies=${!!replies}, button=${!!button}`);
+        }
+    }
 
 // ================== FONCTIONS D'AJOUT DYNAMIQUE DE COMMENTAIRES ==================
 
