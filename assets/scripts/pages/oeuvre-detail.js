@@ -357,7 +357,7 @@ async function handleLikeClick(e) {
     const commentaireId = this.getAttribute('data-commentaire-id');
     
     try {
-            const response = await fetch(`/api/commentaires/${commentaireId}/like`, {
+            const response = await fetch(`/api/commentaires/${commentaireId}/likes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
         });
@@ -368,18 +368,24 @@ async function handleLikeClick(e) {
                 const likeIcon = this.querySelector('.like-icon');
                 const likeCount = this.querySelector('.like-count');
             
-                if (data.liked) {
+                if (data.isLiked) {
                     likeIcon.textContent = '❤️';
-        } else {
+                } else {
                     likeIcon.textContent = '🤍';
                 }
                 
                 if (likeCount) {
                     likeCount.textContent = data.likesCount;
                 }
+                
+                console.log('Like mis à jour:', data);
+        } else {
+            console.error('Erreur API:', data);
+            showNotification('Erreur lors de la mise à jour du like', 'error');
         }
     } catch (error) {
-    
+        console.error('Erreur lors du like:', error);
+        showNotification('Erreur lors de la mise à jour du like', 'error');
     }
 }
 
@@ -400,13 +406,10 @@ function initReplyButtonsSimple() {
 function initToggleButtonsSimple() {
         const toggleButtons = document.querySelectorAll('.toggle-replies-btn, .toggle-replies-to-replies-btn');
     
-        console.log(`Initialisation des boutons toggle: ${toggleButtons.length} boutons trouvés`);
-    
     toggleButtons.forEach(button => {
             button.addEventListener('click', (e) => {
             e.preventDefault();
                 const commentaireId = button.getAttribute('data-commentaire-id');
-                console.log(`Clic sur bouton toggle: commentaireId=${commentaireId}`);
             
                 if (button.classList.contains('toggle-replies-to-replies-btn')) {
                     toggleRepliesToReplies(commentaireId);
@@ -434,17 +437,12 @@ function showReplyToReplyForm(commentaireId) {
 }
 
 function toggleReplies(commentaireId) {
-        console.log(`toggleReplies appelé avec commentaireId=${commentaireId}`);
         const replies = document.getElementById(`replies-${commentaireId}`);
         const button = document.querySelector(`[data-commentaire-id="${commentaireId}"].toggle-replies-btn`);
-    
-        console.log(`Éléments trouvés: replies=${!!replies}, button=${!!button}`);
     
         if (replies && button) {
             // Utiliser une classe CSS au lieu de style.display pour éviter les conflits
             const isVisible = !replies.classList.contains('hidden');
-            
-            console.log(`État actuel: isVisible=${isVisible}, classe hidden=${replies.classList.contains('hidden')}`);
             
             if (isVisible) {
                 replies.classList.add('hidden');
@@ -474,10 +472,6 @@ function toggleReplies(commentaireId) {
                     `Voir ${count} réponse${count > 1 ? 's' : ''}` : 
                     'Masquer les réponses';
             }
-            
-            console.log(`Nouvel état: replies.style.display=${replies.style.display}, classe hidden=${replies.classList.contains('hidden')}`);
-        } else {
-            console.warn(`Éléments manquants pour toggleReplies: commentaireId=${commentaireId}, replies=${!!replies}, button=${!!button}`);
         }
     }
 
@@ -509,8 +503,6 @@ function toggleRepliesToReplies(commentaireId) {
                     `Voir ${count} réponse${count > 1 ? 's' : ''} à cette réponse` : 
                     'Masquer les réponses';
             }
-        } else {
-            console.warn(`Éléments manquants pour toggleRepliesToReplies: commentaireId=${commentaireId}, replies=${!!replies}, button=${!!button}`);
         }
     }
 
