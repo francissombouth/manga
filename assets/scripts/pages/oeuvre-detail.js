@@ -96,9 +96,13 @@ function handleTabClick(e) {
 // ================== SYSTÈME DE NOTATION ==================
 function initRatingStars() {
     
-    const stars = document.querySelectorAll('.star, .star-main');
+    const stars = document.querySelectorAll('.star-modern, .star-main');
     const submitBtn = document.getElementById('submit-rating-main');
     const removeBtn = document.getElementById('remove-rating-main');
+    
+    console.log('Initialisation des étoiles:', stars.length, 'étoiles trouvées');
+    console.log('Bouton submit:', submitBtn);
+    console.log('Bouton remove:', removeBtn);
     
     let selectedRating = 0;
     
@@ -158,7 +162,7 @@ function updateStarsDisplay(stars, rating) {
 }
 
 function resetStars() {
-    const stars = document.querySelectorAll('.star, .star-main');
+    const stars = document.querySelectorAll('.star-modern, .star-main');
     stars.forEach(star => {
         star.classList.remove('selected');
         const svg = star.querySelector('svg');
@@ -170,6 +174,8 @@ function resetStars() {
 }
 
 async function submitRating(rating) {
+    console.log('Soumission de la note:', rating, 'pour l\'œuvre:', oeuvreId);
+    
     try {
         const response = await fetch(`/api/oeuvres/${oeuvreId}/rating`, {
             method: 'POST',
@@ -178,6 +184,7 @@ async function submitRating(rating) {
         });
         
         const data = await response.json();
+        console.log('Réponse API:', data);
         
         if (response.ok) {
             showNotification('Note enregistrée avec succès !', 'success');
@@ -187,6 +194,7 @@ async function submitRating(rating) {
             showNotification(data.message || 'Erreur lors de l\'enregistrement', 'error');
         }
     } catch (error) {
+        console.error('Erreur lors de la soumission:', error);
         showNotification('Erreur lors de l\'enregistrement de la note', 'error');
     }
 }
@@ -232,7 +240,7 @@ async function loadAverageRating() {
         }
         
         if (data.rating && data.rating > 0) {
-            const stars = document.querySelectorAll('.star, .star-main');
+            const stars = document.querySelectorAll('.star-modern, .star-main');
             updateStarsDisplay(stars, data.rating);
             
             const currentRatingText = document.getElementById('current-rating-text-main');
